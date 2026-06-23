@@ -715,3 +715,38 @@ h3 { font-size: 17px; font-weight: 600; }
 }
 
 
+
+/* ---- MOBILE: Outbound section grid fix ---- */
+@media (max-width: 768px) {
+  .outbound-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .outbound-grid > div {
+    width: 100% !important;
+  }
+  /* Force all two-column grids to single column on mobile */
+  div[style*="grid-template-columns:1fr 1fr"],
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px !important;
+    padding: 0 16px !important;
+  }
+
+  /* Outbound section cards */
+  div[style*="grid-template-columns:1fr 1fr"] > div {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Section padding on mobile */
+  .section { padding: 48px 0; }
+
+  /* Fix hero tags wrapping */
+  .hero-tags { padding: 0 16px; }
+
+  /* Fix outbound section specifically */
+  .outbound-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
