@@ -73,5 +73,47 @@
 
 
 
+<script>
+// Minimal QR Code generator - pure JS, no external dependency
+// Using a simple data matrix approach via inline library
+(function(){
+  var url = 'https://novexgrowth.com/card.html';
+  var canvas = document.getElementById('qr');
+  if (!canvas) return;
+  
+  // Load qrcode library dynamically
+  var s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  s.onload = function() {
+    canvas.style.display = 'none';
+    var div = document.createElement('div');
+    div.id = 'qr-div';
+    canvas.parentNode.insertBefore(div, canvas);
+    new QRCode(div, {
+      text: url,
+      width: 160,
+      height: 160,
+      colorDark: '#1A1F4E',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    // Style the generated img
+    setTimeout(function() {
+      var img = div.querySelector('img');
+      if (img) {
+        img.style.borderRadius = '8px';
+        img.style.display = 'block';
+      }
+      var c = div.querySelector('canvas');
+      if (c) c.style.borderRadius = '8px';
+    }, 200);
+  };
+  s.onerror = function() {
+    // Fallback: show text link
+    canvas.parentNode.innerHTML = '<p style="color:#fff;font-size:12px;">Visit: novexgrowth.com/card.html</p>';
+  };
+  document.head.appendChild(s);
+})();
+</script>
 </body>
 </html>
