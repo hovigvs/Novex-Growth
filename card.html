@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hovig Sarkissian — Novex Growth</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&family=Inter:wght@400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:linear-gradient(145deg,#1A1F4E 0%,#2D3480 40%,#3B2D7A 70%,#1E3470 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:36px 32px;max-width:380px;width:100%;text-align:center;backdrop-filter:blur(16px);}
+  .logo{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:22px;background:linear-gradient(90deg,#5CE0FF 0%,#6B75D9 55%,#4A52C4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:24px;display:block;}
+  .avatar{width:88px;height:88px;border-radius:50%;border:2px solid rgba(92,224,255,0.40);margin:0 auto 16px;overflow:hidden;background:rgba(255,255,255,0.10);display:flex;align-items:center;justify-content:center;}
+  .avatar svg{width:48px;height:48px;color:rgba(255,255,255,0.50);}
+  .name{font-size:22px;font-weight:600;color:#fff;margin-bottom:4px;}
+  .title{font-size:14px;color:rgba(255,255,255,0.55);margin-bottom:24px;}
+  .divider{width:48px;height:2px;background:linear-gradient(90deg,#5CE0FF,#6B75D9);border-radius:1px;margin:0 auto 24px;}
+  .contacts{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+  .contact-btn{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:12px 16px;color:rgba(255,255,255,0.85);text-decoration:none;font-size:14px;transition:background 0.2s;}
+  .contact-btn:hover{background:rgba(255,255,255,0.12);}
+  .contact-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#4A52C4,#7B84E8);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+  .save-btn{width:100%;background:linear-gradient(135deg,#4A52C4,#7B84E8);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:12px;transition:opacity 0.2s;}
+  .save-btn:hover{opacity:0.88;}
+  .qr-section{margin-top:24px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.08);}
+  .qr-label{font-size:12px;color:rgba(255,255,255,0.40);margin-bottom:12px;letter-spacing:0.06em;text-transform:uppercase;}
+  #qr-canvas{border-radius:12px;background:#fff;padding:8px;}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <a href="index.html" class="logo">novexgrowth</a>
+
+  <div class="avatar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+    </svg>
+  </div>
+
+  <h1 class="name">Hovig Sarkissian</h1>
+  <p class="title">Founder — Novex Growth</p>
+  <div class="divider"></div>
+
+  <div class="contacts">
+    <a href="tel:+16476960404" class="contact-btn">
+      <div class="contact-icon">📞</div>
+      +1 (647) 696-0404
+    </a>
+    <a href="mailto:info@novexgrowth.com" class="contact-btn">
+      <div class="contact-icon">✉️</div>
+      info@novexgrowth.com
+    </a>
+    <a href="https://novexgrowth.com" target="_blank" class="contact-btn">
+      <div class="contact-icon">🌐</div>
+      novexgrowth.com
+    </a>
+    <a href="https://www.instagram.com/novexgrowth/" target="_blank" class="contact-btn">
+      <div class="contact-icon">📸</div>
+      @novexgrowth
+    </a>
+  </div>
+
+  <button class="save-btn" onclick="saveContact()">💾 Save to Contacts</button>
+
+  <div class="qr-section">
+    <p class="qr-label">Share this card</p>
+    <canvas id="qr-canvas" width="160" height="160"></canvas>
+  </div>
+
+</div>
+
+
+
+
+</body>
+</html>
