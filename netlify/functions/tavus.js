@@ -10,34 +10,39 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: `Missing credentials. API key: ${apiKey ? 'set' : 'MISSING'}, Persona ID: ${personaId ? 'set' : 'MISSING'}` })
+      body: JSON.stringify({ error: `Missing: API key ${apiKey ? 'OK' : 'MISSING'}, Persona ${personaId ? 'OK' : 'MISSING'}` })
     };
   }
 
   try {
+    // First try: persona only (no replica_id)
+    const payload = {
+      persona_id: personaId,
+      conversation_name: 'Novex Growth Website',
+      custom_greeting: "Hi! I'm the Novex Growth AI. Ask me anything about our services or how an AI digital human could work for your business.",
+      max_call_duration: 600
+    };
+
     const response = await fetch('https://tavusapi.com/v2/conversations', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': apiKey
       },
-      body: JSON.stringify({
-        persona_id: personaId,
-        conversation_name: 'Novex Growth Website',
-        custom_greeting: "Hi! I'm the Novex Growth AI. Ask me anything about our services or how an AI digital human could work for your business.",
-        max_call_duration: 600
-      })
+      body: JSON.stringify(payload)
     });
 
-    const data = await response.json();
-    console.log('Tavus response status:', response.status);
-    console.log('Tavus response:', JSON.stringify(data));
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
 
     if (!response.ok) {
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: `Tavus API error ${response.status}: ${JSON.stringify(data)}` })
+        body: JSON.stringify({ 
+          error: `Tavus ${response.status}: ${JSON.stringify(data)}` 
+        })
       };
     }
 
