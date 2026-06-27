@@ -758,3 +758,9 @@ h3 { font-size: 17px; font-weight: 600; }
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ---- QR section responsive ---- */
+@media (max-width: 768px) {
+  .qr-desktop { display: none !important; }
+  .qr-mobile { display: flex !important; }
+}
