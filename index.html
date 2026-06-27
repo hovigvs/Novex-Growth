@@ -222,8 +222,11 @@ async function startTavusConversation() {
     const res = await fetch('/.netlify/functions/tavus', { method: 'POST' });
     const data = await res.json();
 
+    if (data.error) {
+      throw new Error(data.error);
+    }
     if (!res.ok || !data.conversation_url) {
-      throw new Error(data.error || 'Failed to start conversation');
+      throw new Error('No conversation URL returned: ' + JSON.stringify(data));
     }
 
     document.getElementById('tavus-loading').style.display = 'none';
