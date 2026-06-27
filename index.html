@@ -234,6 +234,7 @@ async function startTavusConversation() {
     console.error('Tavus error:', err);
     document.getElementById('tavus-loading').style.display = 'none';
     document.getElementById('tavus-error').style.display = 'block';
+    document.getElementById('tavus-error-msg').textContent = err.message || 'Something went wrong. ' + JSON.stringify(err);
   }
 }
 
