@@ -38,7 +38,6 @@ exports.handler = async (event) => {
         persona_id: personaId,
         conversation_name: 'Novex Growth Website',
         custom_greeting: "Hi! I'm the Novex Growth AI. Ask me anything about our services.",
-        max_call_duration: 600
       })
     });
 
