@@ -8,8 +8,9 @@ exports.handler = async (event) => {
 
   if (!apiKey || !personaId) {
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Tavus credentials not configured' })
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: `Missing credentials. API key: ${apiKey ? 'set' : 'MISSING'}, Persona ID: ${personaId ? 'set' : 'MISSING'}` })
     };
   }
 
@@ -22,24 +23,27 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         persona_id: personaId,
-        conversation_name: 'Novex Growth Website Conversation',
-        custom_greeting: "Hi! I'm the Novex Growth AI. I can tell you about our AI digital humans, growth systems, and how we help service businesses like yours. What would you like to know?",
-        max_call_duration: 600 // 10 minutes max
+        conversation_name: 'Novex Growth Website',
+        custom_greeting: "Hi! I'm the Novex Growth AI. Ask me anything about our services or how an AI digital human could work for your business.",
+        max_call_duration: 600
       })
     });
 
     const data = await response.json();
+    console.log('Tavus response status:', response.status);
+    console.log('Tavus response:', JSON.stringify(data));
 
     if (!response.ok) {
-      throw new Error(data.message || 'Tavus API error');
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: `Tavus API error ${response.status}: ${JSON.stringify(data)}` })
+      };
     }
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({
         conversation_url: data.conversation_url,
         conversation_id: data.conversation_id
@@ -47,10 +51,10 @@ exports.handler = async (event) => {
     };
 
   } catch (err) {
-    console.error('Tavus error:', err);
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message })
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: `Exception: ${err.message}` })
     };
   }
 };
