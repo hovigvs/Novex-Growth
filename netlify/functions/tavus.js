@@ -1,10 +1,23 @@
 exports.handler = async (event) => {
+  const apiKey = process.env.TAVUS_API_KEY;
+  const personaId = process.env.TAVUS_PERSONA_ID;
+
+  // GET request - diagnostic mode
+  if (event.httpMethod === 'GET') {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ 
+        api_key_set: !!apiKey,
+        api_key_prefix: apiKey ? apiKey.substring(0, 8) + '...' : 'NOT SET',
+        persona_id: personaId || 'NOT SET'
+      })
+    };
+  }
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
-
-  const apiKey = process.env.TAVUS_API_KEY;
-  const personaId = process.env.TAVUS_PERSONA_ID;
 
   if (!apiKey || !personaId) {
     return {
@@ -15,34 +28,29 @@ exports.handler = async (event) => {
   }
 
   try {
-    // First try: persona only (no replica_id)
-    const payload = {
-      persona_id: personaId,
-      conversation_name: 'Novex Growth Website',
-      custom_greeting: "Hi! I'm the Novex Growth AI. Ask me anything about our services or how an AI digital human could work for your business.",
-      max_call_duration: 600
-    };
-
     const response = await fetch('https://tavusapi.com/v2/conversations', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': apiKey
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        persona_id: personaId,
+        conversation_name: 'Novex Growth Website',
+        custom_greeting: "Hi! I'm the Novex Growth AI. Ask me anything about our services.",
+        max_call_duration: 600
+      })
     });
 
     const text = await response.text();
     let data;
     try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
 
-    if (!response.ok) {
+    if (!response.ok || data.error) {
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ 
-          error: `Tavus ${response.status}: ${JSON.stringify(data)}` 
-        })
+        body: JSON.stringify({ error: `Tavus ${response.status}: ${JSON.stringify(data)}` })
       };
     }
 
