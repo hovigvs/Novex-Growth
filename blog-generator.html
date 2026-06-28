@@ -445,10 +445,10 @@ async function ghGet(path){
   return r.ok?r.json():{sha:null}
 }
 
-async function ghPut(path,content,message,sha){
+async function ghPut(path,content,message,sha,isBase64){
   var cfg=getGHConfig();
   var url='https://api.github.com/repos/'+cfg.user+'/'+cfg.repo+'/contents/'+path;
-  var body={message:message,content:btoa(unescape(encodeURIComponent(content)))};
+  var body={message:message,content:isBase64?content:btoa(unescape(encodeURIComponent(content)))};
   if(sha)body.sha=sha;
   var r=await fetch(url,{method:'PUT',headers:{Authorization:'token '+getGH(),'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
   return r.ok
@@ -476,7 +476,7 @@ async function publishPost(){
     var imgSha=null;
     try{var existing=await ghGet(imgPath);imgSha=existing.sha||null}catch(e){}
     var imgUrl='https://raw.githubusercontent.com/'+cfg.user+'/'+cfg.repo+'/main/'+imgPath;
-    var imgOk=await ghPut(imgPath,imgBase64DecodeToString(post.imageBase64),'Add blog image: '+post.slug,imgSha);
+    var imgOk=await ghPut(imgPath,post.imageBase64,'Add blog image: '+post.slug,imgSha,true);
     if(!imgOk)throw new Error('Failed to upload image');
     addLog('pub-log','✅ Image uploaded','log-ok');
 
