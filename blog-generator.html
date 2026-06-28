@@ -337,41 +337,58 @@ async function generatePost(){
   clearLog('gen-log');
   document.getElementById('gen-out').style.display='none';
   document.getElementById('publish-card').style.display='none';
+  async function generatePost(){
+  var topic=document.getElementById('custom-topic').value.trim()||selectedTopic;
+  if(!topic){alert('Choose or enter a topic first.');return}
+  if(!imgBase64){alert('Upload a cover image first.');return}
+  var btn=document.getElementById('gen-btn');
+  var icon=document.getElementById('gen-icon');
+  clearLog('gen-log');
+  document.getElementById('gen-out').style.display='none';
+  document.getElementById('publish-card').style.display='none';
   btn.disabled=true;icon.className='spin';
-  addLog('gen-log','✍️ Writing blog post: "'+topic+'"...','log-info');
-  addLog('gen-log','⏳ This takes about 20 seconds...','log-info');
   var vertical=document.getElementById('target-vertical').value;
-  var sys='You are a professional content writer for Novex Growth, an AI automation agency that builds chatbots, voice receptionists, WhatsApp/SMS automation, CRM integration, multilingual ordering systems, and custom AI systems for service businesses. Write blog posts that are practical, authoritative, and SEO-optimised. Tone: professional but plain-spoken — you\'re writing for local business owners, not tech people. Always end posts with a CTA to book a free strategy call at novexgrowth.com. Return ONLY valid JSON, no markdown fences: {"slug":"url-friendly-slug","title":"Full Post Title","category":"category name","readTime":"X min read","metaDescription":"150-160 char meta description","tags":["tag1","tag2","tag3"],"excerpt":"2-3 sentence preview","html":"full blog post HTML using h2,h3,p,ul,li tags only — no html/head/body wrapper, no inline styles"}';
-  var msg='Write a complete, SEO-optimised blog post for Novex Growth on this topic: "'+topic+'"'+(vertical?' targeting '+vertical:'')+'. The post should be 600-800 words. Use the attached cover image as context for the visual theme. Structure: compelling intro (hook with a real pain point), 3-4 main sections with h2 headings, practical advice throughout, and a closing CTA to book a free strategy call at novexgrowth.com. The reader is a non-technical local business owner. Do not mention any specific client names. Write the full HTML content.';
+
   try{
-    var raw=await callClaude(sys,msg,1500,imgBase64,imgType);
-    if(!raw)throw new Error('No response from Claude');
-    var post=parseJSON(raw,'{');
-    if(!post||!post.html)throw new Error('Could not parse post structure — try again');
+    // Step 1: Generate metadata
+    addLog('gen-log','📋 Step 1/2 — Generating post metadata...','log-info');
+    var sysMeta='You are an SEO content strategist for Novex Growth, an AI automation agency. Return ONLY valid JSON, no markdown: {"slug":"url-friendly-slug","title":"Full Post Title","category":"category name","readTime":"X min read","metaDescription":"150-160 char meta description","tags":["tag1","tag2","tag3"],"excerpt":"2-3 sentence preview"}';
+    var msgMeta='Generate SEO metadata for a blog post titled: "'+topic+'"'+(vertical?' targeting '+vertical:'')+'. Return only the JSON object.';
+    var rawMeta=await callClaude(sysMeta,msgMeta,600);
+    if(!rawMeta)throw new Error('No metadata response');
+    var meta=parseJSON(rawMeta,'{');
+    if(!meta||!meta.slug)throw new Error('Could not parse metadata');
+    addLog('gen-log','✅ Metadata ready — writing content...','log-ok');
+
+    // Step 2: Generate HTML content only
+    addLog('gen-log','✍️ Step 2/2 — Writing blog content...','log-info');
+    var sysContent='You are a professional content writer for Novex Growth, an AI automation agency. Write practical, SEO-optimised blog content for local service business owners. Tone: plain-spoken, not technical. Always end with a CTA to book a free strategy call at novexgrowth.com. Return ONLY the HTML body content using h2,h3,p,ul,li tags — no JSON wrapper, no markdown, no html/head/body tags, no inline styles.';
+    var msgContent='Write a 500-700 word blog post body for Novex Growth on: "'+topic+'"'+(vertical?' targeting '+vertical:'')+'. Structure: hook intro paragraph, 3 sections with h2 headings, closing CTA paragraph linking to novexgrowth.com/contact.html. Reader is a non-technical local business owner.';
+    var rawContent=await callClaude(sysContent,msgContent,1200,imgBase64,imgType);
+    if(!rawContent)throw new Error('No content response');
+
+    var post={
+      slug:meta.slug,
+      title:meta.title,
+      category:meta.category,
+      readTime:meta.readTime,
+      metaDescription:meta.metaDescription,
+      tags:meta.tags,
+      excerpt:meta.excerpt,
+      html:rawContent
+    };
     generatedPost=post;
     generatedPost.imageBase64=imgBase64;
     generatedPost.imageType=imgType;
     generatedPost.imageName=imgName;
     addLog('gen-log','✅ Post generated — '+post.title,'log-ok');
-    var out=document.getElementById('gen-out');
-    out.style.display='none';
+    document.getElementById('gen-out').style.display='none';
     renderPreview(post);
   }catch(err){
     addLog('gen-log','❌ '+err.message,'log-err');
-    addLog('gen-log','💡 Check your Anthropic API key in setup','log-info');
   }
   btn.disabled=false;icon.className='';icon.textContent='✍️'
 }
-
-function renderPreview(post){
-  var card=document.getElementById('publish-card');
-  var meta=document.getElementById('post-meta');
-  var preview=document.getElementById('post-preview');
-  meta.innerHTML='<div class="meta-box"><div class="l">Title</div><div class="v">'+post.title+'</div></div>'+
-    '<div class="meta-box"><div class="l">Slug</div><div class="v">'+post.slug+'</div></div>'+
-    '<div class="meta-box"><div class="l">Category</div><div class="v">'+post.category+'</div></div>'+
-    '<div class="meta-box"><div class="l">Read time</div><div class="v">'+post.readTime+'</div></div>'+
-    '<div class="meta-box"><div class="l">Meta description</div><div class="v">'+post.metaDescription+'</div></div>'+
     '<div class="meta-box"><div class="l">Tags</div><div class="v">'+(post.tags||[]).join(', ')+'</div></div>';
   preview.innerHTML='<img class="preview-img" src="data:'+imgType+';base64,'+imgBase64+'" alt="Cover image">'+
     '<div class="preview-body"><div class="preview-tag">'+post.category+'</div><div class="preview-title">'+post.title+'</div><div class="preview-excerpt">'+post.excerpt+'</div></div>';
