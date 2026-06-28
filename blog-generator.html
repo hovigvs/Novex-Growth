@@ -261,6 +261,7 @@ async function callClaude(system,userMsg,maxTokens,imageBase64,imageType){
 
 function parseJSON(raw,startChar){
   if(!raw)return null;
+  raw=raw.replace(/```json/g,'').replace(/```/g,'').trim();
   var s=raw.indexOf(startChar);
   var e=startChar==='['?raw.lastIndexOf(']'):raw.lastIndexOf('}');
   if(s<0||e<0)return null;
