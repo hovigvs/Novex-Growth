@@ -264,7 +264,7 @@ async function callClaude(system,userMsg,maxTokens,imageBase64,imageType){
   var content=[{type:'text',text:userMsg}];
   if(imageBase64&&imageType){content.unshift({type:'image',source:{type:'base64',media_type:imageType,data:imageBase64}})}
   var body={model:'claude-sonnet-4-6',max_tokens:maxTokens||1000,system:system,messages:[{role:'user',content:content}]};
-  var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  var r=await fetch('/.netlify/functions/blog',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   var d=await r.json();
   return d.content&&d.content[0]?d.content[0].text:null
 }
