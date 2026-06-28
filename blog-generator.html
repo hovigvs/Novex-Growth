@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Novex Growth — Blog Generator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1624;
+  --bg2:#1a2236;
+  --purple:#7782D4;
+  --purple2:#646BC1;
+  --cyan:#82DFFF;
+  --border:rgba(119,130,212,0.18);
+  --muted:rgba(255,255,255,0.45);
+  --radius:12px;
+  --font:'Segoe UI',system-ui,sans-serif
+}
+body{font-family:var(--font);background:var(--bg);color:#fff;min-height:100vh}
+.header{background:rgba(15,22,36,.97);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border)}
+.logo{font-size:17px;font-weight:900;background:linear-gradient(90deg,#82DFFF,#7782D4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.badge{font-size:11px;background:rgba(119,130,212,0.12);border:1px solid rgba(119,130,212,0.3);color:var(--cyan);padding:4px 12px;border-radius:20px;font-weight:600}
+.wrap{max-width:980px;margin:0 auto;padding:0 24px}
+.hero{padding:32px 0 24px;text-align:center}
+.hero h1{font-size:26px;font-weight:900;margin-bottom:6px}
+.hero p{font-size:13px;color:var(--muted);max-width:480px;margin:0 auto}
+.setup{background:rgba(119,130,212,0.06);border:1px solid rgba(119,130,212,0.2);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px}
+.setup h3{color:var(--cyan);font-size:14px;font-weight:700;margin-bottom:6px}
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.setup p{font-size:12px;color:var(--muted);margin-bottom:8px}
+.tabs{display:flex;gap:4px;background:rgba(255,255,255,.05);border-radius:10px;padding:4px;margin-bottom:22px;overflow-x:auto}
+.tab{flex:0 0 auto;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,.45);transition:.2s;font-family:var(--font);white-space:nowrap}
+.tab.active{background:var(--purple2);color:#fff}
+.tab:hover:not(.active){color:#fff;background:rgba(255,255,255,.07)}
+.panel{display:none}.panel.active{display:block}
+.card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;margin-bottom:14px}
+.lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:rgba(255,255,255,.3);margin-bottom:8px}
+.btn{background:var(--purple2);color:#fff;border:none;border-radius:9px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.2s;font-family:var(--font)}
+.btn:hover{background:#534AB7}
+.btn:disabled{background:rgba(255,255,255,.12);cursor:not-allowed}
+.btn-sm{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font)}
+.btn-sm:hover{background:rgba(255,255,255,.12)}
+.btn-alt{background:rgba(119,130,212,.15);color:var(--cyan);border:1px solid rgba(119,130,212,.3);border-radius:9px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font)}
+input[type=password],input[type=text],textarea,select{width:100%;padding:10px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:13px;font-family:var(--font)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--purple)}
+select option{background:#1a2236;color:#fff}
+::placeholder{color:rgba(255,255,255,.2)}
+textarea{resize:vertical}
+.row{display:flex;gap:8px}
+.row input{flex:1}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.log{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:12px 14px;font-size:12px;font-family:monospace;line-height:1.7;margin-top:10px;min-height:40px;max-height:220px;overflow-y:auto;display:none}
+.log-ok{color:var(--cyan)}.log-err{color:#f87171}.log-info{color:#a5b4fc}
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.ti{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;padding:12px;cursor:pointer;transition:.2s}
+.ti:hover,.ti.sel{background:rgba(119,130,212,.08);border-color:rgba(119,130,212,.4)}
+.ti .cat{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.ti .ttl{font-size:13px;color:rgba(255,255,255,.85);line-height:1.4;font-weight:500}
+.ti.sel .ttl{color:var(--cyan)}
+.ti .why{font-size:11px;color:rgba(255,255,255,.35);margin-top:4px;line-height:1.4}
+.img-zone{border:2px dashed rgba(119,130,212,.3);border-radius:8px;padding:18px;text-align:center;margin-top:8px;cursor:pointer;transition:.2s;background:rgba(119,130,212,.02);position:relative}
+.img-zone:hover,.img-zone.ready{border-color:rgba(119,130,212,.7);background:rgba(119,130,212,.06)}
+.img-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-zone p{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px}
+.img-zone strong{font-size:12px;color:var(--cyan)}
+.img-zone img{width:100%;height:100px;object-fit:cover;border-radius:5px;margin-top:8px;display:none}
+.out-wrap{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:16px;font-size:12px;color:rgba(255,255,255,.7);max-height:400px;overflow-y:auto;margin-top:12px;white-space:pre-wrap;word-break:break-word;display:none;line-height:1.7}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.meta-box{background:rgba(255,255,255,.05);border-radius:8px;padding:10px 12px}
+.meta-box .l{font-size:10px;color:rgba(255,255,255,.3);margin-bottom:3px;text-transform:uppercase}
+.meta-box .v{font-size:13px;color:#fff;word-break:break-word}
+.next{background:rgba(119,130,212,.07);border:1px solid rgba(119,130,212,.18);border-radius:var(--radius);padding:14px 18px;margin-top:12px}
+.next strong{color:var(--cyan);display:block;margin-bottom:3px;font-size:13px}
+.next p{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5}
+.empty{text-align:center;padding:36px;color:rgba(255,255,255,.25);font-size:14px}
+.preview-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:12px}
+.preview-img{width:100%;height:180px;object-fit:cover;display:block}
+.preview-body{padding:14px 16px}
+.preview-tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--cyan);margin-bottom:6px}
+.preview-title{font-size:16px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.preview-excerpt{font-size:12px;color:rgba(255,255,255,.5);line-height:1.6}
+@media(max-width:640px){.topic-grid,.meta-grid,.setup-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">novexgrowth</div>
+  <div class="badge" id="hdr-badge">Blog Generator</div>
+</header>
+
+<div class="wrap">
+<div class="hero">
+  <h1>Blog Generator</h1>
+  <p>Generate SEO-optimised blog posts for Novex Growth. Pick a topic, upload a cover image, and publish straight to GitHub.</p>
+</div>
+
+<!-- API SETUP -->
+<div class="setup" id="api-box">
+  <h3>🔑 One-time setup — API Keys</h3>
+  <div class="setup-grid">
+    <div>
+      <p>Anthropic API Key — platform.anthropic.com → API Keys</p>
+      <div class="row">
+        <input type="password" id="api-inp" placeholder="sk-ant-...">
+        <button class="btn" onclick="saveKey()" style="padding:10px 16px;font-size:13px">Save</button>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,.25);margin-top:6px;margin-bottom:0" id="key-msg"></p>
+    </div>
+    <div>
+      <p>GitHub Token — github.com → Settings → Developer Settings → Personal Access Tokens (needs repo scope)</p>
+      <div class="row">
+        <input type="password" id="gh-inp" placeholder="ghp_...">
+        <button class="btn" onclick="saveGH()" style="padding:10px 16px;font-size:13px">Save</button>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,.25);margin-top:6px;margin-bottom:0" id="gh-msg"></p>
+    </div>
+  </div>
+  <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+    <div>
+      <p style="margin-bottom:6px">GitHub username</p>
+      <input type="text" id="gh-user" placeholder="your-username">
+    </div>
+    <div>
+      <p style="margin-bottom:6px">Repository name</p>
+      <input type="text" id="gh-repo" placeholder="novexgrowth">
+    </div>
+    <div>
+      <p style="margin-bottom:6px">Folder (blank = root)</p>
+      <input type="text" id="gh-folder" placeholder="e.g. blog-posts">
+    </div>
+  </div>
+  <button class="btn-sm" style="margin-top:10px" onclick="saveGHConfig()">Save GitHub Config</button>
+  <span id="gh-config-msg" style="font-size:11px;color:rgba(255,255,255,.25);margin-left:10px"></span>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('blog')">📝 Blog Generator</button>
+  <button class="tab" onclick="showTab('topics')">💡 Topic Ideas</button>
+  <button class="tab" onclick="showTab('published')">📚 Published Posts</button>
+</div>
+
+<!-- ── BLOG GENERATOR ── -->
+<div class="panel active" id="panel-blog">
+
+  <!-- Step 1: Topic -->
+  <div class="card">
+    <div class="lbl">Step 1 — Choose a topic</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Pick from AI-generated suggestions, or type your own topic below.</p>
+    <button class="btn" onclick="generateTopics()" id="topics-btn">
+      <span id="topics-icon">💡</span> Generate topic ideas
+    </button>
+    <div class="log" id="topics-log"></div>
+    <div class="topic-grid" id="topics-out"></div>
+    <div style="margin-top:10px">
+      <div class="lbl">Or type your own topic</div>
+      <input type="text" id="custom-topic" placeholder="e.g. How AI chatbots help restaurant owners capture more bookings">
+    </div>
+    <div style="margin-top:10px">
+      <div class="lbl">Target industry / vertical</div>
+      <select id="target-vertical">
+        <option value="">All service businesses</option>
+        <option>Catering companies</option>
+        <option>Event venues</option>
+        <option>Restaurants</option>
+        <option>Salons &amp; spas</option>
+        <option>Medical &amp; dental</option>
+        <option>Home services</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Step 2: Image -->
+  <div class="card">
+    <div class="lbl">Step 2 — Upload a cover image</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px">Create your image, then upload it here. It will be embedded directly in the blog post.</p>
+    <div class="img-zone" id="img-zone">
+      <input type="file" accept="image/*" onchange="handleImg(event)">
+      <strong>Click to upload image</strong>
+      <p>PNG, JPG, WEBP — recommended 1200×630px</p>
+      <img id="img-preview" alt="Cover preview">
+    </div>
+    <p id="img-status" style="font-size:11px;color:var(--cyan);margin-top:6px;display:none"></p>
+  </div>
+
+  <!-- Step 3: Generate -->
+  <div class="card">
+    <div class="lbl">Step 3 — Generate the post</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Claude will write a full SEO-optimised blog post (800–1200 words) with meta description, tags, and structured HTML ready to publish.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="generatePost()" id="gen-btn">
+        <span id="gen-icon">✍️</span> Generate blog post
+      </button>
+      <button class="btn-sm" onclick="clearPost()">Clear</button>
+    </div>
+    <div class="log" id="gen-log"></div>
+    <div class="out-wrap" id="gen-out"></div>
+  </div>
+
+  <!-- Step 4: Preview & Publish -->
+  <div class="card" id="publish-card" style="display:none">
+    <div class="lbl">Step 4 — Preview &amp; publish</div>
+    <div class="meta-grid" id="post-meta"></div>
+    <div class="preview-card" id="post-preview"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="publishPost()" id="pub-btn">
+        <span id="pub-icon">🚀</span> Publish to GitHub
+      </button>
+      <button class="btn-sm" onclick="copyHTML()">Copy HTML</button>
+    </div>
+    <div class="log" id="pub-log"></div>
+    <div class="next" id="pub-next" style="display:none">
+      <strong>✅ Published!</strong>
+      <p>Your blog post has been pushed to GitHub. If Netlify is connected, it will be live within a minute.<br>
+      Check your blog page at <code>novexgrowth.com/blog.html</code></p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── TOPIC IDEAS ── -->
+<div class="panel" id="panel-topics">
+  <div class="card">
+    <div class="lbl">SEO topic bank — AI automation for service businesses</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">High-value topics your target audience is searching for. Copy any into the generator.</p>
+    <div id="topic-bank"></div>
+  </div>
+</div>
+
+<!-- ── PUBLISHED ── -->
+<div class="panel" id="panel-published">
+  <div class="card">
+    <div class="lbl">Published posts</div>
+    <div id="published-list"><div class="empty">No posts published yet.<br><span style="font-size:12px">Use the Blog Generator tab to publish your first post.</span></div></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ── KEY STORAGE ──────────────────────────────────────────────
+function saveKey(){var v=document.getElementById('api-inp').value.trim();if(!v||v.startsWith('●'))return;localStorage.setItem('ng_api_key',v);document.getElementById('api-inp').value='●●●●●●●●●●●●●●●●●●●●';document.getElementById('key-msg').textContent='✅ Key saved';document.getElementById('api-box').style.borderColor='rgba(119,130,212,.4)'}
+function getKey(){return localStorage.getItem('ng_api_key')||''}
+function saveGH(){var v=document.getElementById('gh-inp').value.trim();if(!v||v.startsWith('●'))return;localStorage.setItem('ng_gh_token',v);document.getElementById('gh-inp').value='●●●●●●●●●●●●●●●●●●●●';document.getElementById('gh-msg').textContent='✅ Token saved'}
+function getGH(){return localStorage.getItem('ng_gh_token')||''}
+function saveGHConfig(){var u=document.getElementById('gh-user').value.trim(),r=document.getElementById('gh-repo').value.trim(),f=document.getElementById('gh-folder').value.trim();if(!u||!r){document.getElementById('gh-config-msg').textContent='⚠️ Username and repo required';return}localStorage.setItem('ng_gh_user',u);localStorage.setItem('ng_gh_repo',r);localStorage.setItem('ng_gh_folder',f);document.getElementById('gh-config-msg').textContent='✅ Saved'}
+function getGHConfig(){return{user:localStorage.getItem('ng_gh_user')||'',repo:localStorage.getItem('ng_gh_repo')||'',folder:localStorage.getItem('ng_gh_folder')||''}}
+
+// ── TABS ────────────────────────────────────────────────────
+function showTab(t){document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')});document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});event.target.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='topics')renderTopicBank();if(t==='published')renderPublished()}
+
+// ── LOG ─────────────────────────────────────────────────────
+function showLog(id){document.getElementById(id).style.display='block'}
+function clearLog(id){var el=document.getElementById(id);el.innerHTML='';el.style.display='none'}
+function addLog(id,msg,cls){var el=document.getElementById(id);el.style.display='block';el.innerHTML+='<div class="'+(cls||'log-info')+'">'+msg+'</div>';el.scrollTop=el.scrollHeight}
+
+// ── CLAUDE API ──────────────────────────────────────────────
+async function callClaude(system,userMsg,maxTokens,imageBase64,imageType){
+  var key=getKey();
+  if(!key){alert('Add your Anthropic API key in setup first.');return null}
+  var content=[{type:'text',text:userMsg}];
+  if(imageBase64&&imageType){content.unshift({type:'image',source:{type:'base64',media_type:imageType,data:imageBase64}})}
+  var body={model:'claude-sonnet-4-6',max_tokens:maxTokens||1000,system:system,messages:[{role:'user',content:content}]};
+  var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  var d=await r.json();
+  return d.content&&d.content[0]?d.content[0].text:null
+}
+
+function parseJSON(raw,startChar){
+  if(!raw)return null;
+  var s=raw.indexOf(startChar);
+  var e=startChar==='['?raw.lastIndexOf(']'):raw.lastIndexOf('}');
+  if(s<0||e<0)return null;
+  try{return JSON.parse(raw.slice(s,e+1))}catch(e2){return null}
+}
+
+// ── IMAGE HANDLING ───────────────────────────────────────────
+var imgBase64='';var imgType='';var imgName='';
+
+function handleImg(e){
+  var file=e.target.files[0];
+  if(!file)return;
+  imgType=file.type||'image/jpeg';
+  imgName=file.name;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var result=ev.target.result;
+    imgBase64=result.split(',')[1];
+    var preview=document.getElementById('img-preview');
+    preview.src=result;
+    preview.style.display='block';
+    var zone=document.getElementById('img-zone');
+    zone.classList.add('ready');
+    document.getElementById('img-status').style.display='block';
+    document.getElementById('img-status').textContent='✅ '+file.name+' ready ('+Math.round(file.size/1024)+'KB)';
+  };
+  reader.readAsDataURL(file)
+}
+
+// ── TOPIC GENERATOR ─────────────────────────────────────────
+var selectedTopic='';
+
+async function generateTopics(){
+  var btn=document.getElementById('topics-btn');
+  var icon=document.getElementById('topics-icon');
+  clearLog('topics-log');
+  document.getElementById('topics-out').innerHTML='';
+  btn.disabled=true;icon.className='spin';
+  addLog('topics-log','💡 Generating topic ideas for your industry...','log-info');
+  var vertical=document.getElementById('target-vertical').value||'service businesses';
+  var sys='You are an SEO content strategist for Novex Growth, an AI automation agency that builds chatbots, voice receptionists, WhatsApp/SMS automation, CRM integration, and custom AI systems for service businesses. Generate blog topic ideas that will rank well on Google and attract the target audience. Return ONLY valid JSON array, no markdown: [{"category":"AI Chatbots","title":"full blog post title","why":"one sentence on why this topic ranks well and attracts leads"}]. Return exactly 6 topics.';
+  var msg='Generate 6 high-value SEO blog topics for Novex Growth targeting '+vertical+'. Focus on real pain points: missed calls, slow responses, manual follow-ups, no-shows, language barriers, after-hours bookings. Mix topics across: AI chatbots, voice receptionists, WhatsApp automation, CRM/booking, customer reactivation, and multilingual AI. Make titles specific and search-intent focused (e.g. "How to never miss a catering enquiry again" not "AI for catering"). Each should appeal to a non-technical business owner.';
+  try{
+    var raw=await callClaude(sys,msg,800);
+    if(!raw)throw new Error('No response');
+    var topics=parseJSON(raw,'[')||[];
+    addLog('topics-log','✅ '+topics.length+' topics generated — click one to select it','log-ok');
+    document.getElementById('topics-out').innerHTML=topics.map(function(t,i){
+      return '<div class="ti" onclick="selectTopic(this,\''+t.title.replace(/'/g,"\\'")+'\')"><div class="cat">'+t.category+'</div><div class="ttl">'+t.title+'</div><div class="why">'+t.why+'</div></div>'
+    }).join('');
+  }catch(err){
+    addLog('topics-log','❌ '+err.message,'log-err');
+  }
+  btn.disabled=false;icon.className='';icon.textContent='💡'
+}
+
+function selectTopic(el,title){
+  document.querySelectorAll('.ti').forEach(function(t){t.classList.remove('sel')});
+  el.classList.add('sel');
+  selectedTopic=title;
+  document.getElementById('custom-topic').value=title
+}
+
+// ── POST GENERATOR ───────────────────────────────────────────
+var generatedPost=null;
+
+async function generatePost(){
+  var topic=document.getElementById('custom-topic').value.trim()||selectedTopic;
+  if(!topic){alert('Choose or enter a topic first.');return}
+  if(!imgBase64){alert('Upload a cover image first.');return}
+  var btn=document.getElementById('gen-btn');
+  var icon=document.getElementById('gen-icon');
+  clearLog('gen-log');
+  document.getElementById('gen-out').style.display='none';
+  document.getElementById('publish-card').style.display='none';
+  btn.disabled=true;icon.className='spin';
+  var vertical=document.getElementById('target-vertical').value;
+  try{
+    // Step 1: Generate metadata
+    addLog('gen-log','📋 Step 1/2 — Generating post metadata...','log-info');
+    var sysMeta='You are an SEO content strategist for Novex Growth, an AI automation agency. Return ONLY valid JSON, no markdown: {"slug":"url-friendly-slug","title":"Full Post Title","category":"category name","readTime":"X min read","metaDescription":"150-160 char meta description","tags":["tag1","tag2","tag3"],"excerpt":"2-3 sentence preview"}';
+    var msgMeta='Generate SEO metadata for a blog post titled: "'+topic+'"'+(vertical?' targeting '+vertical:'')+'. Return only the JSON object.';
+    var rawMeta=await callClaude(sysMeta,msgMeta,600);
+    if(!rawMeta)throw new Error('No metadata response');
+    var meta=parseJSON(rawMeta,'{');
+    if(!meta||!meta.slug)throw new Error('Could not parse metadata');
+    addLog('gen-log','✅ Metadata ready — writing content...','log-ok');
+    // Step 2: Generate HTML content only
+    addLog('gen-log','✍️ Step 2/2 — Writing blog content...','log-info');
+    var sysContent='You are a professional content writer for Novex Growth, an AI automation agency. Write practical, SEO-optimised blog content for local service business owners. Tone: plain-spoken, not technical. Always end with a CTA to book a free strategy call at novexgrowth.com. Return ONLY the HTML body content using h2,h3,p,ul,li tags — no JSON wrapper, no markdown, no html/head/body tags, no inline styles.';
+    var msgContent='Write a 500-700 word blog post body for Novex Growth on: "'+topic+'"'+(vertical?' targeting '+vertical:'')+'. Structure: hook intro paragraph, 3 sections with h2 headings, closing CTA paragraph linking to novexgrowth.com/contact.html. Reader is a non-technical local business owner.';
+    var rawContent=await callClaude(sysContent,msgContent,1200,imgBase64,imgType);
+    if(!rawContent)throw new Error('No content response');
+    var post={
+      slug:meta.slug,
+      title:meta.title,
+      category:meta.category,
+      readTime:meta.readTime,
+      metaDescription:meta.metaDescription,
+      tags:meta.tags,
+      excerpt:meta.excerpt,
+      html:rawContent
+    };
+    generatedPost=post;
+    generatedPost.imageBase64=imgBase64;
+    generatedPost.imageType=imgType;
+    generatedPost.imageName=imgName;
+    addLog('gen-log','✅ Post generated — '+post.title,'log-ok');
+    document.getElementById('gen-out').style.display='none';
+    renderPreview(post);
+  }catch(err){
+    addLog('gen-log','❌ '+err.message,'log-err');
+  }
+  btn.disabled=false;icon.className='';icon.textContent='✍️'
+}
+
+function renderPreview(post){
+  var card=document.getElementById('publish-card');
+  var meta=document.getElementById('post-meta');
+  var preview=document.getElementById('post-preview');
+  meta.innerHTML='<div class="meta-box"><div class="l">Title</div><div class="v">'+post.title+'</div></div>'+
+    '<div class="meta-box"><div class="l">Slug</div><div class="v">'+post.slug+'</div></div>'+
+    '<div class="meta-box"><div class="l">Category</div><div class="v">'+post.category+'</div></div>'+
+    '<div class="meta-box"><div class="l">Read time</div><div class="v">'+post.readTime+'</div></div>'+
+    '<div class="meta-box"><div class="l">Meta description</div><div class="v">'+post.metaDescription+'</div></div>'+
+    '<div class="meta-box"><div class="l">Tags</div><div class="v">'+(post.tags||[]).join(', ')+'</div></div>';
+  preview.innerHTML='<img class="preview-img" src="data:'+imgType+';base64,'+imgBase64+'" alt="Cover image">'+
+    '<div class="preview-body"><div class="preview-tag">'+post.category+'</div><div class="preview-title">'+post.title+'</div><div class="preview-excerpt">'+post.excerpt+'</div></div>';
+  card.style.display='block'
+}
+
+function clearPost(){
+  generatedPost=null;
+  document.getElementById('gen-out').style.display='none';
+  document.getElementById('publish-card').style.display='none';
+  clearLog('gen-log');
+  document.getElementById('custom-topic').value='';
+  selectedTopic='';
+  document.querySelectorAll('.ti').forEach(function(t){t.classList.remove('sel')});
+  imgBase64='';imgType='';imgName='';
+  document.getElementById('img-preview').style.display='none';
+  document.getElementById('img-zone').classList.remove('ready');
+  document.getElementById('img-status').style.display='none'
+}
+
+function copyHTML(){
+  if(!generatedPost)return;
+  navigator.clipboard.writeText(generatedPost.html).then(function(){
+    var b=event.target;var o=b.textContent;b.textContent='✅ Copied!';setTimeout(function(){b.textContent=o},2000)
+  })
+}
+
+// ── GITHUB PUBLISH ───────────────────────────────────────────
+var savedPosts=JSON.parse(localStorage.getItem('ng_published')||'[]');
+
+function savePosts(){localStorage.setItem('ng_published',JSON.stringify(savedPosts))}
+
+async function ghGet(path){
+  var cfg=getGHConfig();
+  var url='https://api.github.com/repos/'+cfg.user+'/'+cfg.repo+'/contents/'+path;
+  var r=await fetch(url,{headers:{Authorization:'token '+getGH(),'Accept':'application/vnd.github.v3+json'}});
+  return r.ok?r.json():{sha:null}
+}
+
+async function ghPut(path,content,message,sha){
+  var cfg=getGHConfig();
+  var url='https://api.github.com/repos/'+cfg.user+'/'+cfg.repo+'/contents/'+path;
+  var body={message:message,content:btoa(unescape(encodeURIComponent(content)))};
+  if(sha)body.sha=sha;
+  var r=await fetch(url,{method:'PUT',headers:{Authorization:'token '+getGH(),'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+  return r.ok
+}
+
+async function publishPost(){
+  if(!generatedPost){alert('Generate a post first.');return}
+  var cfg=getGHConfig();
+  if(!cfg.user||!cfg.repo){alert('Set up GitHub config in the setup section first.');return}
+  if(!getGH()){alert('Add your GitHub token in setup first.');return}
+  var btn=document.getElementById('pub-btn');
+  var icon=document.getElementById('pub-icon');
+  clearLog('pub-log');
+  btn.disabled=true;icon.className='spin';
+  addLog('pub-log','🚀 Publishing to GitHub...','log-info');
+
+  try{
+    var post=generatedPost;
+    var dateStr=new Date().toISOString().split('T')[0];
+    var folder=cfg.folder?cfg.folder+'/':'';
+
+    // Upload image
+    addLog('pub-log','🖼️ Uploading cover image...','log-info');
+    var imgPath=folder+'assets/blog/'+post.slug+'.'+imgName.split('.').pop();
+    var imgSha=null;
+    try{var existing=await ghGet(imgPath);imgSha=existing.sha||null}catch(e){}
+    var imgUrl='https://raw.githubusercontent.com/'+cfg.user+'/'+cfg.repo+'/main/'+imgPath;
+    var imgOk=await ghPut(imgPath,imgBase64DecodeToString(post.imageBase64),'Add blog image: '+post.slug,imgSha);
+    if(!imgOk)throw new Error('Failed to upload image');
+    addLog('pub-log','✅ Image uploaded','log-ok');
+
+    // Build blog post HTML page
+    var postHTML=buildPostPage(post,imgUrl,dateStr);
+
+    // Upload post HTML
+    addLog('pub-log','📝 Uploading blog post HTML...','log-info');
+    var postPath=folder+'blog/'+post.slug+'.html';
+    var postSha=null;
+    try{var pe=await ghGet(postPath);postSha=pe.sha||null}catch(e){}
+    var postOk=await ghPut(postPath,postHTML,'Add blog post: '+post.title,postSha);
+    if(!postOk)throw new Error('Failed to upload post page');
+    addLog('pub-log','✅ Post page uploaded','log-ok');
+
+    // Update blog listing
+    addLog('pub-log','📋 Updating blog listing...','log-info');
+    await updateBlogListing(post,imgUrl,dateStr,folder);
+
+    // Save locally
+    savedPosts.unshift({title:post.title,slug:post.slug,category:post.category,date:dateStr,url:cfg.user+'.github.io/'+cfg.repo+'/blog/'+post.slug+'.html'});
+    savePosts();
+    updateBadge();
+
+    addLog('pub-log','✅ Published successfully!','log-ok');
+    document.getElementById('pub-next').style.display='block';
+
+  }catch(err){
+    addLog('pub-log','❌ '+err.message,'log-err');
+    addLog('pub-log','💡 Check your GitHub token has repo write access','log-info');
+  }
+  btn.disabled=false;icon.className='';icon.textContent='🚀'
+}
+
+function imgBase64DecodeToString(b64){
+  var binary='';
+  var bytes=atob(b64);
+  for(var i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes.charCodeAt(i));
+  return binary
+}
+
+function buildPostPage(post,imgUrl,dateStr){
+  return'<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0">\n<meta name="description" content="'+post.metaDescription+'">\n<title>'+post.title+' | Novex Growth</title>\n<link rel="stylesheet" href="../css/style.css">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">\n</head>\n<body>\n<div class="nav-wrap"><nav class="nav"><a href="../index.html" class="logo">novexgrowth</a><ul class="nav-links"><li><a href="../index.html">Home</a></li><li><a href="../services.html">Services</a></li><li><a href="../blog.html">Blog</a></li><li><a href="../about.html">About</a></li><li><a href="../contact.html">Contact</a></li></ul><div class="nav-menu-icon" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div><a href="../contact.html" class="nav-cal-btn"><i class="ti ti-calendar"></i></a><button class="nav-hamburger"><span></span><span></span><span></span></button></nav></div>\n<div class="mobile-nav"><button class="mobile-nav-close">&times;</button><a href="../index.html">Home</a><a href="../services.html">Services</a><a href="../blog.html">Blog</a><a href="../about.html">About</a><a href="../contact.html">Contact</a></div>\n<section style="background:var(--hero-grad);padding:80px 0 48px;">\n<div class="container" style="max-width:760px;">\n<span class="blog-tag">'+post.category+'</span>\n<h1 style="margin:12px 0 16px;font-size:clamp(24px,3.5vw,38px);">'+post.title+'</h1>\n<p style="font-size:14px;color:var(--text2);">'+dateStr+' · '+post.readTime+'</p>\n</div>\n</section>\n<section style="padding:48px 0 80px;background:#fff;">\n<div class="container" style="max-width:760px;">\n<img src="'+imgUrl+'" alt="'+post.title+'" style="width:100%;border-radius:16px;margin-bottom:32px;">\n'+post.html+'\n<div style="margin-top:48px;padding:28px;background:var(--hero-grad);border-radius:16px;text-align:center;">\n<h3 style="margin-bottom:10px;">Ready to build this into your business?</h3>\n<p style="font-size:14px;color:var(--text2);margin-bottom:18px;">Book a free strategy call and we\'ll show you exactly what\'s possible.</p>\n<a href="../contact.html" class="btn-primary"><i class="ti ti-calendar"></i> Book a free strategy call</a>\n</div>\n</div>\n</section>\n<footer class="footer"><div class="container"><div class="footer-grid"><div class="footer-brand"><a href="../index.html" class="logo">novexgrowth</a><p>We build AI growth systems that turn missed opportunities into revenue.</p></div><div class="footer-col"><h4>Services</h4><ul><li><a href="../services.html">AI Chatbots</a></li><li><a href="../services.html">Voice Receptionists</a></li><li><a href="../services.html">WhatsApp &amp; SMS</a></li><li><a href="../services.html">CRM &amp; Booking</a></li></ul></div><div class="footer-col"><h4>Company</h4><ul><li><a href="../about.html">About</a></li><li><a href="../blog.html">Blog</a></li><li><a href="../contact.html">Contact</a></li><li><a href="../privacy-policy.html">Privacy Policy</a></li><li><a href="../terms-and-conditions.html">Terms &amp; Conditions</a></li></ul></div><div class="footer-col"><h4>Contact</h4><ul><li><a href="mailto:info@novexgrowth.com" class="contact-item"><i class="ti ti-mail"></i> info@novexgrowth.com</a></li></ul></div></div><div class="footer-bottom"><p>&copy; 2026 Novex Growth. Operated by SARLI INC.</p></div></div></footer>\n<script src="../js/main.js"><\/script>\n</body>\n</html>'
+}
+
+async function updateBlogListing(post,imgUrl,dateStr,folder){
+  var blogPath=folder+'blog.html';
+  var existing=await ghGet(blogPath);
+  if(!existing||!existing.content)return;
+  var html=decodeURIComponent(escape(atob(existing.content.replace(/\n/g,''))));
+  var newCard='<article class="blog-card">\n<div class="blog-thumb" style="padding:0;overflow:hidden;"><img src="'+imgUrl+'" alt="'+post.title+'" style="width:100%;height:100%;object-fit:cover;"></div>\n<div class="blog-body">\n<span class="blog-tag">'+post.category+'</span>\n<h3><a href="blog/'+post.slug+'.html" style="color:inherit;text-decoration:none;">'+post.title+'</a></h3>\n<p>'+post.excerpt+'</p>\n<p class="blog-meta">'+dateStr+' · '+post.readTime+'</p>\n</div>\n</article>';
+  var marker='<div class="blog-grid">';
+  var idx=html.indexOf(marker);
+  if(idx>=0){html=html.slice(0,idx+marker.length)+'\n'+newCard+'\n'+html.slice(idx+marker.length)}
+  var sha=existing.sha;
+  await ghPut(blogPath,html,'Add blog post to listing: '+post.title,sha)
+}
+
+// ── TOPIC BANK ───────────────────────────────────────────────
+var TOPIC_BANK=[
+  {cat:'AI Chatbots',title:'How to never miss a catering enquiry again (even at 10pm)'},
+  {cat:'Voice AI',title:'Why your venue is losing Saturday bookings — and how to fix it'},
+  {cat:'WhatsApp',title:'WhatsApp vs website chat: which converts better for local service businesses?'},
+  {cat:'CRM',title:'The hidden cost of manual follow-ups: what you\'re actually losing'},
+  {cat:'Multilingual',title:'Serving a multilingual customer base: how AI removes the language barrier'},
+  {cat:'Reactivation',title:'Customer reactivation: the revenue already sitting in your contact list'},
+  {cat:'AI Chatbots',title:'5 questions every catering customer asks — and how AI answers them instantly'},
+  {cat:'Voice AI',title:'The after-hours problem: how AI voice receptionists work while you sleep'},
+  {cat:'WhatsApp',title:'How to take orders on WhatsApp without lifting a finger'},
+  {cat:'Booking',title:'No-shows are costing you more than you think — here\'s the fix'},
+  {cat:'AI Systems',title:'What does it actually mean to "run AI" in your business?'},
+  {cat:'ROI',title:'How to calculate what a missed call is actually costing your business'},
+];
+
+function renderTopicBank(){
+  var el=document.getElementById('topic-bank');
+  el.innerHTML='<div class="topic-grid">'+TOPIC_BANK.map(function(t){
+    var escaped=t.title.replace(/'/g,"\\'");
+    return'<div class="ti" onclick="document.querySelector(\'.tabs .tab\').click();setTimeout(function(){document.getElementById(\'custom-topic\').value=\''+escaped+'\'},100)"><div class="cat">'+t.cat+'</div><div class="ttl">'+t.title+'</div></div>'
+  }).join('')+'</div>'
+}
+
+// ── PUBLISHED LIST ───────────────────────────────────────────
+function renderPublished(){
+  var el=document.getElementById('published-list');
+  if(!savedPosts.length){el.innerHTML='<div class="empty">No posts published yet.</div>';return}
+  el.innerHTML=savedPosts.map(function(p){
+    return'<div class="card" style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
+      '<div><div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+p.title+'</div>'+
+      '<div style="font-size:12px;color:var(--muted)">'+p.category+' · '+p.date+'</div></div>'+
+      '<a href="https://'+p.url+'" target="_blank" class="btn-sm">View →</a></div>'
+  }).join('')
+}
+
+function updateBadge(){
+  var el=document.getElementById('hdr-badge');
+  el.textContent=savedPosts.length?savedPosts.length+' post'+(savedPosts.length!==1?'s':'')+ ' published':'Blog Generator'
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+window.addEventListener('load',function(){
+  var k=getKey();
+  if(k){document.getElementById('api-inp').value='●●●●●●●●●●●●●●●●●●●●';document.getElementById('key-msg').textContent='✅ Key saved';document.getElementById('api-box').style.borderColor='rgba(119,130,212,.4)'}
+  var gh=getGH();
+  if(gh){document.getElementById('gh-inp').value='●●●●●●●●●●●●●●●●●●●●';document.getElementById('gh-msg').textContent='✅ Token saved'}
+  var cfg=getGHConfig();
+  if(cfg.user)document.getElementById('gh-user').value=cfg.user;
+  if(cfg.repo)document.getElementById('gh-repo').value=cfg.repo;
+  if(cfg.folder)document.getElementById('gh-folder').value=cfg.folder;
+  updateBadge()
+});
+</script>
+</body>
+</html>
