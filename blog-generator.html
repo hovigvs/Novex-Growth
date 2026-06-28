@@ -259,9 +259,7 @@ function addLog(id,msg,cls){var el=document.getElementById(id);el.style.display=
 
 // ── CLAUDE API ──────────────────────────────────────────────
 async function callClaude(system,userMsg,maxTokens,imageBase64,imageType){
-  var key=getKey();
-  if(!key){alert('Add your Anthropic API key in setup first.');return null}
-  var content=[{type:'text',text:userMsg}];
+    var content=[{type:'text',text:userMsg}];
   if(imageBase64&&imageType){content.unshift({type:'image',source:{type:'base64',media_type:imageType,data:imageBase64}})}
   var body={model:'claude-sonnet-4-6',max_tokens:maxTokens||1000,system:system,messages:[{role:'user',content:content}]};
   var r=await fetch('/.netlify/functions/blog',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
