@@ -389,13 +389,21 @@ async function generatePost(){
   }
   btn.disabled=false;icon.className='';icon.textContent='✍️'
 }
+  function renderPreview(post){
+  var card=document.getElementById('publish-card');
+  var meta=document.getElementById('post-meta');
+  var preview=document.getElementById('post-preview');
+  meta.innerHTML='<div class="meta-box"><div class="l">Title</div><div class="v">'+post.title+'</div></div>'+
+    '<div class="meta-box"><div class="l">Slug</div><div class="v">'+post.slug+'</div></div>'+
+    '<div class="meta-box"><div class="l">Category</div><div class="v">'+post.category+'</div></div>'+
+    '<div class="meta-box"><div class="l">Read time</div><div class="v">'+post.readTime+'</div></div>'+
+    '<div class="meta-box"><div class="l">Meta description</div><div class="v">'+post.metaDescription+'</div></div>'+
     '<div class="meta-box"><div class="l">Tags</div><div class="v">'+(post.tags||[]).join(', ')+'</div></div>';
   preview.innerHTML='<img class="preview-img" src="data:'+imgType+';base64,'+imgBase64+'" alt="Cover image">'+
     '<div class="preview-body"><div class="preview-tag">'+post.category+'</div><div class="preview-title">'+post.title+'</div><div class="preview-excerpt">'+post.excerpt+'</div></div>';
   card.style.display='block'
 }
-
-function clearPost(){
+  function clearPost(){
   generatedPost=null;
   document.getElementById('gen-out').style.display='none';
   document.getElementById('publish-card').style.display='none';
