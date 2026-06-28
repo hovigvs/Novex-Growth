@@ -259,7 +259,8 @@ function addLog(id,msg,cls){var el=document.getElementById(id);el.style.display=
 
 // ── CLAUDE API ──────────────────────────────────────────────
 async function callClaude(system,userMsg,maxTokens,imageBase64,imageType){
-    var content=[{type:'text',text:userMsg}];
+
+  var content=[{type:'text',text:userMsg}];
   if(imageBase64&&imageType){content.unshift({type:'image',source:{type:'base64',media_type:imageType,data:imageBase64}})}
   var body={model:'claude-sonnet-4-6',max_tokens:maxTokens||1000,system:system,messages:[{role:'user',content:content}]};
   var r=await fetch('/.netlify/functions/blog',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -281,19 +282,30 @@ var imgBase64='';var imgType='';var imgName='';
 function handleImg(e){
   var file=e.target.files[0];
   if(!file)return;
-  imgType=file.type||'image/jpeg';
+  imgType='image/jpeg';
   imgName=file.name;
   var reader=new FileReader();
   reader.onload=function(ev){
-    var result=ev.target.result;
-    imgBase64=result.split(',')[1];
-    var preview=document.getElementById('img-preview');
-    preview.src=result;
-    preview.style.display='block';
-    var zone=document.getElementById('img-zone');
-    zone.classList.add('ready');
-    document.getElementById('img-status').style.display='block';
-    document.getElementById('img-status').textContent='✅ '+file.name+' ready ('+Math.round(file.size/1024)+'KB)';
+    var img=new Image();
+    img.onload=function(){
+      var canvas=document.createElement('canvas');
+      var maxW=1200,maxH=630;
+      var scale=Math.min(maxW/img.width,maxH/img.height,1);
+      canvas.width=Math.round(img.width*scale);
+      canvas.height=Math.round(img.height*scale);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      var compressed=canvas.toDataURL('image/jpeg',0.82);
+      imgBase64=compressed.split(',')[1];
+      var preview=document.getElementById('img-preview');
+      preview.src=compressed;
+      preview.style.display='block';
+      var zone=document.getElementById('img-zone');
+      zone.classList.add('ready');
+      var kb=Math.round(imgBase64.length*0.75/1024);
+      document.getElementById('img-status').style.display='block';
+      document.getElementById('img-status').textContent='✅ '+file.name+' ready ('+kb+'KB compressed)';
+    };
+    img.src=ev.target.result;
   };
   reader.readAsDataURL(file)
 }
@@ -460,7 +472,7 @@ async function publishPost(){
 
     // Upload image
     addLog('pub-log','🖼️ Uploading cover image...','log-info');
-    var imgPath=folder+'assets/blog/'+post.slug+'.'+imgName.split('.').pop();
+    var imgPath=folder+'assets/blog/'+post.slug+'.jpg';
     var imgSha=null;
     try{var existing=await ghGet(imgPath);imgSha=existing.sha||null}catch(e){}
     var imgUrl='https://raw.githubusercontent.com/'+cfg.user+'/'+cfg.repo+'/main/'+imgPath;
@@ -515,7 +527,7 @@ async function updateBlogListing(post,imgUrl,dateStr,folder){
   var existing=await ghGet(blogPath);
   if(!existing||!existing.content)return;
   var html=decodeURIComponent(escape(atob(existing.content.replace(/\n/g,''))));
-  var newCard='<article class="blog-card">\n<div class="blog-thumb" style="padding:0;overflow:hidden;"><img src="'+imgUrl+'" alt="'+post.title+'" style="width:100%;height:100%;object-fit:cover;"></div>\n<div class="blog-body">\n<span class="blog-tag">'+post.category+'</span>\n<h3><a href="blog/'+post.slug+'.html" style="color:inherit;text-decoration:none;">'+post.title+'</a></h3>\n<p>'+post.excerpt+'</p>\n<p class="blog-meta">'+dateStr+' · '+post.readTime+'</p>\n</div>\n</article>';
+  var newCard='<a class="blog-card" href="blog/'+post.slug+'.html">\n<div class="blog-thumb"><img src="'+imgUrl+'" alt="'+post.title+'"></div>\n<div class="blog-body">\n<span class="blog-tag">'+post.category+'</span>\n<h3>'+post.title+'</h3>\n<p>'+post.excerpt+'</p>\n<p class="blog-meta">'+dateStr+' · '+post.readTime+'</p>\n<span class="blog-read">Read more</span>\n</div>\n</a>';
   var marker='<div class="blog-grid">';
   var idx=html.indexOf(marker);
   if(idx>=0){html=html.slice(0,idx+marker.length)+'\n'+newCard+'\n'+html.slice(idx+marker.length)}
