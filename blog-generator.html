@@ -354,8 +354,7 @@ async function generatePost(){
     generatedPost.imageName=imgName;
     addLog('gen-log','✅ Post generated — '+post.title,'log-ok');
     var out=document.getElementById('gen-out');
-    out.textContent=post.html;
-    out.style.display='block';
+    out.style.display='none';
     renderPreview(post);
   }catch(err){
     addLog('gen-log','❌ '+err.message,'log-err');
