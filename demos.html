@@ -93,6 +93,15 @@
   font-size: 24px;
   cursor: pointer;
   color: #fff;
+  flex-shrink: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s, background 0.2s;
+}
+.tab-arrow:hover { background: rgba(255,255,255,0.18); }
+.tab-arrow.hidden { opacity: 0; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -389,5 +398,28 @@ function endTavusConversation() {
 </script>
 
 <script src="js/main.js"></script>
+  <script>
+  const tabScroll = document.getElementById('tabScroll');
+  const arrowLeft = document.getElementById('arrowLeft');
+  const arrowRight = document.getElementById('arrowRight');
+  const wrapper = tabScroll.parentElement;
+
+  function scrollTabs(amount) {
+    tabScroll.scrollLeft += amount;
+  }
+
+  function updateArrows() {
+    const s = tabScroll.scrollLeft;
+    const max = tabScroll.scrollWidth - tabScroll.clientWidth;
+    arrowLeft.classList.toggle('hidden', s <= 0);
+    arrowRight.classList.toggle('hidden', s >= max);
+    wrapper.classList.toggle('scrolled-left', s > 0);
+    wrapper.classList.toggle('at-end', s >= max);
+  }
+
+  tabScroll.addEventListener('scroll', updateArrows);
+  window.addEventListener('resize', updateArrows);
+  updateArrows();
+</script>
 </body>
 </html>
