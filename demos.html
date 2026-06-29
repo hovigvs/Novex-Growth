@@ -81,7 +81,7 @@
   top: 0;
   width: 80px;
   height: 100%;
-  background: linear-gradient(to right, transparent, var(--navy));
+  background: linear-gradient(to right, transparent, #f0efff);
   pointer-events: none;
   transition: opacity 0.3s;
 }
@@ -93,7 +93,7 @@
   top: 0;
   width: 80px;
   height: 100%;
-  background: linear-gradient(to left, transparent, var(--navy));
+  background: linear-gradient(to left, transparent, #f0efff);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s;
@@ -103,22 +103,23 @@
 .tab-scroll-wrapper.at-end::after { opacity: 0; }
 
 .tab-arrow {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: #fff;
+  border: 1px solid var(--border);
   border-radius: 50%;
   width: 32px;
   height: 32px;
   font-size: 24px;
   cursor: pointer;
-  color: #fff;
+  color: var(--purple-dark);
   flex-shrink: 0;
-  z-index: 2;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: opacity 0.3s, background 0.2s;
+  box-shadow: 0 2px 8px rgba(74,82,196,0.15);
 }
-.tab-arrow:hover { background: rgba(255,255,255,0.18); }
+.tab-arrow:hover { background: #f0efff; }
 .tab-arrow.hidden { opacity: 0; pointer-events: none; }
 </style>
 </head>
