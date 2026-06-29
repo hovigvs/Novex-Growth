@@ -7,3 +7,8 @@
     X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/whatsapp_demo.html"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
