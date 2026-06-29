@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Novex Growth — Kitchen Dashboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap"/>
+<style>
+:root{--dark:#1E1E3A;--amber:#5558B8;--gold:#7782D4;--cream:#F0F2FF;--light:#DCEAFF;--muted:#646BC1;--border:#D4D8F5;--red:#C0392B;--green:#27AE60;--blue:#2980B9;--orange:#E67E22;--bg:#EEEEFF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);display:flex;min-height:100vh;}
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--dark);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100;flex-shrink:0;}
+.sb-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo-main{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;}
+.sb-logo-sub{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.sb-nav{flex:1;padding:16px 0;overflow-y:auto;}
+.sb-section{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);padding:8px 20px 6px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:13.5px;color:rgba(255,255,255,.6);transition:all .15s;border-left:3px solid transparent;}
+.sb-item:hover{color:white;background:rgba(255,255,255,.05);}
+.sb-item.active{color:white;background:rgba(196,134,42,.15);border-left-color:var(--amber);}
+.sb-item-icon{font-size:16px;width:20px;text-align:center;}
+.sb-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);}
+.sb-date{font-size:11px;color:rgba(255,255,255,.3);}
+.sb-live{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11px;color:var(--gold);}
+.live-dot{width:7px;height:7px;background:#27AE60;border-radius:50%;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+/* MAIN */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:white;border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--dark);}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.tb-badge{background:var(--red);color:white;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.tb-avatar{width:34px;height:34px;background:var(--amber);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--dark);}
+.content{flex:1;padding:28px 32px;}
+/* TABS */
+.tab-bar{display:flex;gap:4px;margin-bottom:24px;background:white;border-radius:12px;padding:5px;border:1px solid var(--border);width:fit-content;}
+.tab-btn{padding:8px 20px;border-radius:8px;border:none;background:transparent;font-family:inherit;font-size:13.5px;font-weight:500;cursor:pointer;color:var(--muted);transition:all .2s;}
+.tab-btn.active{background:var(--dark);color:white;font-weight:600;}
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:white;border-radius:14px;padding:20px;border:1px solid var(--border);}
+.stat-card.accent{background:var(--dark);border-color:var(--dark);}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.stat-card.accent .stat-label{color:rgba(255,255,255,.45);}
+.stat-val{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--dark);line-height:1;}
+.stat-card.accent .stat-val{color:var(--gold);}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:5px;}
+.stat-card.accent .stat-sub{color:rgba(255,255,255,.35);}
+.stat-trend{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;margin-top:5px;}
+.stat-trend.up{background:rgba(39,174,96,.12);color:#27AE60;}
+.stat-trend.dn{background:rgba(192,57,43,.1);color:var(--red);}
+/* SECTION TITLE */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--dark);}
+.section-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.view-all{font-size:12px;color:var(--amber);font-weight:600;cursor:pointer;text-decoration:none;background:none;border:none;font-family:inherit;}
+/* PREP GRID */
+.prep-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;}
+.prep-card{background:white;border-radius:12px;padding:16px 14px;border:1px solid var(--border);text-align:center;}
+.prep-count{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--dark);line-height:1;}
+.prep-count.high{color:var(--red);}
+.prep-count.med{color:var(--orange);}
+.prep-name{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;}
+.prep-bar-wrap{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+.prep-bar{height:100%;border-radius:2px;background:var(--amber);}
+/* ORDERS TABLE */
+.orders-table{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:24px;}
+.ot-filter-bar{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.ot-filter{padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);background:transparent;font-family:inherit;font-size:12px;cursor:pointer;color:var(--muted);font-weight:500;}
+.ot-filter.on{background:var(--dark);color:white;border-color:var(--dark);}
+.ot-head{display:grid;grid-template-columns:2fr 2fr 1.2fr 1fr 1.2fr 1.2fr;gap:12px;padding:11px 18px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);}
+.ot-row{display:grid;grid-template-columns:2fr 2fr 1.2fr 1fr 1.2fr 1.2fr;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;cursor:pointer;}
+.ot-row:hover{background:var(--bg);}
+.ot-row:last-child{border-bottom:none;}
+.ot-name{font-weight:600;font-size:13.5px;color:var(--dark);}
+.ot-phone{font-size:12px;color:var(--muted);}
+.ot-meals{font-size:13px;color:var(--dark);}
+.ot-city{font-size:12.5px;color:var(--muted);}
+.ot-date{font-size:12.5px;color:var(--dark);}
+.status-badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:inherit;white-space:nowrap;}
+.s-prep{background:rgba(196,134,42,.12);color:#8B5E10;}
+.s-ready{background:rgba(230,126,34,.12);color:var(--orange);}
+.s-out{background:rgba(41,128,185,.12);color:var(--blue);}
+.s-done{background:rgba(39,174,96,.12);color:var(--green);}
+.ot-total{font-weight:700;font-size:13.5px;color:var(--dark);}
+/* BOTTOM GRID */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+/* CITY BREAKDOWN */
+.city-card{background:white;border-radius:14px;padding:20px;border:1px solid var(--border);}
+.city-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.city-row:last-child{margin-bottom:0;}
+.city-name{font-size:13.5px;font-weight:600;color:var(--dark);min-width:100px;}
+.city-bar-wrap{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.city-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--amber),var(--gold));}
+.city-count{font-size:12px;color:var(--muted);min-width:60px;text-align:right;}
+/* REVENUE CHART */
+.chart-card{background:white;border-radius:14px;padding:20px;border:1px solid var(--border);}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:110px;margin-top:16px;}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;background:var(--amber);min-height:4px;transition:height .3s;}
+.chart-bar.today{background:var(--dark);}
+.chart-day{font-size:10px;color:var(--muted);}
+.chart-val{font-size:9px;color:var(--muted);}
+/* CUSTOMERS TAB */
+.cust-table{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+.ct-head{display:grid;grid-template-columns:2fr 1.2fr 1fr 1.2fr 1.2fr;gap:12px;padding:11px 18px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);}
+.ct-row{display:grid;grid-template-columns:2fr 1.2fr 1fr 1.2fr 1.2fr;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;transition:background .15s;}
+.ct-row:hover{background:var(--bg);}
+.ct-row:last-child{border-bottom:none;}
+.ct-avatar{width:32px;height:32px;border-radius:50%;background:var(--light);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--amber);margin-right:8px;border:1.5px solid var(--border);}
+.ct-name-wrap{display:flex;align-items:center;}
+.ct-name{font-weight:600;font-size:13.5px;color:var(--dark);}
+.ct-sub-lbl{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;margin-top:2px;}
+.sub-active{background:rgba(39,174,96,.1);color:var(--green);}
+.sub-paused{background:rgba(192,57,43,.08);color:var(--red);}
+.plan-lbl{font-size:12.5px;color:var(--dark);}
+.orders-count{font-size:13.5px;font-weight:600;color:var(--dark);}
+.ltv{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--dark);}
+.last-order{font-size:12px;color:var(--muted);}
+/* NOTIFICATION PREVIEW */
+.notif-card{background:var(--dark);border-radius:14px;padding:20px;margin-bottom:24px;}
+.notif-title{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px;}
+.notif-item{background:rgba(255,255,255,.06);border-radius:10px;padding:14px;margin-bottom:8px;border:1px solid rgba(255,255,255,.08);}
+.notif-item:last-child{margin-bottom:0;}
+.notif-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.notif-icon{font-size:16px;}
+.notif-from{font-size:12px;font-weight:700;color:rgba(255,255,255,.8);}
+.notif-time{font-size:11px;color:rgba(255,255,255,.35);margin-left:auto;}
+.notif-body{font-size:12.5px;color:rgba(255,255,255,.65);line-height:1.6;}
+/* PAGE VISIBILITY */
+.tab-page{display:none;}
+.tab-page.active{display:block;}
+/* DETAIL PANEL */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;justify-content:flex-end;}
+.detail-overlay.open{display:flex;}
+.detail-panel{width:400px;background:white;height:100%;overflow-y:auto;box-shadow:-4px 0 30px rgba(0,0,0,.15);}
+.dp-head{background:var(--dark);padding:20px;display:flex;align-items:center;justify-content:space-between;}
+.dp-close{background:none;border:none;color:white;font-size:20px;cursor:pointer;}
+.dp-body{padding:24px;}
+.dp-section{margin-bottom:20px;}
+.dp-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;font-weight:700;}
+.dp-val{font-size:14px;color:var(--dark);font-weight:500;}
+.dp-meal-list{display:flex;flex-direction:column;gap:7px;}
+.dp-meal{display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg);border-radius:8px;font-size:13px;}
+.history-entry{padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;}
+.he-date{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.he-meals{font-size:13px;color:var(--dark);font-weight:500;}
+.he-total{font-size:13px;font-weight:700;color:var(--amber);float:right;}
+
+/* PREP FORECAST */
+.forecast-banner{background:linear-gradient(135deg,var(--dark),#3D1A06);border-radius:14px;padding:20px 24px;margin-bottom:24px;color:white;}
+.forecast-banner-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.forecast-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;}
+.forecast-sub{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px;}
+.forecast-ai-badge{background:rgba(196,134,42,.2);color:var(--gold);border:1px solid rgba(196,134,42,.4);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.forecast-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.fc-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px 12px;text-align:center;}
+.fc-dish{font-size:11px;color:rgba(255,255,255,.6);margin-bottom:6px;line-height:1.3;height:28px;display:flex;align-items:center;justify-content:center;}
+.fc-num{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:white;line-height:1;}
+.fc-trend{font-size:10px;font-weight:600;margin-top:5px;padding:2px 6px;border-radius:10px;display:inline-block;}
+.fc-up{background:rgba(196,134,42,.25);color:var(--gold);}
+.fc-flat{background:rgba(255,255,255,.1);color:rgba(255,255,255,.5);}
+.fc-confirmed{font-size:9px;color:rgba(255,255,255,.4);margin-top:4px;}
+.forecast-insight{background:rgba(196,134,42,.12);border-left:3px solid var(--gold);border-radius:6px;padding:10px 14px;margin-top:14px;font-size:12.5px;color:rgba(255,255,255,.85);line-height:1.5;}
+.pattern-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);}
+.pattern-row:last-child{border-bottom:none;}
+.pattern-label{font-size:13px;color:var(--dark);font-weight:600;min-width:160px;}
+.pattern-bar-wrap{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.pattern-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--amber),var(--gold));}
+.pattern-val{font-size:12px;color:var(--muted);min-width:90px;text-align:right;font-weight:600;}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&display=swap"/>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sb-logo" style="display:flex;align-items:center;padding:16px 20px;">
+    <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.01em;background:linear-gradient(90deg,#82DFFF 0%,#B6DAFE 55%,#CECBF6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">novexgrowth</span>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">Operations</div>
+    <div class="sb-item active" data-tab="overview"><span class="sb-item-icon">&#127968;</span>Overview</div>
+    <div class="sb-item" data-tab="orders"><span class="sb-item-icon">&#128203;</span>Orders</div>
+    <div class="sb-item" data-tab="prep"><span class="sb-item-icon">&#127859;</span>Meal Prep</div>
+    <div class="sb-item" data-tab="customers"><span class="sb-item-icon">&#128101;</span>Customers</div>
+    <div class="sb-section">Analytics</div>
+    <div class="sb-item" data-tab="reports"><span class="sb-item-icon">&#128200;</span>Reports</div>
+    <div class="sb-section">Settings</div>
+    <div class="sb-item" data-tab="menu"><span class="sb-item-icon">&#9881;</span>Weekly Menu</div>
+    <div class="sb-item" data-tab="settings"><span class="sb-item-icon">&#128274;</span>Settings</div>
+  </div>
+  <div class="sb-footer">
+    <div class="sb-date" id="sb-date"></div>
+    <div class="sb-live"><div class="live-dot"></div>Live &mdash; auto-updating</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Today's Overview</div>
+    <div class="topbar-right">
+      <div style="font-size:13px;color:var(--muted)">Scarborough &amp; Mississauga</div>
+      <div style="position:relative">
+        <span style="font-size:20px">&#128276;</span>
+        <div class="tb-badge" style="position:absolute;top:-4px;right:-4px">3</div>
+      </div>
+      <div class="tb-avatar">AM</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW TAB -->
+    <div class="tab-page active" id="tab-overview">
+      <div class="stats-row">
+        <div class="stat-card accent">
+          <div class="stat-label">Today's Revenue</div>
+          <div class="stat-val">$892</div>
+          <div class="stat-sub">.45 incl. HST</div>
+          <div class="stat-trend up">&#8593; 12% vs last Fri</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Orders Today</div>
+          <div class="stat-val">14</div>
+          <div class="stat-sub">10 subscribers &middot; 4 one-time</div>
+          <div class="stat-trend up">&#8593; 2 vs yesterday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Meals to Prepare</div>
+          <div class="stat-val">70</div>
+          <div class="stat-sub">Across 10 dishes</div>
+          <div class="stat-trend up">&#8593; 8 vs yesterday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Subscribers</div>
+          <div class="stat-val">47</div>
+          <div class="stat-sub">$2,820 monthly recurring</div>
+          <div class="stat-trend up">&#8593; 3 new this week</div>
+        </div>
+      </div>
+
+      <!-- RECENT NOTIFICATIONS -->
+      <div class="section-hdr">
+        <div><div class="section-title">Live Notifications</div><div class="section-sub">Orders received in real-time via WhatsApp &amp; email</div></div>
+      </div>
+      <div class="notif-card">
+        <div class="notif-title">Latest Activity</div>
+        <div class="notif-item">
+          <div class="notif-header"><span class="notif-icon">&#128241;</span><span class="notif-from">New Order &mdash; WhatsApp</span><span class="notif-time">2 min ago</span></div>
+          <div class="notif-body">New Ready Meals order from <strong style="color:white">Nina Petrova</strong> &mdash; Family plan (10 meals), delivering Friday June 13 to 88 Yonge St, Toronto. Total: <strong style="color:var(--gold)">$124.09</strong></div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-header"><span class="notif-icon">&#128140;</span><span class="notif-from">New Subscriber &mdash; Website</span><span class="notif-time">18 min ago</span></div>
+          <div class="notif-body"><strong style="color:white">Roberto Campos</strong> subscribed to the Regular plan (5 meals/week). First delivery: Saturday June 14. MRR +<strong style="color:var(--gold)">$59.99</strong></div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-header"><span class="notif-icon">&#128233;</span><span class="notif-from">Order Confirmed &mdash; Email</span><span class="notif-time">41 min ago</span></div>
+          <div class="notif-body"><strong style="color:white">Mohamed Al-Rashid</strong> &mdash; Family plan 10 meals confirmed for Mississauga. Order #247. Total: <strong style="color:var(--gold)">$124.09</strong></div>
+        </div>
+      </div>
+
+      <div class="bottom-grid">
+        <div>
+          <div class="section-hdr"><div><div class="section-title">Deliveries by City</div><div class="section-sub">Today</div></div></div>
+          <div class="city-card">
+            <div class="city-row"><span class="city-name">Scarborough</span><div class="city-bar-wrap"><div class="city-bar" style="width:71%"></div></div><span class="city-count">5 orders &middot; 27 meals</span></div>
+            <div class="city-row"><span class="city-name">Mississauga</span><div class="city-bar-wrap"><div class="city-bar" style="width:57%"></div></div><span class="city-count">4 orders &middot; 22 meals</span></div>
+            <div class="city-row"><span class="city-name">Toronto</span><div class="city-bar-wrap"><div class="city-bar" style="width:43%"></div></div><span class="city-count">3 orders &middot; 14 meals</span></div>
+            <div class="city-row"><span class="city-name">North York</span><div class="city-bar-wrap"><div class="city-bar" style="width:28%"></div></div><span class="city-count">2 orders &middot; 7 meals</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-hdr"><div><div class="section-title">Revenue This Week</div><div class="section-sub">June 9 – 15, 2026</div></div></div>
+          <div class="chart-card">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--dark)">$5,285</div>
+              <div style="font-size:12px;color:var(--green);font-weight:600">&#8593; 18% vs last week</div>
+            </div>
+            <div class="chart-bars">
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:45%"></div><div class="chart-day">Mon</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:72%"></div><div class="chart-day">Tue</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:63%"></div><div class="chart-day">Wed</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:83%"></div><div class="chart-day">Thu</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar today" style="height:95%"></div><div class="chart-day" style="color:var(--dark);font-weight:700">Fri</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:40%;opacity:.3"></div><div class="chart-day">Sat</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:35%;opacity:.3"></div><div class="chart-day">Sun</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div class="tab-page" id="tab-orders">
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card"><div class="stat-label">Preparing</div><div class="stat-val" style="color:var(--amber)">6</div><div class="stat-sub">In kitchen now</div></div>
+        <div class="stat-card"><div class="stat-label">Ready</div><div class="stat-val" style="color:var(--orange)">3</div><div class="stat-sub">Awaiting pickup</div></div>
+        <div class="stat-card"><div class="stat-label">Out for Delivery</div><div class="stat-val" style="color:var(--blue)">3</div><div class="stat-sub">En route</div></div>
+        <div class="stat-card accent"><div class="stat-label">Delivered</div><div class="stat-val">2</div><div class="stat-sub">Completed today</div></div>
+      </div>
+      <div class="orders-table">
+        <div class="ot-filter-bar">
+          <button class="ot-filter on" data-ofilter="all">All (14)</button>
+          <button class="ot-filter" data-ofilter="Preparing">Preparing (6)</button>
+          <button class="ot-filter" data-ofilter="Ready">Ready (3)</button>
+          <button class="ot-filter" data-ofilter="Out for Delivery">Out for Delivery (3)</button>
+          <button class="ot-filter" data-ofilter="Delivered">Delivered (2)</button>
+        </div>
+        <div class="ot-head"><span>Customer</span><span>Meals</span><span>City</span><span>Delivery</span><span>Status</span><span>Total</span></div>
+        <div id="orders-list"></div>
+      </div>
+    </div>
+
+    <!-- PREP TAB -->
+    <div class="tab-page" id="tab-prep">
+
+      <!-- AI PREP FORECAST -->
+      <div class="forecast-banner">
+        <div class="forecast-banner-top">
+          <div>
+            <div class="forecast-title">Tomorrow's Prep Forecast</div>
+            <div class="forecast-sub">Friday, June 13 &middot; Predicted from order patterns + confirmed orders</div>
+          </div>
+          <div class="forecast-ai-badge">&#9889; AI Prediction</div>
+        </div>
+        <div class="forecast-grid">
+          <div class="fc-card"><div class="fc-dish">Chicken Shawarma</div><div class="fc-num">38</div><div class="fc-trend fc-up">&#8593; 42% Fri</div><div class="fc-confirmed">12 confirmed</div></div>
+          <div class="fc-card"><div class="fc-dish">Lamb Ouzi</div><div class="fc-num">24</div><div class="fc-trend fc-up">&#8593; 33% Fri</div><div class="fc-confirmed">8 confirmed</div></div>
+          <div class="fc-card"><div class="fc-dish">Chicken Musakhan</div><div class="fc-num">19</div><div class="fc-trend fc-up">&#8593; 18% Fri</div><div class="fc-confirmed">6 confirmed</div></div>
+          <div class="fc-card"><div class="fc-dish">Kibbeh Plate</div><div class="fc-num">14</div><div class="fc-trend fc-flat">&#8594; typical</div><div class="fc-confirmed">4 confirmed</div></div>
+          <div class="fc-card"><div class="fc-dish">Butter Chicken</div><div class="fc-num">12</div><div class="fc-trend fc-flat">&#8594; typical</div><div class="fc-confirmed">3 confirmed</div></div>
+        </div>
+        <div class="forecast-insight">&#128161; <strong>Insight:</strong> Fridays run 35% busier than weekdays. Prep extra Chicken Shawarma and Lamb Ouzi. Order marinated chicken today &mdash; tomorrow's demand exceeds current stock by 4kg.</div>
+      </div>
+
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card accent"><div class="stat-label">Total Portions Today</div><div class="stat-val">70</div><div class="stat-sub">Across 14 orders</div></div>
+        <div class="stat-card"><div class="stat-label">Most In-Demand</div><div class="stat-val" style="font-size:22px;line-height:1.3">Chicken Shawarma</div><div class="stat-sub">12 portions today</div></div>
+        <div class="stat-card"><div class="stat-label">Prep Completion</div><div class="stat-val">34%</div><div class="stat-sub">24 of 70 portions ready</div></div>
+      </div>
+      <div class="section-hdr"><div><div class="section-title">Today's Prep Counts</div><div class="section-sub">Portions to prepare by dish — sorted by quantity</div></div></div>
+      <div class="prep-grid" id="prep-grid"></div>
+      <div class="section-hdr"><div><div class="section-title">Ingredient Alert</div><div class="section-sub">Based on today's orders</div></div></div>
+      <div style="background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden">
+        <div class="ot-head" style="grid-template-columns:2fr 1fr 1fr 1fr"><span>Ingredient</span><span>Needed Today</span><span>In Stock</span><span>Status</span></div>
+        <div class="ot-row" style="grid-template-columns:2fr 1fr 1fr 1fr"><span class="ot-name">Lamb shoulder</span><span class="ot-meals">6.5 kg</span><span class="ot-city">8 kg</span><span><button class="status-badge s-done">Sufficient</button></span></div>
+        <div class="ot-row" style="grid-template-columns:2fr 1fr 1fr 1fr"><span class="ot-name">Chicken (marinated)</span><span class="ot-meals">9 kg</span><span class="ot-city">7 kg</span><span><button class="status-badge s-out">Order More</button></span></div>
+        <div class="ot-row" style="grid-template-columns:2fr 1fr 1fr 1fr"><span class="ot-name">Ground beef / kofta mix</span><span class="ot-meals">4.5 kg</span><span class="ot-city">6 kg</span><span><button class="status-badge s-done">Sufficient</button></span></div>
+        <div class="ot-row" style="grid-template-columns:2fr 1fr 1fr 1fr"><span class="ot-name">Saffron rice</span><span class="ot-meals">8 kg</span><span class="ot-city">5 kg</span><span><button class="status-badge s-ready" style="background:rgba(192,57,43,.1);color:var(--red)">Low Stock</button></span></div>
+        <div class="ot-row" style="grid-template-columns:2fr 1fr 1fr 1fr"><span class="ot-name">Flatbread (musakhan)</span><span class="ot-meals">16 pcs</span><span class="ot-city">20 pcs</span><span><button class="status-badge s-done">Sufficient</button></span></div>
+      </div>
+    </div>
+
+    <!-- CUSTOMERS TAB -->
+    <div class="tab-page" id="tab-customers">
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card accent"><div class="stat-label">Total Subscribers</div><div class="stat-val">47</div><div class="stat-sub">$2,820 MRR</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Lifetime Value</div><div class="stat-val">$342</div><div class="stat-sub">Per subscriber</div></div>
+        <div class="stat-card"><div class="stat-label">New This Month</div><div class="stat-val">8</div><div class="stat-sub">3 from Layla chat</div></div>
+        <div class="stat-card"><div class="stat-label">Retention Rate</div><div class="stat-val">84%</div><div class="stat-sub">&#8593; 6% vs last month</div></div>
+      </div>
+      <div class="cust-table">
+        <div class="ct-head"><span>Customer</span><span>Plan</span><span>Orders</span><span>Lifetime Value</span><span>Last Order</span></div>
+        <div id="customers-list"></div>
+      </div>
+    </div>
+
+    <!-- REPORTS TAB -->
+    <div class="tab-page" id="tab-reports">
+      <div class="stats-row">
+        <div class="stat-card accent"><div class="stat-label">Monthly Revenue</div><div class="stat-val">$18,420</div><div class="stat-sub">June 2026</div><div class="stat-trend up">&#8593; 22% vs May</div></div>
+        <div class="stat-card"><div class="stat-label">Total Orders (MTD)</div><div class="stat-val">218</div><div class="stat-sub">14.5 avg/day</div><div class="stat-trend up">&#8593; 31 vs last month</div></div>
+        <div class="stat-card"><div class="stat-label">Most Popular Meal</div><div class="stat-val" style="font-size:20px;line-height:1.4">Chicken Shawarma</div><div class="stat-sub">312 portions this month</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Order Value</div><div class="stat-val">$67</div><div class="stat-sub">.23 incl. HST</div><div class="stat-trend up">&#8593; $4.80 vs last month</div></div>
+      </div>
+      <div class="bottom-grid">
+        <div class="city-card">
+          <div class="section-hdr" style="margin-bottom:16px"><div><div class="section-title">Top Dishes This Month</div></div></div>
+          <div class="city-row"><span class="city-name" style="font-size:12px">Chicken Shawarma Bowl</span><div class="city-bar-wrap"><div class="city-bar" style="width:100%"></div></div><span class="city-count">312</span></div>
+          <div class="city-row"><span class="city-name" style="font-size:12px">Lamb Ouzi</span><div class="city-bar-wrap"><div class="city-bar" style="width:78%"></div></div><span class="city-count">244</span></div>
+          <div class="city-row"><span class="city-name" style="font-size:12px">Chicken Musakhan</span><div class="city-bar-wrap"><div class="city-bar" style="width:72%"></div></div><span class="city-count">226</span></div>
+          <div class="city-row"><span class="city-name" style="font-size:12px">Kibbeh Plate</span><div class="city-bar-wrap"><div class="city-bar" style="width:64%"></div></div><span class="city-count">200</span></div>
+          <div class="city-row"><span class="city-name" style="font-size:12px">Butter Chicken</span><div class="city-bar-wrap"><div class="city-bar" style="width:58%"></div></div><span class="city-count">182</span></div>
+        </div>
+        <div class="city-card">
+          <div class="section-hdr" style="margin-bottom:16px"><div><div class="section-title">Plan Distribution</div></div></div>
+          <div class="city-row"><span class="city-name">Regular (5 meals)</span><div class="city-bar-wrap"><div class="city-bar" style="width:64%"></div></div><span class="city-count">30 subs (64%)</span></div>
+          <div class="city-row"><span class="city-name">Family (10 meals)</span><div class="city-bar-wrap"><div class="city-bar" style="width:30%"></div></div><span class="city-count">14 subs (30%)</span></div>
+          <div class="city-row"><span class="city-name">Starter (3 meals)</span><div class="city-bar-wrap"><div class="city-bar" style="width:6%"></div></div><span class="city-count">3 subs (6%)</span></div>
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+            <div class="stat-label" style="margin-bottom:8px">Subscription vs One-Time</div>
+            <div class="city-row" style="margin-bottom:8px"><span class="city-name">Subscriptions</span><div class="city-bar-wrap"><div class="city-bar" style="width:76%"></div></div><span class="city-count">76%</span></div>
+            <div class="city-row"><span class="city-name">One-time orders</span><div class="city-bar-wrap"><div class="city-bar" style="width:24%"></div></div><span class="city-count">24%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEMAND PATTERNS -->
+      <div class="section-hdr" style="margin-top:8px"><div><div class="section-title">Demand Patterns</div><div class="section-sub">Learned from order history &mdash; powers the prep forecast</div></div><div class="forecast-ai-badge" style="background:rgba(196,134,42,.15);color:var(--amber);border-color:rgba(196,134,42,.3)">&#9889; AI Learned</div></div>
+      <div class="city-card">
+        <div class="pattern-row"><span class="pattern-label">Friday (busiest day)</span><div class="pattern-bar-wrap"><div class="pattern-bar" style="width:100%"></div></div><span class="pattern-val">+42% vs avg</span></div>
+        <div class="pattern-row"><span class="pattern-label">Thursday</span><div class="pattern-bar-wrap"><div class="pattern-bar" style="width:82%"></div></div><span class="pattern-val">+24% vs avg</span></div>
+        <div class="pattern-row"><span class="pattern-label">Saturday</span><div class="pattern-bar-wrap"><div class="pattern-bar" style="width:78%"></div></div><span class="pattern-val">+18% vs avg</span></div>
+        <div class="pattern-row"><span class="pattern-label">Monday (slowest)</span><div class="pattern-bar-wrap"><div class="pattern-bar" style="width:45%"></div></div><span class="pattern-val">-20% vs avg</span></div>
+        <div class="pattern-row"><span class="pattern-label">Pre-Eid / Ramadan week</span><div class="pattern-bar-wrap"><div class="pattern-bar" style="width:100%"></div></div><span class="pattern-val">3x normal</span></div>
+        <div class="pattern-row"><span class="pattern-label">Rainy days (delivery up)</span><div class="pattern-bar-wrap"><div class="pattern-bar" style="width:68%"></div></div><span class="pattern-val">+15% delivery</span></div>
+      </div>
+      <div style="background:var(--light);border-radius:10px;padding:14px 18px;margin-top:14px;font-size:13px;color:var(--dark);line-height:1.6">&#128176; <strong>Estimated savings:</strong> Following these forecasts reduced food waste by an estimated <strong>$1,180 last month</strong> by preventing over-prep on slow days while avoiding stockouts on busy ones.</div>
+    </div>
+
+    <!-- MENU TAB -->
+    <div class="tab-page" id="tab-menu">
+      <div style="background:white;border-radius:14px;border:1px solid var(--border);padding:28px;text-align:center;max-width:600px;margin:40px auto">
+        <div style="font-size:48px;margin-bottom:16px">&#128203;</div>
+        <div class="section-title" style="margin-bottom:8px">Weekly Menu Management</div>
+        <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:20px">Update next week's meal selection. Changes go live on the customer website immediately. Edit the <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:13px">MEALS_CONFIG</code> block in the website file to update menus.</p>
+        <button class="status-badge s-done" style="padding:10px 24px;font-size:13px;cursor:pointer">Coming in Phase 2 &rarr;</button>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-page" id="tab-settings">
+      <div style="background:white;border-radius:14px;border:1px solid var(--border);padding:28px;text-align:center;max-width:600px;margin:40px auto">
+        <div style="font-size:48px;margin-bottom:16px">&#128274;</div>
+        <div class="section-title" style="margin-bottom:8px">Dashboard Settings</div>
+        <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:20px">Manage notification preferences, staff access, WhatsApp number, and CRM integration settings. Connected to Novex Growth CRM.</p>
+        <button class="status-badge s-done" style="padding:10px 24px;font-size:13px;cursor:pointer">Coming in Phase 2 &rarr;</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ORDER DETAIL PANEL -->
+<div class="detail-overlay" id="detail-overlay">
+  <div class="detail-panel" id="detail-panel"></div>
+</div>
+
+<script>
+var ORDERS = [
+  {id:'#247',name:'Mohamed Al-Rashid',phone:'(416) 882-3310',meals:[{n:'Lamb Ouzi',q:3},{n:'Chicken Musakhan',q:4},{n:'Mansaf Plate',q:3}],city:'Mississauga',addr:'45 Confederation Pkwy, Mississauga',date:'Jun 13',plan:'Family',status:'Preparing',total:124.09,type:'subscriber'},
+  {id:'#246',name:'Sarah Mitchell',phone:'(416) 553-9021',meals:[{n:'Chicken Shawarma Bowl',q:2},{n:'Kibbeh Plate',q:2},{n:'Mujadara Bowl',q:1}],city:'Scarborough',addr:'1200 Lawrence Ave E, Scarborough',date:'Jun 13',plan:'Regular',status:'Ready',total:67.79,type:'subscriber'},
+  {id:'#245',name:'Nina Petrova',phone:'(416) 445-0988',meals:[{n:'Butter Chicken',q:4},{n:'Chicken Shawarma Bowl',q:3},{n:'Fattoush & Falafel',q:3}],city:'Toronto',addr:'88 Yonge St, Toronto',date:'Jun 13',plan:'Family',status:'Preparing',total:124.09,type:'subscriber'},
+  {id:'#244',name:'Ali Karimi',phone:'(416) 773-2245',meals:[{n:'Chicken Shawarma Bowl',q:2},{n:'Grilled Kofta Plate',q:2},{n:'Stuffed Grape Leaves',q:1}],city:'Scarborough',addr:'3200 Eglinton Ave E, Scarborough',date:'Jun 13',plan:'Regular',status:'Out for Delivery',total:67.79,type:'subscriber'},
+  {id:'#243',name:'Fatima Hassan',phone:'(905) 338-7741',meals:[{n:'Lamb Ouzi',q:2},{n:'Kibbeh Plate',q:2},{n:'Mujadara Bowl',q:1}],city:'Mississauga',addr:'720 Bristol Rd W, Mississauga',date:'Jun 13',plan:'Regular',status:'Preparing',total:67.79,type:'subscriber'},
+  {id:'#242',name:'David Kim',phone:'(416) 290-1834',meals:[{n:'Chicken Musakhan',q:3},{n:'Butter Chicken',q:3},{n:'Grilled Kofta',q:2},{n:'Chicken Shawarma',q:2}],city:'Mississauga',addr:'200 City Centre Dr, Mississauga',date:'Jun 13',plan:'Family',status:'Preparing',total:124.09,type:'subscriber'},
+  {id:'#241',name:'Nadia Boutros',phone:'(416) 661-5503',meals:[{n:'Fattoush & Falafel',q:1},{n:'Stuffed Grape Leaves',q:1},{n:'Mujadara Bowl',q:1}],city:'Toronto',addr:'55 Bloor St W, Toronto',date:'Jun 13',plan:'Starter',status:'Ready',total:40.44,type:'onetime'},
+  {id:'#240',name:'Omar Saleh',phone:'(905) 276-8834',meals:[{n:'Mansaf Plate',q:2},{n:'Lamb Ouzi',q:2},{n:'Kibbeh Plate',q:1}],city:'Mississauga',addr:'1151 Dundas St W, Mississauga',date:'Jun 13',plan:'Regular',status:'Preparing',total:67.79,type:'subscriber'},
+  {id:'#239',name:'Hassan Yusuf',phone:'(416) 752-4490',meals:[{n:'Chicken Shawarma Bowl',q:3},{n:'Butter Chicken',q:2}],city:'Scarborough',addr:'2100 Lawrence Ave E, Scarborough',date:'Jun 13',plan:'Regular',status:'Ready',total:67.79,type:'subscriber'},
+  {id:'#238',name:'Roberto Campos',phone:'(905) 456-7731',meals:[{n:'Grilled Kofta',q:3},{n:'Chicken Musakhan',q:2}],city:'Mississauga',addr:'510 Hensall Cir, Mississauga',date:'Jun 14',plan:'Regular',status:'Preparing',total:67.79,type:'subscriber'},
+  {id:'#237',name:'Priya Sharma',phone:'(416) 304-5612',meals:[{n:'Butter Chicken',q:2},{n:'Fattoush & Falafel',q:1}],city:'North York',addr:'4789 Yonge St, North York',date:'Jun 13',plan:'Starter',status:'Out for Delivery',total:40.44,type:'subscriber'},
+  {id:'#236',name:'Amina Diallo',phone:'(416) 819-3345',meals:[{n:'Chicken Shawarma Bowl',q:2},{n:'Stuffed Grape Leaves',q:1}],city:'North York',addr:'3300 Dufferin St, North York',date:'Jun 13',plan:'Starter',status:'Preparing',total:40.44,type:'onetime'},
+  {id:'#235',name:'James Chen',phone:'(416) 502-7822',meals:[{n:'Lamb Ouzi',q:2},{n:'Kibbeh Plate',q:1}],city:'Scarborough',addr:'840 Progress Ave, Scarborough',date:'Jun 12',plan:'Starter',status:'Delivered',total:40.44,type:'onetime'},
+  {id:'#234',name:'Jennifer Walsh',phone:'(416) 238-9914',meals:[{n:'Mujadara Bowl',q:2},{n:'Fattoush & Falafel',q:1}],city:'Etobicoke',addr:'500 The West Mall, Etobicoke',date:'Jun 12',plan:'Starter',status:'Delivered',total:40.44,type:'onetime'},
+];
+
+var CUSTOMERS = [
+  {name:'Ali Karimi',phone:'(416) 773-2245',plan:'Regular',orders:15,ltv:1049.85,lastOrder:'Jun 13',status:'active',initials:'AK',history:['Jun 13 – 5 meals – $67.79','May 30 – 5 meals – $67.79','May 16 – 5 meals – $67.79','May 2 – 5 meals – $67.79']},
+  {name:'Mohamed Al-Rashid',phone:'(416) 882-3310',plan:'Family',orders:8,ltv:847.20,lastOrder:'Jun 13',status:'active',initials:'MA',history:['Jun 13 – 10 meals – $124.09','May 30 – 10 meals – $124.09','May 16 – 10 meals – $124.09']},
+  {name:'Sarah Mitchell',phone:'(416) 553-9021',plan:'Regular',orders:12,ltv:723.88,lastOrder:'Jun 13',status:'active',initials:'SM',history:['Jun 13 – 5 meals – $67.79','May 30 – 5 meals – $67.79','May 16 – 5 meals – $67.79']},
+  {name:'Fatima Hassan',phone:'(905) 338-7741',plan:'Regular',orders:10,ltv:677.90,lastOrder:'Jun 13',status:'active',initials:'FH',history:['Jun 13 – 5 meals – $67.79','May 30 – 5 meals – $67.79']},
+  {name:'David Kim',phone:'(416) 290-1834',plan:'Family',orders:6,ltv:744.54,lastOrder:'Jun 13',status:'active',initials:'DK',history:['Jun 13 – 10 meals – $124.09','May 30 – 10 meals – $124.09']},
+  {name:'Nina Petrova',phone:'(416) 445-0988',plan:'Family',orders:4,ltv:496.36,lastOrder:'Jun 13',status:'active',initials:'NP',history:['Jun 13 – 10 meals – $124.09','May 30 – 10 meals – $124.09']},
+  {name:'Omar Saleh',phone:'(905) 276-8834',plan:'Regular',orders:9,ltv:610.11,lastOrder:'Jun 13',status:'active',initials:'OS',history:['Jun 13 – 5 meals – $67.79','May 30 – 5 meals – $67.79']},
+  {name:'Hassan Yusuf',phone:'(416) 752-4490',plan:'Regular',orders:7,ltv:474.53,lastOrder:'Jun 13',status:'active',initials:'HY',history:['Jun 13 – 5 meals – $67.79','May 16 – 5 meals – $67.79']},
+  {name:'Roberto Campos',phone:'(905) 456-7731',plan:'Regular',orders:1,ltv:67.79,lastOrder:'Jun 14',status:'active',initials:'RC',history:['Jun 14 – 5 meals – $67.79']},
+  {name:'Nadia Boutros',phone:'(416) 661-5503',plan:'Starter',orders:3,ltv:121.32,lastOrder:'Jun 13',status:'active',initials:'NB',history:['Jun 13 – 3 meals – $40.44','May 30 – 3 meals – $40.44']},
+  {name:'Priya Sharma',phone:'(416) 304-5612',plan:'Starter',orders:5,ltv:202.20,lastOrder:'Jun 13',status:'paused',initials:'PS',history:['Jun 13 – 3 meals – $40.44','May 2 – 3 meals – $40.44']},
+];
+
+var PREP = [
+  {name:'Chicken Shawarma Bowl',count:12,max:12},
+  {name:'Grilled Kofta',count:9,max:12},
+  {name:'Lamb Ouzi',count:8,max:12},
+  {name:'Chicken Musakhan',count:8,max:12},
+  {name:'Butter Chicken',count:7,max:12},
+  {name:'Mansaf Plate',count:6,max:12},
+  {name:'Kibbeh Plate',count:5,max:12},
+  {name:'Fattoush & Falafel',count:5,max:12},
+  {name:'Stuffed Grape Leaves',count:5,max:12},
+  {name:'Mujadara Bowl',count:5,max:12},
+];
+
+var STATUSES = ['Preparing','Ready','Out for Delivery','Delivered'];
+var STATUS_CLASS = {'Preparing':'s-prep','Ready':'s-ready','Out for Delivery':'s-out','Delivered':'s-done'};
+var orderFilter = 'all';
+
+function renderOrders(filter){
+  var list = document.getElementById('orders-list'); if(!list) return;
+  var filtered = filter === 'all' ? ORDERS : ORDERS.filter(function(o){return o.status===filter;});
+  list.innerHTML = filtered.map(function(o){
+    var mealStr = o.meals.map(function(m){return m.n.split(' ')[0]+' x'+m.q;}).join(', ');
+    var sc = STATUS_CLASS[o.status] || 's-prep';
+    return '<div class="ot-row" data-order-id="'+o.id+'">'
+      +'<div><div class="ot-name">'+o.name+'</div><div class="ot-phone">'+o.id+' &middot; '+o.phone+'</div></div>'
+      +'<div class="ot-meals" title="'+mealStr+'">'+o.meals.length+' dishes &middot; '+o.plan+' plan</div>'
+      +'<div class="ot-city">'+o.city+'</div>'
+      +'<div class="ot-date">'+o.date+'</div>'
+      +'<button class="status-badge '+sc+'" data-order-status="'+o.id+'">'+o.status+'</button>'
+      +'<div class="ot-total">$'+o.total.toFixed(2)+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function renderPrep(){
+  var grid=document.getElementById('prep-grid'); if(!grid) return;
+  grid.innerHTML = PREP.map(function(p){
+    var cls = p.count>=10?'high':p.count>=7?'med':'';
+    var pct = Math.round(p.count/p.max*100);
+    return '<div class="prep-card">'
+      +'<div class="prep-count '+cls+'">'+p.count+'</div>'
+      +'<div class="prep-name">'+p.name+'</div>'
+      +'<div class="prep-bar-wrap"><div class="prep-bar" style="width:'+pct+'%"></div></div>'
+      +'</div>';
+  }).join('');
+}
+
+function renderCustomers(){
+  var list=document.getElementById('customers-list'); if(!list) return;
+  list.innerHTML = CUSTOMERS.map(function(c,i){
+    return '<div class="ct-row" data-cust-idx="'+i+'">'
+      +'<div class="ct-name-wrap"><div class="ct-avatar">'+c.initials+'</div><div><div class="ct-name">'+c.name+'</div><div class="ct-sub-lbl sub-'+(c.status==='active'?'active':'paused')+'">'+c.status.charAt(0).toUpperCase()+c.status.slice(1)+'</div></div></div>'
+      +'<div class="plan-lbl">'+c.plan+'</div>'
+      +'<div class="orders-count">'+c.orders+'</div>'
+      +'<div class="ltv">$'+c.ltv.toFixed(2)+'</div>'
+      +'<div class="last-order">'+c.lastOrder+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function openOrderDetail(id){
+  var o = ORDERS.find(function(x){return x.id===id;}); if(!o) return;
+  var sc = STATUS_CLASS[o.status]||'s-prep';
+  var panel = document.getElementById('detail-panel');
+  panel.innerHTML = '<div class="dp-head"><div><div style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Order '+o.id+'</div><div style="font-family:Playfair Display,serif;font-size:18px;color:white;font-weight:700">'+o.name+'</div></div><button class="dp-close" id="dp-close-btn">&#10005;</button></div>'
+    +'<div class="dp-body">'
+    +'<div class="dp-section"><div class="dp-label">Status</div><button class="status-badge '+sc+'" data-order-status="'+o.id+'" style="font-size:13px;padding:6px 14px">'+o.status+'</button></div>'
+    +'<div class="dp-section"><div class="dp-label">Contact</div><div class="dp-val">'+o.phone+'</div></div>'
+    +'<div class="dp-section"><div class="dp-label">Delivery Address</div><div class="dp-val">'+o.addr+'</div></div>'
+    +'<div class="dp-section"><div class="dp-label">Delivery Date</div><div class="dp-val">'+o.date+' 2026</div></div>'
+    +'<div class="dp-section"><div class="dp-label">Plan</div><div class="dp-val">'+o.plan+' &middot; '+(o.type==='subscriber'?'Weekly Subscriber':'One-Time Order')+'</div></div>'
+    +'<div class="dp-section"><div class="dp-label">Meals Ordered</div><div class="dp-meal-list">'+o.meals.map(function(m){return '<div class="dp-meal"><span>'+m.n+'</span><span style="font-weight:700">&times;'+m.q+'</span></div>';}).join('')+'</div></div>'
+    +'<div class="dp-section"><div class="dp-label">Order Total</div><div class="dp-val" style="font-family:Playfair Display,serif;font-size:22px;font-weight:700;color:var(--amber)">$'+o.total.toFixed(2)+'</div></div>'
+    +'<div style="display:flex;gap:8px;margin-top:20px">'
+    +'<button style="flex:1;background:#25D366;color:white;border:none;border-radius:10px;padding:12px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">&#128241; WhatsApp Customer</button>'
+    +'<button style="flex:1;background:var(--dark);color:white;border:none;border-radius:10px;padding:12px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">Mark Delivered</button>'
+    +'</div>'
+    +'</div>';
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function openCustomerDetail(idx){
+  var c = CUSTOMERS[idx]; if(!c) return;
+  var panel = document.getElementById('detail-panel');
+  panel.innerHTML = '<div class="dp-head"><div><div style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Customer Profile</div><div style="font-family:Playfair Display,serif;font-size:18px;color:white;font-weight:700">'+c.name+'</div></div><button class="dp-close" id="dp-close-btn">&#10005;</button></div>'
+    +'<div class="dp-body">'
+    +'<div class="dp-section"><div class="dp-label">Status</div><button class="status-badge sub-'+c.status+'" style="font-size:13px;padding:6px 14px">'+c.status.charAt(0).toUpperCase()+c.status.slice(1)+'</button></div>'
+    +'<div class="dp-section"><div class="dp-label">Phone</div><div class="dp-val">'+c.phone+'</div></div>'
+    +'<div class="dp-section"><div class="dp-label">Active Plan</div><div class="dp-val">'+c.plan+' (weekly)</div></div>'
+    +'<div class="dp-section"><div class="dp-label">Total Orders</div><div class="dp-val" style="font-family:Playfair Display,serif;font-size:26px;font-weight:700">'+c.orders+'</div></div>'
+    +'<div class="dp-section"><div class="dp-label">Lifetime Value</div><div class="dp-val" style="font-family:Playfair Display,serif;font-size:26px;font-weight:700;color:var(--amber)">$'+c.ltv.toFixed(2)+'</div></div>'
+    +'<div class="dp-section"><div class="dp-label">Order History</div><div class="history-list">'+c.history.map(function(h){var parts=h.split(' – ');return '<div class="history-entry"><div class="he-date">'+parts[0]+'</div><span class="he-meals">'+parts[1]+'</span><span class="he-total">'+parts[2]+'</span></div>';}).join('')+'</div></div>'
+    +'<div style="display:flex;gap:8px;margin-top:20px">'
+    +'<button style="flex:1;background:#25D366;color:white;border:none;border-radius:10px;padding:12px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">&#128241; WhatsApp</button>'
+    +'<button style="flex:1;background:var(--dark);color:white;border:none;border-radius:10px;padding:12px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">'+(c.status==='active'?'Pause Subscription':'Resume Subscription')+'</button>'
+    +'</div></div>';
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+var TITLES = {overview:"Today's Overview",orders:"Orders",prep:"Meal Prep",customers:"Customers",reports:"Reports",menu:"Weekly Menu",settings:"Settings"};
+
+document.addEventListener('click',function(e){
+  var t=e.target;
+  var sbItem=t.closest('[data-tab]');
+  if(sbItem&&sbItem.classList.contains('sb-item')){
+    var tab=sbItem.getAttribute('data-tab');
+    document.querySelectorAll('.sb-item').forEach(function(b){b.classList.toggle('active',b===sbItem);});
+    document.querySelectorAll('.tab-page').forEach(function(p){p.classList.toggle('active',p.id==='tab-'+tab);});
+    document.getElementById('topbar-title').textContent=TITLES[tab]||tab;
+    if(tab==='orders')renderOrders(orderFilter);
+    if(tab==='prep')renderPrep();
+    if(tab==='customers')renderCustomers();
+    return;
+  }
+  var statusBtn=t.closest('[data-order-status]');
+  if(statusBtn){
+    var oid=statusBtn.getAttribute('data-order-status');
+    var ord=ORDERS.find(function(o){return o.id===oid;});
+    if(ord){var cur=STATUSES.indexOf(ord.status);ord.status=STATUSES[(cur+1)%STATUSES.length];var sc=STATUS_CLASS[ord.status];statusBtn.className='status-badge '+sc;statusBtn.textContent=ord.status;}
+    return;
+  }
+  var orow=t.closest('[data-order-id]');
+  if(orow&&!t.hasAttribute('data-order-status')){openOrderDetail(orow.getAttribute('data-order-id'));return;}
+  var crow=t.closest('[data-cust-idx]');
+  if(crow){openCustomerDetail(parseInt(crow.getAttribute('data-cust-idx')));return;}
+  var ofilter=t.closest('[data-ofilter]');
+  if(ofilter){
+    orderFilter=ofilter.getAttribute('data-ofilter');
+    document.querySelectorAll('[data-ofilter]').forEach(function(b){b.classList.toggle('on',b===ofilter);});
+    renderOrders(orderFilter);return;
+  }
+  if(t.id==='dp-close-btn'||t.id==='detail-overlay'){document.getElementById('detail-overlay').classList.remove('open');return;}
+});
+
+// Set date
+var now=new Date();
+document.getElementById('sb-date').textContent=now.toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+
+// Init
+renderOrders('all');
+renderPrep();
+renderCustomers();
+</script>
+</body>
+</html>

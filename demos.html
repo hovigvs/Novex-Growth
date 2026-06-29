@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="description" content="Live interactive demos of AI systems built by Novex Growth — AI digital humans, multilingual chatbots, WhatsApp ordering, kitchen dashboards, loyalty apps, and venue automation.">
+<title>Live Demos | Novex Growth</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+.demos-hero{background:var(--hero-grad);padding:100px 0 56px;text-align:center;}
+.demos-hero h1{margin-bottom:12px;}
+.demos-hero p{font-size:15px;color:var(--text2);max-width:560px;margin:0 auto;}
+
+.demos-tab-wrap{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:64px;z-index:50;}
+.demos-tab-list{display:flex;overflow-x:auto;max-width:1200px;margin:0 auto;padding:0 24px;gap:0;scrollbar-width:none;}
+.demos-tab-list::-webkit-scrollbar{display:none;}
+.demos-tab-btn{flex-shrink:0;padding:16px 22px;font-size:13px;font-weight:600;color:var(--text2);border:none;border-radius:0!important;background:none!important;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:7px;box-shadow:none!important;}
+.demos-tab-btn:hover{color:var(--navy);background:none!important;}
+.demos-tab-btn.active{color:var(--purple-dark);border-bottom-color:var(--purple-dark);background:none!important;}
+
+.demo-panel{display:none;}
+.demo-panel.active{display:block;}
+
+.demo-section{padding:48px 0 64px;background:#fff;}
+.demo-intro{max-width:760px;margin:0 auto 32px;text-align:center;}
+.demo-intro .eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--purple-dark);margin-bottom:10px;}
+.demo-intro h2{font-size:clamp(22px,2.5vw,30px);color:var(--navy);margin-bottom:12px;}
+.demo-intro p{font-size:14px;color:var(--text2);line-height:1.75;}
+
+.demo-notice{display:flex;align-items:center;gap:10px;background:#fff8ed;border:1px solid #f5d67a;border-radius:8px;padding:10px 16px;font-size:12px;color:#7a5c00;margin:0 auto 24px;max-width:760px;}
+
+.demo-frame-wrap{max-width:1100px;margin:0 auto;border-radius:var(--radius-xl);overflow:hidden;box-shadow:0 20px 60px rgba(74,82,196,.12);border:1px solid var(--border);}
+.demo-frame-wrap iframe{width:100%;border:none;display:block;}
+
+/* Digital human section reuses homepage styles */
+.dh-section{padding:48px 0 64px;background:var(--navy);text-align:center;}
+.dh-inner{max-width:680px;margin:0 auto;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav-wrap">
+  <nav class="nav">
+    <a href="index.html" class="logo">novexgrowth</a>
+    <div class="nav-menu-icon" id="navMenu" aria-label="Open menu">
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+      <div class="nav-dropdown" id="navDropdown">
+        <a href="index.html">Home</a>
+        <a href="services.html">Services</a>
+        <a href="demos.html">Demos</a>
+        <a href="blog.html">Blog</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <a href="contact.html" class="nav-cal-btn" aria-label="Book a call">
+      <i class="ti ti-calendar" aria-hidden="true"></i>
+    </a>
+  </nav>
+</div>
+
+<!-- HERO -->
+<section class="demos-hero">
+  <div class="container">
+    <p class="section-eyebrow">Live demos</p>
+    <h1>See the AI systems in action</h1>
+    <p>Every demo below is a real, working system — the same technology we build and deploy for service businesses. Click through, interact, and explore.</p>
+  </div>
+</section>
+
+<!-- TABS -->
+<div class="demos-tab-wrap">
+  <div class="demos-tab-list">
+    <button class="demos-tab-btn active" onclick="switchDemo('digital-human', this)">
+      <i class="ti ti-user-circle"></i> AI Digital Human
+    </button>
+    <button class="demos-tab-btn" onclick="switchDemo('catering-site', this)">
+      <i class="ti ti-tools-kitchen-2"></i> Catering & Prep Meal
+    </button>
+    <button class="demos-tab-btn" onclick="switchDemo('whatsapp', this)">
+      <i class="ti ti-brand-whatsapp"></i> WhatsApp Ordering
+    </button>
+    <button class="demos-tab-btn" onclick="switchDemo('kitchen', this)">
+      <i class="ti ti-layout-dashboard"></i> Kitchen Dashboard
+    </button>
+    <button class="demos-tab-btn" onclick="switchDemo('rewards', this)">
+      <i class="ti ti-gift"></i> Rewards App
+    </button>
+    <button class="demos-tab-btn" onclick="switchDemo('venue', this)">
+      <i class="ti ti-building"></i> Venue Automation
+    </button>
+    <button class="demos-tab-btn" onclick="switchDemo('broadcast', this)">
+      <i class="ti ti-speakerphone"></i> WhatsApp Automated Campaign Broadcasts <span style="font-size:10px;background:var(--cyan);color:var(--navy);border-radius:20px;padding:2px 7px;font-weight:700;margin-left:4px;">Soon</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── PANEL: AI DIGITAL HUMAN ── -->
+<div class="demo-panel active" id="panel-digital-human">
+  <section class="dh-section">
+    <div class="dh-inner">
+      <p class="section-eyebrow" style="color:var(--cyan);">AI digital human</p>
+      <h2 style="color:#fff;margin-bottom:12px;">Have a real face-to-face conversation with our AI</h2>
+      <p style="font-size:15px;color:rgba(255,255,255,.60);line-height:1.7;margin-bottom:32px;">This is a live AI persona — not a video, not a recording. Click start, allow camera and microphone, and have a real two-way conversation. Ask anything about Novex Growth or how an AI digital human could work for your business.</p>
+
+      <div id="dh-pre">
+        <button onclick="startTavusConversation()" class="btn-primary" style="font-size:16px;padding:16px 36px;gap:10px;margin-bottom:16px;">
+          <i class="ti ti-video"></i> Start a live conversation
+        </button>
+        <p style="font-size:12px;color:rgba(255,255,255,.35);">Camera and microphone will be requested · No sign-up required · Best in Chrome or Edge</p>
+      </div>
+
+      <div id="dh-loading" style="display:none;">
+        <div style="width:56px;height:56px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:var(--cyan);animation:spin 0.8s linear infinite;margin:0 auto 16px;"></div>
+        <p style="color:rgba(255,255,255,.60);font-size:14px;">Starting your conversation...</p>
+      </div>
+
+      <div id="dh-embed" style="display:none;">
+        <div style="position:relative;border-radius:var(--radius-xl);overflow:hidden;background:#000;aspect-ratio:16/9;max-width:720px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.50);">
+          <iframe id="dh-iframe" allow="camera;microphone;fullscreen;display-capture" style="width:100%;height:100%;border:none;" title="Novex Growth AI Digital Human"></iframe>
+        </div>
+        <button onclick="endTavusConversation()" style="margin-top:16px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.60);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius-pill);padding:9px 20px;font-size:13px;cursor:pointer;font-family:inherit;">
+          End conversation
+        </button>
+      </div>
+
+      <div id="dh-error" style="display:none;">
+        <p style="color:#f87171;font-size:14px;margin-bottom:12px;">Something went wrong starting the conversation.</p>
+        <button onclick="startTavusConversation()" class="btn-ghost">Try again</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ── PANEL: CATERING WEBSITE ── -->
+<div class="demo-panel" id="panel-catering-site">
+  <section class="demo-section">
+    <div class="demo-intro">
+      <p class="eyebrow">Catering & prep meal demo</p>
+      <h2>A full catering & prep meal website with multilingual AI assistant</h2>
+      <p>This is a live demo of a catering business website complete with an AI chatbot that handles customer enquiries, takes orders, and responds in multiple languages — 24/7, without any staff involvement.</p>
+    </div>
+    <div class="demo-notice" style="display:flex;">
+      <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0;"></i>
+      <span>Voice input works best in <strong>Chrome or Edge</strong>. Safari may block microphone access in this demo environment.</span>
+    </div>
+    <div class="container">
+      <div class="demo-frame-wrap">
+        <iframe src="website_v2.html" style="height:800px;" title="Catering Website Demo" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ── PANEL: WHATSAPP ── -->
+<div class="demo-panel" id="panel-whatsapp">
+  <section class="demo-section">
+    <div class="demo-intro">
+      <p class="eyebrow">WhatsApp ordering demo</p>
+      <h2>AI-powered ordering through WhatsApp</h2>
+      <p>See how customers can browse the menu, place orders, and get instant responses — all through WhatsApp. The AI handles the entire conversation from first message to confirmed order.</p>
+    </div>
+    <div class="container">
+      <div class="demo-frame-wrap">
+        <iframe src="whatsapp_demo.html" style="height:750px;" title="WhatsApp Ordering Demo" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ── PANEL: KITCHEN DASHBOARD ── -->
+<div class="demo-panel" id="panel-kitchen">
+  <section class="demo-section">
+    <div class="demo-intro">
+      <p class="eyebrow">Kitchen dashboard demo</p>
+      <h2>Real-time order management for the kitchen</h2>
+      <p>Every order placed — through the website, WhatsApp, or phone — flows instantly into this dashboard. The kitchen team sees live order status, prep times, and customer details without any manual data entry.</p>
+    </div>
+    <div class="container">
+      <div class="demo-frame-wrap">
+        <iframe src="kitchen_dashboard.html" style="height:750px;" title="Kitchen Dashboard Demo" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ── PANEL: REWARDS APP ── -->
+<div class="demo-panel" id="panel-rewards">
+  <section class="demo-section">
+    <div class="demo-intro">
+      <p class="eyebrow">Loyalty rewards app demo</p>
+      <h2>A branded loyalty rewards system for repeat customers</h2>
+      <p>Customers earn points on every order, redeem rewards, and stay engaged — all through a branded app experience. Built to retain customers and drive repeat business automatically.</p>
+    </div>
+    <div class="container">
+      <div class="demo-frame-wrap">
+        <iframe src="rewards_app.html" style="height:750px;" title="Rewards App Demo" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ── PANEL: VENUE ── -->
+<div class="demo-panel" id="panel-venue">
+  <section class="demo-section">
+    <div class="demo-intro">
+      <p class="eyebrow">Venue automation demo</p>
+      <h2>Full venue management — automated</h2>
+      <p>A complete AI-powered operations system for event venues. Enquiries, bookings, floor plans, staff coordination, and client communications — all managed in one place, automatically.</p>
+    </div>
+    <div class="container">
+      <div class="demo-frame-wrap">
+        <iframe src="VenueOS_Demo.html" style="height:800px;" title="Venue Automation Demo" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ── PANEL: BROADCAST COMING SOON ── -->
+<div class="demo-panel" id="panel-broadcast">
+  <section class="demo-section" style="background:var(--bg-section);">
+    <div class="demo-intro">
+      <p class="eyebrow">Coming soon</p>
+      <h2>WhatsApp Automated Campaign Broadcasts</h2>
+      <p>We're building a live demo of our WhatsApp broadcast system — designed for businesses that need to reach large numbers of customers with targeted campaigns, updates, and promotions.</p>
+    </div>
+    <div class="container" style="max-width:760px;">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);padding:48px 40px;text-align:center;">
+        <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#EEEDFE,#D8D6FC);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+          <i class="ti ti-speakerphone" style="font-size:32px;color:var(--purple-dark);"></i>
+        </div>
+        <h3 style="color:var(--navy);margin-bottom:12px;">Reach thousands of customers instantly — via WhatsApp</h3>
+        <p style="font-size:14px;color:var(--text2);line-height:1.75;margin-bottom:32px;max-width:500px;margin-left:auto;margin-right:auto;">Whether you're a real estate agent sending property listings, a clinic sending appointment reminders, or a restaurant running weekly promotions — our WhatsApp broadcast system lets you reach thousands of opted-in customers instantly, with personalised messages, at a fraction of the cost of traditional marketing.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:36px;text-align:left;">
+          <div style="background:var(--bg-section);border-radius:var(--radius-md);padding:16px;">
+            <i class="ti ti-home" style="color:var(--purple-dark);font-size:20px;margin-bottom:8px;display:block;"></i>
+            <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;">Real Estate</p>
+            <p style="font-size:12px;color:var(--text2);">New listings, open houses, market updates to your buyer list</p>
+          </div>
+          <div style="background:var(--bg-section);border-radius:var(--radius-md);padding:16px;">
+            <i class="ti ti-stethoscope" style="color:var(--purple-dark);font-size:20px;margin-bottom:8px;display:block;"></i>
+            <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;">Medical & Dental</p>
+            <p style="font-size:12px;color:var(--text2);">Appointment reminders, health tips, seasonal campaigns</p>
+          </div>
+          <div style="background:var(--bg-section);border-radius:var(--radius-md);padding:16px;">
+            <i class="ti ti-tools-kitchen-2" style="color:var(--purple-dark);font-size:20px;margin-bottom:8px;display:block;"></i>
+            <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;">Restaurants & Catering</p>
+            <p style="font-size:12px;color:var(--text2);">Weekly specials, event promotions, loyalty offers</p>
+          </div>
+          <div style="background:var(--bg-section);border-radius:var(--radius-md);padding:16px;">
+            <i class="ti ti-building" style="color:var(--purple-dark);font-size:20px;margin-bottom:8px;display:block;"></i>
+            <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;">Any Service Business</p>
+            <p style="font-size:12px;color:var(--text2);">Re-engage lapsed customers, announce new services, drive bookings</p>
+          </div>
+        </div>
+        <a href="contact.html" class="btn-primary"><i class="ti ti-calendar"></i> Talk to us about this</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo-white">novexgrowth</a>
+        <p>We build AI growth systems and AI digital humans that turn missed opportunities into revenue.</p>
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <a href="https://www.instagram.com/novexgrowth/" target="_blank" rel="noopener" aria-label="Instagram" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.60);font-size:16px;" onmouseover="this.style.background='rgba(255,255,255,0.16)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.60)'"><i class="ti ti-brand-instagram"></i></a>
+          <a href="https://www.facebook.com/novexgrowth" target="_blank" rel="noopener" aria-label="Facebook" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.60);font-size:16px;" onmouseover="this.style.background='rgba(255,255,255,0.16)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.60)'"><i class="ti ti-brand-facebook"></i></a>
+          <a href="https://x.com" target="_blank" rel="noopener" aria-label="X" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.60);font-size:16px;" onmouseover="this.style.background='rgba(255,255,255,0.16)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.60)'"><i class="ti ti-brand-x"></i></a>
+        </div>
+      </div>
+      <div class="footer-col"><h4>Services</h4><ul><li><a href="services.html">AI Digital Humans</a></li><li><a href="services.html">AI Growth Systems</a></li><li><a href="services.html">AI Chatbots</a></li><li><a href="services.html">Voice Receptionists</a></li><li><a href="services.html">WhatsApp &amp; SMS</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">About</a></li><li><a href="demos.html">Demos</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact</a></li><li><a href="privacy-policy.html">Privacy Policy</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul><li><a href="mailto:info@novexgrowth.com" class="contact-item"><i class="ti ti-mail"></i> info@novexgrowth.com</a></li><li><a href="tel:+16476960404" class="contact-item"><i class="ti ti-phone"></i> +1 (647) 696-0404</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Novex Growth. Operated by SARLI INC.</p>
+      <a href="contact.html" class="btn-primary" style="font-size:12px;padding:8px 18px;">Book a free strategy call</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<script>
+// Tab switching
+function switchDemo(id, btn) {
+  document.querySelectorAll('.demo-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.demos-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Tavus digital human
+async function startTavusConversation() {
+  document.getElementById('dh-pre').style.display = 'none';
+  document.getElementById('dh-loading').style.display = 'block';
+  document.getElementById('dh-error').style.display = 'none';
+  try {
+    const res = await fetch('/.netlify/functions/tavus', { method: 'POST' });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (!data.conversation_url) throw new Error('No conversation URL returned');
+    document.getElementById('dh-loading').style.display = 'none';
+    document.getElementById('dh-embed').style.display = 'block';
+    document.getElementById('dh-iframe').src = data.conversation_url;
+  } catch (err) {
+    document.getElementById('dh-loading').style.display = 'none';
+    document.getElementById('dh-error').style.display = 'block';
+  }
+}
+
+function endTavusConversation() {
+  document.getElementById('dh-iframe').src = '';
+  document.getElementById('dh-embed').style.display = 'none';
+  document.getElementById('dh-pre').style.display = 'block';
+}
+</script>
+
+<script src="js/main.js"></script>
+</body>
+</html>
