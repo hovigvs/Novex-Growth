@@ -73,30 +73,37 @@
 </section>
 
 <!-- TABS -->
-<div class="demos-tab-wrap">
-  <div class="demos-tab-list">
-    <button class="demos-tab-btn active" onclick="switchDemo('digital-human', this)">
-      <i class="ti ti-user-circle"></i> AI Digital Human
-    </button>
-    <button class="demos-tab-btn" onclick="switchDemo('catering-site', this)">
-      <i class="ti ti-tools-kitchen-2"></i> Catering & Prep Meal
-    </button>
-    <button class="demos-tab-btn" onclick="switchDemo('whatsapp', this)">
-      <i class="ti ti-brand-whatsapp"></i> WhatsApp Ordering
-    </button>
-    <button class="demos-tab-btn" onclick="switchDemo('kitchen', this)">
-      <i class="ti ti-layout-dashboard"></i> Kitchen Dashboard
-    </button>
-    <button class="demos-tab-btn" onclick="switchDemo('rewards', this)">
-      <i class="ti ti-gift"></i> Rewards App
-    </button>
-    <button class="demos-tab-btn" onclick="switchDemo('venue', this)">
-      <i class="ti ti-building"></i> Venue Automation
-    </button>
-    <button class="demos-tab-btn" onclick="switchDemo('broadcast', this)">
-      <i class="ti ti-speakerphone"></i> WhatsApp Automated Campaign Broadcasts <span style="font-size:10px;background:var(--cyan);color:var(--navy);border-radius:20px;padding:2px 7px;font-weight:700;margin-left:4px;">Soon</span>
-    </button>
+<!-- TABS -->
+<div class="tab-scroll-wrapper">
+  <button class="tab-arrow tab-arrow-left hidden" id="arrowLeft" onclick="scrollTabs(-200)">&#8249;</button>
+  <div class="tab-scroll-container" id="tabScroll">
+    <div class="demos-tab-wrap">
+      <div class="demos-tab-list">
+        <button class="demos-tab-btn active" onclick="switchDemo('digital-human', this)">
+          <i class="ti ti-user-circle"></i> AI Digital Human
+        </button>
+        <button class="demos-tab-btn" onclick="switchDemo('catering-site', this)">
+          <i class="ti ti-tools-kitchen-2"></i> Catering & Prep Meal
+        </button>
+        <button class="demos-tab-btn" onclick="switchDemo('whatsapp', this)">
+          <i class="ti ti-brand-whatsapp"></i> WhatsApp Ordering
+        </button>
+        <button class="demos-tab-btn" onclick="switchDemo('kitchen', this)">
+          <i class="ti ti-layout-dashboard"></i> Kitchen Dashboard
+        </button>
+        <button class="demos-tab-btn" onclick="switchDemo('rewards', this)">
+          <i class="ti ti-gift"></i> Rewards App
+        </button>
+        <button class="demos-tab-btn" onclick="switchDemo('venue', this)">
+          <i class="ti ti-building"></i> Venue Automation
+        </button>
+        <button class="demos-tab-btn" onclick="switchDemo('broadcast', this)">
+          <i class="ti ti-speakerphone"></i> WhatsApp Automated Campaign Broadcasts <span style="font-size:10px;background:var(--cyan);color:#1a1f4e;padding:2px 6px;border-radius:4px;margin-left:6px;">Coming Soon</span>
+        </button>
+      </div>
+    </div>
   </div>
+  <button class="tab-arrow tab-arrow-right" id="arrowRight" onclick="scrollTabs(200)">&#8250;</button>
 </div>
 
 <!-- ── PANEL: AI DIGITAL HUMAN ── -->
