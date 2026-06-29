@@ -37,6 +37,62 @@
 /* Digital human section reuses homepage styles */
 .dh-section{padding:48px 0 64px;background:var(--navy);text-align:center;}
 .dh-inner{max-width:680px;margin:0 auto;}
+/* Tab scroll arrows + fade */
+.tab-scroll-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tab-scroll-container {
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+}
+
+.tab-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-scroll-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 40px;
+  top: 0;
+  width: 80px;
+  height: 100%;
+  background: linear-gradient(to right, transparent, var(--navy));
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.tab-scroll-wrapper::before {
+  content: '';
+  position: absolute;
+  left: 40px;
+  top: 0;
+  width: 80px;
+  height: 100%;
+  background: linear-gradient(to left, transparent, var(--navy));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tab-scroll-wrapper.scrolled-left::before { opacity: 1; }
+.tab-scroll-wrapper.at-end::after { opacity: 0; }
+
+.tab-arrow {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #fff;
 </style>
 </head>
 <body>
@@ -72,7 +128,6 @@
   </div>
 </section>
 
-<!-- TABS -->
 <!-- TABS -->
 <div class="tab-scroll-wrapper">
   <button class="tab-arrow tab-arrow-left hidden" id="arrowLeft" onclick="scrollTabs(-200)">&#8249;</button>
