@@ -12,7 +12,23 @@
 .demos-hero{background:var(--hero-grad);padding:100px 0 56px;text-align:center;}
 .demos-hero h1{margin-bottom:12px;}
 .demos-hero p{font-size:15px;color:var(--text2);max-width:560px;margin:0 auto;}
-
+.demos-tab-wrap {
+  display: flex !important;
+  width: max-content !important;
+}
+.demos-tab-list {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 8px;
+  padding: 0 4px;
+}
+.demos-tab-btn {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+.tab-scroll-container {
+  overflow-x: auto !important;
+}
 .demos-tab-wrap{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:64px;z-index:50;}
 .demos-tab-list{display:flex;overflow-x:auto;max-width:1200px;margin:0 auto;padding:0 24px;gap:0;scrollbar-width:none;}
 .demos-tab-list::-webkit-scrollbar{display:none;}
