@@ -29,13 +29,15 @@
 .tab-scroll-container {
   overflow-x: auto !important;
 }
-.demos-tab-wrap{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:64px;z-index:50;}
-.demos-tab-list{display:flex;overflow-x:auto;max-width:1200px;margin:0 auto;padding:0 24px;gap:0;scrollbar-width:none;}
-.demos-tab-list::-webkit-scrollbar{display:none;}
-.demos-tab-btn{flex-shrink:0;padding:16px 22px;font-size:13px;font-weight:600;color:var(--text2);border:none;border-radius:0!important;background:none!important;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:7px;box-shadow:none!important;}
-.demos-tab-btn:hover{color:var(--navy);background:none!important;}
-.demos-tab-btn.active{color:var(--purple-dark);border-bottom-color:var(--purple-dark);background:none!important;}
-
+  .tab-scroll-wrapper {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+}
+.demos-tab-list {
+  justify-content: flex-start;
+  padding: 12px 4px;
+}
 .demo-panel{display:none;}
 .demo-panel.active{display:block;}
 
