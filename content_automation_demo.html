@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Novex Growth — Content Automation Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap"/>
+<style>
+:root{--dark:#1E1E3A;--amber:#5558B8;--gold:#7782D4;--cream:#F0F2FF;--light:#DCEAFF;--muted:#646BC1;--border:#D4D8F5;--red:#C0392B;--green:#27AE60;--blue:#2980B9;--orange:#E67E22;--bg:#EEEEFF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);display:flex;min-height:100vh;}
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--dark);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100;flex-shrink:0;}
+.sb-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo-main{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;}
+.sb-logo-sub{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.sb-nav{flex:1;padding:16px 0;overflow-y:auto;}
+.sb-section{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);padding:8px 20px 6px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:13.5px;color:rgba(255,255,255,.6);transition:all .15s;border-left:3px solid transparent;}
+.sb-item:hover{color:white;background:rgba(255,255,255,.05);}
+.sb-item.active{color:white;background:rgba(196,134,42,.15);border-left-color:var(--amber);}
+.sb-item-icon{font-size:16px;width:20px;text-align:center;}
+.sb-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);}
+.sb-date{font-size:11px;color:rgba(255,255,255,.3);}
+.sb-live{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11px;color:var(--gold);}
+.live-dot{width:7px;height:7px;background:#27AE60;border-radius:50%;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+/* MAIN */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:white;border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--dark);}
+.topbar-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.tb-badge{background:var(--red);color:white;min-width:20px;height:20px;padding:0 6px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.content{flex:1;padding:28px 32px;}
+.panel{display:none;}
+.panel.active{display:block;}
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:white;border-radius:14px;padding:20px;border:1px solid var(--border);}
+.stat-card.accent{background:var(--dark);border-color:var(--dark);}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.stat-card.accent .stat-label{color:rgba(255,255,255,.45);}
+.stat-val{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--dark);line-height:1;}
+.stat-card.accent .stat-val{color:var(--gold);}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:5px;}
+.stat-card.accent .stat-sub{color:rgba(255,255,255,.35);}
+/* COMPOSER */
+.composer{background:white;border-radius:14px;border:1px solid var(--border);padding:20px;margin-bottom:24px;}
+.composer-label{font-size:12.5px;color:var(--muted);margin-bottom:8px;font-weight:500;}
+.composer input[type=text]{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--border);font-family:inherit;font-size:13.5px;color:var(--dark);margin-bottom:14px;}
+.composer input[type=text]:focus{outline:none;border-color:var(--amber);}
+.platform-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.plat-pill{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;user-select:none;}
+.plat-pill.on{background:var(--dark);color:white;border-color:var(--dark);}
+.gen-btn{background:var(--amber);color:white;border:none;border-radius:10px;padding:11px 22px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:all .15s;}
+.gen-btn:hover{background:var(--dark);}
+.gen-btn:disabled{opacity:.6;cursor:default;}
+.upload-row{margin-bottom:16px;}
+.upload-btn{display:inline-flex;align-items:center;gap:8px;border:1.5px dashed var(--border);background:var(--bg);border-radius:10px;padding:10px 16px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;}
+.upload-btn:hover{border-color:var(--amber);color:var(--amber);}
+.upload-chip{display:none;align-items:center;gap:10px;background:var(--bg);border:1.5px solid var(--amber);border-radius:10px;padding:9px 14px;margin-top:8px;font-size:12.5px;color:var(--dark);}
+.upload-chip .name{font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.upload-chip .remove{color:var(--red);cursor:pointer;font-weight:700;flex-shrink:0;}
+/* SHIMMER */
+.shimmer-row{display:none;background:white;border-radius:14px;border:1px solid var(--border);padding:20px;margin-bottom:16px;color:var(--muted);font-size:13px;text-align:center;}
+.shimmer-dots span{display:inline-block;width:6px;height:6px;background:var(--amber);border-radius:50%;margin:0 3px;animation:bounce 1.2s infinite;}
+.shimmer-dots span:nth-child(2){animation-delay:.2s;}
+.shimmer-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+/* SECTION TITLE */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--dark);}
+.section-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+/* QUEUE CARD */
+.queue-card{background:white;border-radius:14px;border:1px solid var(--border);padding:18px;margin-bottom:14px;display:grid;grid-template-columns:120px 1fr;gap:16px;transition:opacity .3s;}
+.qc-media{background:var(--bg);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:30px;height:100px;color:var(--muted);}
+.qc-caption{font-size:13.5px;color:var(--dark);line-height:1.6;margin-bottom:10px;}
+.qc-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.qc-plat{font-size:10.5px;background:var(--bg);color:var(--muted);padding:3px 9px;border-radius:20px;font-weight:600;}
+.status-badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;display:inline-block;margin-bottom:10px;}
+.s-pending{background:rgba(196,134,42,.12);color:#8B5E10;}
+.s-scheduled{background:rgba(39,174,96,.12);color:var(--green);}
+.qc-actions{display:flex;gap:8px;}
+.qc-btn{border-radius:8px;border:1.5px solid var(--border);background:white;padding:7px 14px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;}
+.qc-btn.approve{color:var(--green);border-color:var(--green);}
+.qc-btn.approve:hover{background:var(--green);color:white;}
+.qc-btn.reject{color:var(--red);border-color:var(--red);}
+.qc-btn.reject:hover{background:var(--red);color:white;}
+.qc-btn.edit:hover{background:var(--bg);}
+.qc-editbox{display:none;margin-top:10px;}
+.qc-editbox textarea{width:100%;border-radius:8px;border:1.5px solid var(--border);font-family:inherit;font-size:12.5px;padding:9px 11px;margin-bottom:8px;resize:vertical;}
+.qc-scheduled-note{font-size:12px;color:var(--muted);}
+.empty-state{background:white;border-radius:14px;border:1px dashed var(--border);padding:40px;text-align:center;color:var(--muted);font-size:13px;}
+/* CALENDAR */
+.cal-row{background:white;border-radius:14px;border:1px solid var(--border);padding:16px 18px;margin-bottom:12px;display:flex;align-items:center;gap:16px;}
+.cal-date{font-family:'Playfair Display',serif;font-weight:700;font-size:14px;color:var(--dark);min-width:120px;}
+.cal-cap{flex:1;font-size:13px;color:var(--dark);}
+.cal-plat{font-size:10.5px;background:var(--bg);color:var(--muted);padding:3px 9px;border-radius:20px;font-weight:600;margin-left:4px;}
+/* CHART */
+.chart-card{background:white;border-radius:14px;padding:20px;border:1px solid var(--border);}
+.chart-bars{display:flex;gap:10px;margin-top:16px;}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.chart-bar-slot{height:80px;width:100%;display:flex;align-items:flex-end;}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;background:var(--amber);min-height:4px;transition:height .3s;}
+.chart-day{font-size:10px;color:var(--muted);}
+.chart-val{font-size:9px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sb-logo">
+    <svg viewBox="0 0 420 100" style="height:26px;width:auto;display:block;margin-bottom:6px;">
+      <defs>
+        <linearGradient id="sbLogoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#82DFFF;stop-opacity:1" />
+          <stop offset="55%" style="stop-color:#7782D4;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#646BC1;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <text x="0" y="68" font-family="'Baloo 2','Poppins','Arial Rounded MT Bold',sans-serif" font-weight="700" font-size="52" fill="url(#sbLogoGrad)">novexgrowth</text>
+    </svg>
+    <div class="sb-logo-sub">Content Automation</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">Studio</div>
+    <div class="sb-item active" data-tab="queue" onclick="switchTab('queue')"><span class="sb-item-icon">📝</span> Content queue</div>
+    <div class="sb-item" data-tab="calendar" onclick="switchTab('calendar')"><span class="sb-item-icon">📅</span> Calendar</div>
+    <div class="sb-item" data-tab="analytics" onclick="switchTab('analytics')"><span class="sb-item-icon">📊</span> Analytics</div>
+  </div>
+  <div class="sb-footer">
+    <div class="sb-date" id="sb-date"></div>
+    <div class="sb-live"><span class="live-dot"></span> Pipeline active</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Content queue</div>
+      <div class="topbar-sub" id="topbar-sub">Nothing publishes until you approve it</div>
+    </div>
+    <div class="tb-badge" id="pending-badge">2</div>
+  </div>
+
+  <div class="content">
+
+    <!-- CONTENT QUEUE PANEL -->
+    <div class="panel active" id="panel-queue">
+      <div class="stats-row">
+        <div class="stat-card accent">
+          <div class="stat-label">Pending review</div>
+          <div class="stat-val" id="stat-pending">2</div>
+          <div class="stat-sub">Waiting on your approval</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Scheduled</div>
+          <div class="stat-val" id="stat-scheduled">3</div>
+          <div class="stat-sub">Approved, queued to post</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Published this month</div>
+          <div class="stat-val">18</div>
+          <div class="stat-sub">Across all platforms</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg. engagement</div>
+          <div class="stat-val">4.2%</div>
+          <div class="stat-sub">Up from 2.8% last month</div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <div class="composer-label">What's this post about?</div>
+        <input type="text" id="brief-input" placeholder="New venue package launch"/>
+        <div class="composer-label">Or use your own photo or video (optional)</div>
+        <div class="upload-row">
+          <label class="upload-btn" for="file-input">📎 Attach a photo or video</label>
+          <input type="file" id="file-input" accept="image/*,video/*" style="display:none" onchange="handleFileSelect(event)"/>
+          <div class="upload-chip" id="upload-chip">
+            <span>🎞️</span><span class="name" id="upload-name"></span><span class="remove" onclick="clearFile()">✕</span>
+          </div>
+        </div>
+        <div id="format-row">
+          <div class="composer-label">Generate as</div>
+          <div class="platform-row">
+            <div class="plat-pill on" data-format="photo" onclick="selectFormat(this,'photo')">📷 Photo</div>
+            <div class="plat-pill" data-format="video" onclick="selectFormat(this,'video')">🎬 Video</div>
+          </div>
+        </div>
+        <div class="composer-label">Post to</div>
+        <div class="platform-row" id="platform-row">
+          <div class="plat-pill on" data-plat="Instagram" onclick="togglePlat(this)">Instagram</div>
+          <div class="plat-pill on" data-plat="Facebook" onclick="togglePlat(this)">Facebook</div>
+          <div class="plat-pill on" data-plat="LinkedIn" onclick="togglePlat(this)">LinkedIn</div>
+          <div class="plat-pill on" data-plat="TikTok" onclick="togglePlat(this)">TikTok</div>
+        </div>
+        <button class="gen-btn" id="generate-btn" onclick="generateDraft()">✨ Generate draft</button>
+      </div>
+
+      <div class="shimmer-row" id="shimmer-row">
+        Generating image, adding music and text
+        <div class="shimmer-dots"><span></span><span></span><span></span></div>
+      </div>
+
+      <div class="section-hdr">
+        <div>
+          <div class="section-title">Pending review</div>
+          <div class="section-sub">Approve, edit, or reject before anything goes live</div>
+        </div>
+      </div>
+      <div id="queue-list"></div>
+    </div>
+
+    <!-- CALENDAR PANEL -->
+    <div class="panel" id="panel-calendar">
+      <div class="section-hdr">
+        <div>
+          <div class="section-title">Scheduled posts</div>
+          <div class="section-sub">Ordered by when they go live</div>
+        </div>
+      </div>
+      <div id="calendar-list"></div>
+    </div>
+
+    <!-- ANALYTICS PANEL -->
+    <div class="panel" id="panel-analytics">
+      <div class="stats-row">
+        <div class="stat-card accent">
+          <div class="stat-label">Total reach</div>
+          <div class="stat-val">42.1K</div>
+          <div class="stat-sub">Last 30 days</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">New followers</div>
+          <div class="stat-val">318</div>
+          <div class="stat-sub">Across all platforms</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Best performer</div>
+          <div class="stat-val" style="font-size:17px;">Kitchen prep reel</div>
+          <div class="stat-sub">6.1% engagement</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Rejected drafts</div>
+          <div class="stat-val">4</div>
+          <div class="stat-sub">Caught before publishing</div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="section-title" style="font-size:15px;">Engagement — last 7 days</div>
+        <div class="chart-bars" id="chart-bars"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var queue = [
+  {id:1, caption:"Behind the scenes: this Saturday's 200-guest wedding — the kitchen at full speed before doors open.", plats:["Instagram","Facebook","TikTok"], media:"🎥"},
+  {id:2, caption:"Our new corporate lunch package is here — book 10+ trays and we handle setup and cleanup.", plats:["LinkedIn","Facebook"], media:"📷"}
+];
+var scheduled = [
+  {date:"Tomorrow · 9:00 AM", caption:"Holiday catering menu now open for bookings.", plats:["Instagram","Facebook"]},
+  {date:"Thu · 2:00 PM", caption:"Client spotlight: the Chen-Patel wedding reception.", plats:["Instagram","TikTok"]},
+  {date:"Sat · 11:00 AM", caption:"Meet the team behind every event — our head chef on what makes a great tasting.", plats:["LinkedIn"]}
+];
+var nextId = 3;
+
+function fmtPlats(plats){
+  return plats.map(function(p){ return '<span class="qc-plat">'+p+'</span>'; }).join('');
+}
+
+function renderQueue(){
+  var el = document.getElementById('queue-list');
+  if (queue.length === 0){
+    el.innerHTML = '<div class="empty-state">Nothing waiting on you right now. New drafts will show up here.</div>';
+  } else {
+    el.innerHTML = queue.map(function(item){
+      return '<div class="queue-card" id="qc-'+item.id+'">'
+        + '<div class="qc-media">'+item.media+'</div>'
+        + '<div>'
+        + '<span class="status-badge s-pending">Pending review</span><br>'
+        + '<div class="qc-caption">'+item.caption+'</div>'
+        + '<div class="qc-meta">'+fmtPlats(item.plats)+'</div>'
+        + '<div class="qc-actions">'
+        + '<button class="qc-btn approve" onclick="approveItem('+item.id+')">✓ Approve</button>'
+        + '<button class="qc-btn edit" onclick="toggleEdit('+item.id+')">✎ Request edit</button>'
+        + '<button class="qc-btn reject" onclick="rejectItem('+item.id+')">✕ Reject</button>'
+        + '</div>'
+        + '<div class="qc-editbox" id="edit-'+item.id+'">'
+        + '<textarea rows="2" placeholder="What should change?"></textarea>'
+        + '<button class="qc-btn" onclick="resubmitItem('+item.id+')">↻ Resubmit</button>'
+        + '</div>'
+        + '</div></div>';
+    }).join('');
+  }
+  document.getElementById('stat-pending').textContent = queue.length;
+  document.getElementById('pending-badge').textContent = queue.length;
+}
+
+function renderCalendar(){
+  var el = document.getElementById('calendar-list');
+  el.innerHTML = scheduled.map(function(s){
+    return '<div class="cal-row"><div class="cal-date">'+s.date+'</div><div class="cal-cap">'+s.caption+'</div><div>'+fmtPlats(s.plats)+'</div></div>';
+  }).join('');
+  document.getElementById('stat-scheduled').textContent = scheduled.length;
+}
+
+var attachedFile = null;
+var selectedFormat = 'photo';
+
+function selectFormat(el, format){
+  document.querySelectorAll('#format-row .plat-pill').forEach(function(p){ p.classList.remove('on'); });
+  el.classList.add('on');
+  selectedFormat = format;
+}
+
+function handleFileSelect(event){
+  var file = event.target.files[0];
+  if (!file) return;
+  attachedFile = file;
+  document.getElementById('upload-name').textContent = file.name;
+  document.getElementById('upload-chip').style.display = 'flex';
+  document.getElementById('format-row').style.display = 'none';
+}
+
+function clearFile(){
+  attachedFile = null;
+  document.getElementById('file-input').value = '';
+  document.getElementById('upload-chip').style.display = 'none';
+  document.getElementById('format-row').style.display = 'block';
+}
+
+function togglePlat(el){
+  el.classList.toggle('on');
+}
+
+function selectedPlats(){
+  return Array.prototype.slice.call(document.querySelectorAll('#platform-row .plat-pill.on')).map(function(p){ return p.getAttribute('data-plat'); });
+}
+
+function generateDraft(){
+  var input = document.getElementById('brief-input');
+  var topic = input.value.trim() || 'new venue package launch';
+  var plats = selectedPlats();
+  if (plats.length === 0){ plats = ['Instagram']; }
+  var btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  var shimmerText = attachedFile ? 'Processing your upload, adding music and text' : 'Generating image, adding music and text';
+  document.getElementById('shimmer-row').innerHTML = shimmerText + '<div class="shimmer-dots"><span></span><span></span><span></span></div>';
+  document.getElementById('shimmer-row').style.display = 'block';
+  var usingUpload = !!attachedFile;
+  var fileName = usingUpload ? attachedFile.name : null;
+  setTimeout(function(){
+    document.getElementById('shimmer-row').style.display = 'none';
+    btn.disabled = false;
+    var aiMedia = selectedFormat === 'video' ? '🎬' : '🖼️';
+    var aiCaption = (selectedFormat === 'video' ? 'AI video — ' : 'AI photo — ') + 'Introducing our ' + topic + ' — book your date before the season fills up.';
+    queue.unshift({
+      id: nextId++,
+      caption: usingUpload
+        ? 'Using your uploaded file (' + fileName + ') — ' + topic + '.'
+        : aiCaption,
+      plats: plats,
+      media: usingUpload ? '📎' : aiMedia
+    });
+    renderQueue();
+    input.value = '';
+    clearFile();
+  }, 1100);
+}
+
+function approveItem(id){
+  var idx = queue.findIndex(function(q){ return q.id === id; });
+  if (idx === -1) return;
+  var item = queue[idx];
+  queue.splice(idx, 1);
+  var slots = ['Tomorrow · 10:00 AM','Fri · 1:00 PM','Mon · 9:00 AM'];
+  scheduled.unshift({date: slots[Math.floor(Math.random()*slots.length)], caption: item.caption, plats: item.plats});
+  renderQueue();
+  renderCalendar();
+}
+
+function rejectItem(id){
+  var card = document.getElementById('qc-'+id);
+  if (card){ card.style.opacity = '0'; }
+  setTimeout(function(){
+    queue = queue.filter(function(q){ return q.id !== id; });
+    renderQueue();
+  }, 250);
+}
+
+function toggleEdit(id){
+  var box = document.getElementById('edit-'+id);
+  box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+}
+
+function resubmitItem(id){
+  var box = document.getElementById('edit-'+id);
+  var notes = box.querySelector('textarea').value.trim();
+  var item = queue.find(function(q){ return q.id === id; });
+  if (item && notes){
+    item.caption = item.caption.replace(/ \(revised.*\)$/, '') + ' (revised: ' + notes + ')';
+  }
+  box.style.display = 'none';
+  renderQueue();
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.sb-item').forEach(function(i){ i.classList.toggle('active', i.getAttribute('data-tab') === tab); });
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('panel-'+tab).classList.add('active');
+  var titles = {queue:['Content queue',"Nothing publishes until you approve it"], calendar:['Calendar','Everything here was approved by you first'], analytics:['Analytics','How the last 30 days performed']};
+  document.getElementById('topbar-title').textContent = titles[tab][0];
+  document.getElementById('topbar-sub').textContent = titles[tab][1];
+  document.getElementById('pending-badge').style.display = (tab === 'queue') ? 'flex' : 'none';
+}
+
+// Analytics chart (mock data)
+var chartData = [
+  {day:'Mon', val:3.1}, {day:'Tue', val:3.8}, {day:'Wed', val:4.4},
+  {day:'Thu', val:3.6}, {day:'Fri', val:5.0}, {day:'Sat', val:6.1}, {day:'Sun', val:4.2}
+];
+document.getElementById('chart-bars').innerHTML = chartData.map(function(d){
+  var h = Math.round((d.val/6.1)*80);
+  return '<div class="chart-bar-wrap"><div class="chart-bar-slot"><div class="chart-bar" style="height:'+h+'px"></div></div><div class="chart-val">'+d.val+'%</div><div class="chart-day">'+d.day+'</div></div>';
+}).join('');
+
+document.getElementById('sb-date').textContent = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+
+renderQueue();
+renderCalendar();
+</script>
+</body>
+</html>
