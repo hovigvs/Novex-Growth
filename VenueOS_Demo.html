@@ -185,6 +185,12 @@ body { background: #F3F4F6; display: flex; min-height: 100vh; }
 /* TOAST */
 .toast { position: fixed; bottom: 24px; right: 24px; background: #0D0F2E; color: white; padding: 14px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 999; border: 1px solid rgba(130,222,254,0.2); }
 .toast.show { transform: translateY(0); opacity: 1; }
+
+/* PROCESS MODAL */
+.process-modal-backdrop { position: fixed; inset: 0; background: rgba(13,15,46,0.72); z-index: 1000; display: none; align-items: flex-start; justify-content: center; padding: 40px 24px; overflow-y: auto; }
+.process-modal-inner { position: relative; width: 100%; max-width: 980px; }
+.process-modal-close { position: absolute; top: -14px; right: -14px; width: 32px; height: 32px; border-radius: 50%; background: white; border: 1px solid #E5E7EB; color: #1F2937; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1; }
+.process-modal-close:hover { background: #F3F4F6; }
 </style>
 </head>
 <body>
@@ -215,9 +221,13 @@ body { background: #F3F4F6; display: flex; min-height: 100vh; }
       <div class="status-pill"><div class="status-dot"></div>All bots active</div>
       <div class="topbar-avatar">GH</div>
     </div>
+  </div>
 
-    <!-- PROCESS VISUALIZER -->
-    <div class="two-col" id="process-section" style="display:none;margin-top:16px;">
+  <!-- PROCESS VISUALIZER (modal) -->
+  <div class="process-modal-backdrop" id="process-section" onclick="if(event.target===this)closeProcessModal()">
+    <div class="process-modal-inner">
+      <button class="process-modal-close" onclick="closeProcessModal()">✕</button>
+      <div class="two-col" style="margin:0;">
       <div class="card"><div class="card-body">
         <div class="sec-title" style="margin-bottom:14px;">⚙️ System process log</div>
         <div class="process-panel">
@@ -266,6 +276,7 @@ body { background: #F3F4F6; display: flex; min-height: 100vh; }
           </div>
         </div>
       </div></div>
+      </div>
     </div>
   </div>
 
@@ -803,15 +814,18 @@ function addDivider(delay) {
   }, delay);
 }
 
+function closeProcessModal() {
+  document.getElementById('process-section').style.display = 'none';
+}
+
 function startFullProcess() {
   var btn = document.getElementById('send-btn');
   btn.textContent = '⚙️ Processing...';
   btn.disabled = true;
   btn.style.opacity = '0.6';
 
-  document.getElementById('process-section').style.display = 'grid';
+  document.getElementById('process-section').style.display = 'flex';
   document.getElementById('guest-counter-display').style.display = 'block';
-  document.getElementById('process-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   var log = document.getElementById('process-log');
   log.innerHTML = '';
