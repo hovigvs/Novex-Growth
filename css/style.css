@@ -196,12 +196,12 @@ h3 { font-size: 17px; font-weight: 600; }
 
 /* ---- HERO — dark rich background ---- */
 .hero {
-  background: var(--bg-hero);
+  background: transparent;
   padding: 110px 0 90px;
   position: relative; overflow: hidden;
 }
 .hero-orb {
-  position: absolute; border-radius: 50%; pointer-events: none;
+  position: absolute; border-radius: 50%; pointer-events: none; z-index: 2;
 }
 .hero-orb-1 {
   width: 600px; height: 600px;
@@ -220,7 +220,7 @@ h3 { font-size: 17px; font-weight: 600; }
 }
 .hero-inner {
   text-align: center; max-width: 700px;
-  margin: 0 auto; position: relative; z-index: 1;
+  margin: 0 auto; position: relative; z-index: 3;
 }
 @keyframes shimmer {
   0%   { transform: translateX(-100%) skewX(-12deg); }
