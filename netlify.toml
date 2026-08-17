@@ -1,3 +1,15 @@
+[[redirects]]
+  from = "https://vertexfidelity.com/*"
+  to = "https://www.novexgrowth.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.vertexfidelity.com/*"
+  to = "https://www.novexgrowth.com/:splat"
+  status = 301
+  force = true
+
 [build]
   functions = "netlify/functions"
 
