@@ -707,6 +707,14 @@ h3 { font-size: 17px; font-weight: 600; }
 .voice-mic-btn:hover { transform: scale(1.05); }
 .voice-mic-btn.listening { animation: micPulse 1.2s ease-in-out infinite; }
 @keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(119,130,212,.5)} 50%{box-shadow:0 0 0 14px rgba(119,130,212,0)} }
+.voice-mic-btn.thinking { opacity: 0.55; animation: none; }
+.thinking-dots { display: inline-flex; gap: 3px; margin-left: 4px; vertical-align: middle; }
+.thinking-dots span {
+  width: 5px; height: 5px; background: var(--cyan); border-radius: 50%; display: inline-block;
+  animation: bounce 1.2s infinite;
+}
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
 .voice-status-text { margin-top: 14px; }
 .voice-mute-toggle {
   margin-top: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);

@@ -230,6 +230,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const voiceMuteBtn = document.getElementById('voiceMuteBtn');
   let voiceMuted = false, isListening = false, micStream = null, silenceTimer = null;
 
+  // Fills the gap between "she stopped listening" and "her reply starts
+  // playing" — without this, that pause (API calls in flight) looks like
+  // the mic just silently failed.
+  function showNicoleThinking() {
+    if (voiceStatusText) voiceStatusText.innerHTML = 'Nicole is thinking<span class="thinking-dots"><span></span><span></span><span></span></span>';
+    micBtn?.classList.add('thinking');
+  }
+  function clearNicoleThinking() {
+    micBtn?.classList.remove('thinking');
+  }
+
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
   if (SpeechRec && !/Firefox/i.test(navigator.userAgent)) {
@@ -246,10 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (chatInput) chatInput.value = final || interim;
       if (silenceTimer) clearTimeout(silenceTimer);
       if (final) {
-        silenceTimer = setTimeout(() => { stopListening(); sendMessage(); }, 1500);
+        silenceTimer = setTimeout(() => { stopListening(); showNicoleThinking(); sendMessage(); }, 1500);
       } else if (interim) {
         silenceTimer = setTimeout(() => {
-          if (chatInput?.value.trim()) { stopListening(); sendMessage(); }
+          if (chatInput?.value.trim()) { stopListening(); showNicoleThinking(); sendMessage(); }
         }, 2500);
       }
     };
@@ -317,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
         || voices.find(v => v.lang.toLowerCase().startsWith(lc));
       if (pick) utt.voice = pick;
     }
-    utt.onstart = () => { if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
+    utt.onstart = () => { clearNicoleThinking(); if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
     utt.onend = () => { if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
     window.speechSynthesis.speak(utt);
   }
@@ -336,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         currentAudio = new Audio(url);
-        currentAudio.onplay = () => { if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
+        currentAudio.onplay = () => { clearNicoleThinking(); if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
         currentAudio.onended = () => { URL.revokeObjectURL(url); if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
         currentAudio.onerror = () => browserSpeak(text);
         currentAudio.play().catch(() => browserSpeak(text));
