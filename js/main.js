@@ -121,18 +121,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInput = document.getElementById('chatInput');
   const chatSend = document.getElementById('chatSend');
   const chatMessages = document.getElementById('chatMessages');
+  const modeTextTab = document.getElementById('modeTextTab');
+  const modeVoiceTab = document.getElementById('modeVoiceTab');
+  const chatInputRow = document.getElementById('chatInputRow');
+  const chatVoicePanel = document.getElementById('chatVoicePanel');
   let chatHistory = [], chatGreeted = false;
 
   function openChat() {
     chatPanel?.classList.add('open');
+    chatToggle?.classList.add('hidden');
     if (!chatGreeted) {
       chatGreeted = true;
       setTimeout(() => addChatBubble('bot', "Hi! I'm Nicole from Novex Growth 👋 I can answer questions about our AI systems, services, or help you book a strategy call. What can I help you with?"), 350);
     }
   }
 
-  chatToggle?.addEventListener('click', () => chatPanel?.classList.contains('open') ? chatPanel.classList.remove('open') : openChat());
-  chatClose?.addEventListener('click', () => chatPanel?.classList.remove('open'));
+  function closeChat() {
+    chatPanel?.classList.remove('open');
+    chatToggle?.classList.remove('hidden');
+  }
+
+  chatToggle?.addEventListener('click', () => chatPanel?.classList.contains('open') ? closeChat() : openChat());
+  chatClose?.addEventListener('click', closeChat);
+
+  modeTextTab?.addEventListener('click', () => {
+    modeTextTab.classList.add('active');
+    modeVoiceTab.classList.remove('active');
+    chatMessages?.classList.remove('hidden-mode');
+    chatInputRow?.classList.remove('hidden-mode');
+    chatVoicePanel?.classList.remove('active');
+  });
+  modeVoiceTab?.addEventListener('click', () => {
+    modeVoiceTab.classList.add('active');
+    modeTextTab.classList.remove('active');
+    chatMessages?.classList.add('hidden-mode');
+    chatInputRow?.classList.add('hidden-mode');
+    chatVoicePanel?.classList.add('active');
+  });
 
   function addChatBubble(role, text) {
     if (!chatMessages) return;

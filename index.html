@@ -606,12 +606,12 @@ function endTavusConversation() {
   </div>
 </section>
 
-<!-- AI CHAT WIDGET -->
+<!-- AI CHAT WIDGET (ambient greeter) -->
 <div class="chat-widget">
   <div class="chat-panel" id="chatPanel">
     <div class="chat-panel-header">
       <div class="chat-panel-avatar">
-        <img src="assets/nicole.png" alt="Nicole">
+        <video autoplay muted loop playsinline src="assets/nicole/nicole_wave_final.mp4"></video>
       </div>
       <div>
         <h4>Nicole</h4>
@@ -619,15 +619,26 @@ function endTavusConversation() {
       </div>
       <button class="chat-close" id="chatClose">&times;</button>
     </div>
+    <div class="chat-mode-tabs">
+      <button class="chat-mode-tab active" id="modeTextTab">Text</button>
+      <button class="chat-mode-tab" id="modeVoiceTab">Voice <span class="soon-badge">soon</span></button>
+    </div>
     <div class="chat-messages" id="chatMessages"></div>
-    <div class="chat-input-row">
+    <div class="chat-input-row" id="chatInputRow">
       <input type="text" id="chatInput" placeholder="Ask us anything...">
       <button class="chat-send" id="chatSend"><i class="ti ti-send"></i></button>
     </div>
+    <div class="chat-voice-panel" id="chatVoicePanel">
+      <p>Voice conversations are coming soon — for now, switch back to text and Nicole's happy to help.</p>
+    </div>
   </div>
-  <button class="chat-toggle" id="chatToggle" aria-label="Chat with Nicole">
-    <i class="ti ti-message-circle"></i>
-  </button>
+  <div class="chat-toggle-wrap" id="chatToggle" aria-label="Chat with Nicole">
+    <div class="chat-toggle-bubble">
+      <video autoplay muted loop playsinline src="assets/nicole/nicole_wave_final.mp4"></video>
+      <span class="chat-toggle-dot"></span>
+    </div>
+    <div class="chat-toggle-greeting">Hi, I'm Nicole — you can ask me anything, in any language you want.</div>
+  </div>
 </div>
 
 <script src="js/main.js"></script>
