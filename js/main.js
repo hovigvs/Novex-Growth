@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const modeVoiceTab = document.getElementById('modeVoiceTab');
   const chatInputRow = document.getElementById('chatInputRow');
   const chatVoicePanel = document.getElementById('chatVoicePanel');
-  let chatHistory = [], chatGreeted = false;
+  let chatHistory = [], chatGreeted = false, voiceModeActive = false;
 
   function openChat() {
     chatPanel?.classList.add('open');
@@ -150,6 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
     chatMessages?.classList.remove('hidden-mode');
     chatInputRow?.classList.remove('hidden-mode');
     chatVoicePanel?.classList.remove('active');
+    voiceModeActive = false;
+    stopListening();
+    nicoleStopSpeaking();
   });
   modeVoiceTab?.addEventListener('click', () => {
     modeVoiceTab.classList.add('active');
@@ -157,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatMessages?.classList.add('hidden-mode');
     chatInputRow?.classList.add('hidden-mode');
     chatVoicePanel?.classList.add('active');
+    voiceModeActive = true;
   });
 
   function addChatBubble(role, text) {
@@ -196,14 +200,148 @@ document.addEventListener('DOMContentLoaded', () => {
       typing?.remove();
       addChatBubble('bot', reply);
       chatHistory.push({ role: 'assistant', content: reply });
+      if (voiceModeActive) nicoleSpeak(reply);
     } catch {
       typing?.remove();
-      addChatBubble('bot', "I'm having a small hiccup — please email info@novexgrowth.com or book a call from our Contact page!");
+      const fallbackMsg = "I'm having a small hiccup — please email info@novexgrowth.com or book a call from our Contact page!";
+      addChatBubble('bot', fallbackMsg);
+      if (voiceModeActive) nicoleSpeak(fallbackMsg);
     }
   }
 
   chatSend?.addEventListener('click', sendMessage);
   chatInput?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+
+  // ---- Voice: speech recognition (STT) + Nicole's voice (TTS) ----
+  const micBtn = document.getElementById('micBtn');
+  const micLangSelect = document.getElementById('micLangSelect');
+  const voiceStatusText = document.getElementById('voiceStatusText');
+  const voiceMuteBtn = document.getElementById('voiceMuteBtn');
+  let voiceMuted = false, isListening = false, micStream = null, silenceTimer = null;
+
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  if (SpeechRec && !/Firefox/i.test(navigator.userAgent)) {
+    recognition = new SpeechRec();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = e => {
+      let interim = '', final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript;
+        else interim += e.results[i][0].transcript;
+      }
+      if (chatInput) chatInput.value = final || interim;
+      if (silenceTimer) clearTimeout(silenceTimer);
+      if (final) {
+        silenceTimer = setTimeout(() => { stopListening(); sendMessage(); }, 1500);
+      } else if (interim) {
+        silenceTimer = setTimeout(() => {
+          if (chatInput?.value.trim()) { stopListening(); sendMessage(); }
+        }, 2500);
+      }
+    };
+    recognition.onerror = () => stopListening();
+    recognition.onend = () => {
+      const hasText = chatInput && chatInput.value.trim().length > 0;
+      if (isListening && !hasText) { try { recognition.start(); } catch { stopListening(); } }
+      else stopListening();
+    };
+  }
+
+  function startListening() {
+    if (!recognition) {
+      if (voiceStatusText) voiceStatusText.textContent = /Firefox/i.test(navigator.userAgent)
+        ? "Voice input isn't supported in Firefox — try Chrome, Safari, or Edge."
+        : "Voice input isn't supported in this browser.";
+      return;
+    }
+    nicoleStopSpeaking();
+    recognition.lang = micLangSelect ? micLangSelect.value : 'en-US';
+    function doStart() {
+      try {
+        recognition.start();
+        isListening = true;
+        micBtn?.classList.add('listening');
+        if (voiceStatusText) voiceStatusText.textContent = 'Listening… speak now';
+      } catch (e) { console.warn('mic:', e); }
+    }
+    if (micStream) { doStart(); return; }
+    if (navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(s => { micStream = s; doStart(); })
+        .catch(() => { if (voiceStatusText) voiceStatusText.textContent = 'Microphone access denied — check your browser settings.'; });
+    } else { doStart(); }
+  }
+
+  function stopListening() {
+    isListening = false;
+    try { recognition?.stop(); } catch {}
+    micBtn?.classList.remove('listening');
+    if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking';
+  }
+
+  micBtn?.addEventListener('click', () => isListening ? stopListening() : startListening());
+
+  let currentAudio = null;
+  function nicoleStopSpeaking() {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (voiceStatusText && voiceModeActive) voiceStatusText.textContent = 'Tap the mic and start talking';
+  }
+
+  function browserSpeak(text) {
+    if (!window.speechSynthesis) return;
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = micLangSelect ? micLangSelect.value : 'en-US';
+    utt.rate = 0.95;
+    // Prefer a female system voice for this language, since Nicole is a female
+    // persona — same reasoning as the ElevenLabs voice choice, applied to the
+    // no-key fallback path so the two stay consistent.
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length) {
+      const lc = utt.lang.split('-')[0];
+      const pick = voices.find(v => v.lang.toLowerCase().startsWith(lc) && /female|woman|samantha|karen|moira|zira/i.test(v.name))
+        || voices.find(v => v.lang.toLowerCase().startsWith(lc));
+      if (pick) utt.voice = pick;
+    }
+    utt.onstart = () => { if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
+    utt.onend = () => { if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
+    window.speechSynthesis.speak(utt);
+  }
+
+  async function nicoleSpeak(text) {
+    if (voiceMuted || !text) return;
+    nicoleStopSpeaking();
+    try {
+      const res = await fetch('/.netlify/functions/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const contentType = res.headers.get('Content-Type') || '';
+      if (contentType.includes('audio')) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        currentAudio = new Audio(url);
+        currentAudio.onplay = () => { if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
+        currentAudio.onended = () => { URL.revokeObjectURL(url); if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
+        currentAudio.onerror = () => browserSpeak(text);
+        currentAudio.play().catch(() => browserSpeak(text));
+      } else {
+        browserSpeak(text); // server signaled fallback (no ElevenLabs key configured yet)
+      }
+    } catch {
+      browserSpeak(text);
+    }
+  }
+
+  voiceMuteBtn?.addEventListener('click', () => {
+    voiceMuted = !voiceMuted;
+    if (voiceMuted) nicoleStopSpeaking();
+    voiceMuteBtn.innerHTML = voiceMuted ? '<i class="ti ti-volume-3"></i>' : '<i class="ti ti-volume"></i>';
+    voiceMuteBtn.title = voiceMuted ? "Unmute Nicole's voice" : "Mute Nicole's voice";
+  });
 
   // ---- Contact form ----
   document.querySelector('.contact-form')?.addEventListener('submit', e => {

@@ -621,7 +621,7 @@ function endTavusConversation() {
     </div>
     <div class="chat-mode-tabs">
       <button class="chat-mode-tab active" id="modeTextTab">Text</button>
-      <button class="chat-mode-tab" id="modeVoiceTab">Voice <span class="soon-badge">soon</span></button>
+      <button class="chat-mode-tab" id="modeVoiceTab">Voice</button>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
     <div class="chat-input-row" id="chatInputRow">
@@ -629,7 +629,17 @@ function endTavusConversation() {
       <button class="chat-send" id="chatSend"><i class="ti ti-send"></i></button>
     </div>
     <div class="chat-voice-panel" id="chatVoicePanel">
-      <p>Voice conversations are coming soon — for now, switch back to text and Nicole's happy to help.</p>
+      <select id="micLangSelect" class="voice-lang-select">
+        <option value="en-US">English</option>
+        <option value="ar-LB">Arabic</option>
+        <option value="fr-FR">French</option>
+        <option value="es-ES">Spanish</option>
+        <option value="el-GR">Greek</option>
+        <option value="zh-CN">Mandarin</option>
+      </select>
+      <button id="micBtn" class="voice-mic-btn" title="Tap to speak"><i class="ti ti-microphone"></i></button>
+      <p id="voiceStatusText" class="voice-status-text">Tap the mic and start talking</p>
+      <button id="voiceMuteBtn" class="voice-mute-toggle" title="Mute Nicole's voice"><i class="ti ti-volume"></i></button>
     </div>
   </div>
   <div class="chat-toggle-wrap" id="chatToggle" aria-label="Chat with Nicole">
