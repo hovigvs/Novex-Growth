@@ -121,6 +121,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInput = document.getElementById('chatInput');
   const chatSend = document.getElementById('chatSend');
   const chatMessages = document.getElementById('chatMessages');
+  const panelAvatarVideo = document.getElementById('panelAvatarVideo');
+  let nicoleHasEngaged = false;
+  function pauseNicoleWave() {
+    // Once the visitor actually starts talking or typing, Nicole stops
+    // looping the greeting wave — she's listening/responding now, not
+    // still saying hello.
+    if (nicoleHasEngaged || !panelAvatarVideo) return;
+    nicoleHasEngaged = true;
+    panelAvatarVideo.pause();
+  }
   const modeTextTab = document.getElementById('modeTextTab');
   const modeVoiceTab = document.getElementById('modeVoiceTab');
   const chatInputRow = document.getElementById('chatInputRow');
@@ -185,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function sendMessage() {
     const text = chatInput?.value?.trim();
     if (!text) return;
+    pauseNicoleWave();
     chatInput.value = '';
     addChatBubble('user', text);
     chatHistory.push({ role: 'user', content: text });
@@ -258,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     nicoleStopSpeaking();
+    pauseNicoleWave();
     recognition.lang = micLangSelect ? micLangSelect.value : 'en-US';
     function doStart() {
       try {
