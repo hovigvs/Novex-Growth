@@ -4,11 +4,9 @@
 // One voice, every language: eleven_multilingual_v2 keeps a single voice's identity
 // (including gender) consistent across ~29 languages, so Nicole doesn't need — and
 // shouldn't use — a different voice ID per language. That was the old catering-demo
-// pattern and it risked mixing male and female voices across languages. Confirm this
-// ID is a female voice in your ElevenLabs library before going live — Rachel
-// (21m00Tcm4TlvDq8ikWAM) is ElevenLabs' well-known default female voice, used here
-// as the placeholder; swap in your own confirmed choice if you prefer a different one.
-const NICOLE_VOICE_ID = '21m00Tcm4TlvDq8ikWAM';
+// pattern and it risked mixing male and female voices across languages.
+// Voice: Emma — confirmed female, multilingual, chosen from ElevenLabs' voice library.
+const NICOLE_VOICE_ID = 'BVsq7dMRQW9XpXw9o5Rq';
 
 exports.handler = async (event) => {
   const headers = {
