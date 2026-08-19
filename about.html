@@ -132,6 +132,51 @@
   </div>
 </footer>
 
+<!-- AI CHAT WIDGET (ambient greeter) -->
+<div class="chat-widget">
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-panel-header">
+      <div class="chat-panel-avatar">
+        <video autoplay muted loop playsinline src="assets/nicole/nicole_wave_final.mp4" id="panelAvatarVideo"></video>
+      </div>
+      <div>
+        <h4>Nicole</h4>
+        <p>Novex Growth · online</p>
+      </div>
+      <button class="chat-close" id="chatClose">&times;</button>
+    </div>
+    <div class="chat-mode-tabs">
+      <button class="chat-mode-tab active" id="modeTextTab">Text</button>
+      <button class="chat-mode-tab" id="modeVoiceTab">Voice</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-row" id="chatInputRow">
+      <input type="text" id="chatInput" placeholder="Ask us anything...">
+      <button class="chat-send" id="chatSend"><i class="ti ti-send"></i></button>
+    </div>
+    <div class="chat-voice-panel" id="chatVoicePanel">
+      <select id="micLangSelect" class="voice-lang-select">
+        <option value="en-US">English</option>
+        <option value="ar-LB">Arabic</option>
+        <option value="fr-FR">French</option>
+        <option value="es-ES">Spanish</option>
+        <option value="el-GR">Greek</option>
+        <option value="zh-CN">Mandarin</option>
+      </select>
+      <button id="micBtn" class="voice-mic-btn" title="Tap to speak"><i class="ti ti-microphone"></i></button>
+      <p id="voiceStatusText" class="voice-status-text">Tap the mic and start talking</p>
+      <button id="voiceMuteBtn" class="voice-mute-toggle" title="Mute Nicole's voice"><i class="ti ti-volume"></i></button>
+    </div>
+  </div>
+  <div class="chat-toggle-wrap" id="chatToggle" aria-label="Chat with Nicole">
+    <div class="chat-toggle-bubble">
+      <video autoplay muted loop playsinline src="assets/nicole/nicole_wave_final.mp4"></video>
+      <span class="chat-toggle-dot"></span>
+    </div>
+    <div class="chat-toggle-greeting">Hi, I'm Nicole — you can ask me anything, in any language you want.</div>
+  </div>
+</div>
+
 <script src="js/main.js"></script>
 </body>
 </html>
