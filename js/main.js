@@ -267,8 +267,19 @@ document.addEventListener('DOMContentLoaded', () => {
     recognition.onerror = () => stopListening();
     recognition.onend = () => {
       const hasText = chatInput && chatInput.value.trim().length > 0;
-      if (isListening && !hasText) { try { recognition.start(); } catch { stopListening(); } }
-      else stopListening();
+      if (hasText) {
+        // The recognition session ended on its own (common — browsers auto-end
+        // continuous sessions after a pause) while we already had a transcript.
+        // Send it now instead of silently dropping it.
+        if (silenceTimer) clearTimeout(silenceTimer);
+        stopListening();
+        showNicoleThinking();
+        sendMessage();
+      } else if (isListening) {
+        try { recognition.start(); } catch { stopListening(); }
+      } else {
+        stopListening();
+      }
     };
   }
 
