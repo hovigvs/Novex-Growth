@@ -54,7 +54,8 @@ exports.handler = async (event) => {
           stability: /[؀-ۿ]/.test(text) ? 0.6 : 0.5,
           similarity_boost: 0.8,
           style: 0.2,
-          use_speaker_boost: true
+          use_speaker_boost: true,
+          speed: 1.1 // slight bump — default (1.0) read a touch slow
         }
       })
     });
