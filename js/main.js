@@ -293,11 +293,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  // Every iOS browser runs on Safari's WebKit engine — only the real Safari
+  // app exposes speech recognition there at all. And WebKit's implementation
+  // has a documented bug where continuous + interimResults together silently
+  // fail (mic never stops, no text ever received), so iOS Safari needs a
+  // different, simpler configuration than everywhere else.
+  const _ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/i.test(_ua);
+  const isIOSSafari = isIOS && /Safari/i.test(_ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(_ua);
   let recognition = null;
-  if (SpeechRec && !/Firefox/i.test(navigator.userAgent)) {
+  if (SpeechRec && !/Firefox/i.test(_ua)) {
     recognition = new SpeechRec();
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.continuous = !isIOSSafari;
+    recognition.interimResults = !isIOSSafari;
 
     recognition.onresult = e => {
       let interim = '', final = '';
@@ -306,6 +314,13 @@ document.addEventListener('DOMContentLoaded', () => {
         else interim += e.results[i][0].transcript;
       }
       if (chatInput) chatInput.value = final || interim;
+      if (isIOSSafari) {
+        // Single-utterance mode: WebKit already waited for the natural pause
+        // before firing this, so send immediately instead of running our own
+        // silence timer (which assumes continuous mode).
+        if (final) { stopListening(); showNicoleThinking(); sendMessage(); }
+        return;
+      }
       if (silenceTimer) clearTimeout(silenceTimer);
       if (final) {
         silenceTimer = setTimeout(() => { stopListening(); showNicoleThinking(); sendMessage(); }, 1500);
@@ -326,7 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
         stopListening();
         showNicoleThinking();
         sendMessage();
-      } else if (isListening) {
+      } else if (isListening && !isIOSSafari) {
+        // Auto-restart only applies to continuous mode — iOS Safari's
+        // single-utterance sessions are supposed to end after one phrase.
         try { recognition.start(); } catch { stopListening(); }
       } else {
         stopListening();
@@ -336,9 +353,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function startListening() {
     if (!recognition) {
-      if (voiceStatusText) voiceStatusText.textContent = /Firefox/i.test(navigator.userAgent)
-        ? "Voice input isn't supported in Firefox — try Chrome, Safari, or Edge."
-        : "Voice input isn't supported in this browser.";
+      if (voiceStatusText) {
+        if (isIOS && !isIOSSafari) {
+          voiceStatusText.textContent = "Voice input needs Safari on iPhone — other browsers here can't access it. Open this page in Safari, or use Text mode instead.";
+        } else if (/Firefox/i.test(_ua)) {
+          voiceStatusText.textContent = "Voice input isn't supported in Firefox — try Chrome, Safari, or Edge, or use Text mode.";
+        } else {
+          voiceStatusText.textContent = "Voice input isn't supported in this browser — try Text mode instead.";
+        }
+      }
       return;
     }
     nicoleStopSpeaking();
