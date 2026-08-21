@@ -425,10 +425,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   micBtn?.addEventListener('click', () => isListening ? stopListening() : startListening());
 
-  function nicoleStopSpeaking() {
+  function nicoleStopSpeaking(resetStatusText = true) {
     try { ttsAudioEl.pause(); } catch {}
     if (window.speechSynthesis) window.speechSynthesis.cancel();
-    if (voiceStatusText && voiceModeActive) voiceStatusText.textContent = 'Tap the mic and start talking';
+    if (resetStatusText && voiceStatusText && voiceModeActive) voiceStatusText.textContent = 'Tap the mic and start talking';
   }
 
   function browserSpeak(text) {
@@ -453,7 +453,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function nicoleSpeak(text) {
     if (voiceMuted || !text) return;
-    nicoleStopSpeaking();
+    // false: this is clearing any leftover audio before a NEW reply starts
+    // preparing, not the visitor stopping her mid-sentence — the "Nicole is
+    // thinking" text set moments ago should stay up until audio is ready.
+    nicoleStopSpeaking(false);
     try {
       const res = await fetch('/.netlify/functions/tts', {
         method: 'POST',
