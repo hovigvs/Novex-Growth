@@ -192,6 +192,39 @@ document.addEventListener('DOMContentLoaded', () => {
     return b;
   }
 
+  // Pulls Nicole's hidden lead-capture marker out of a reply, if present,
+  // and returns the visitor-facing text separately from the captured lead.
+  function extractLeadMarker(reply) {
+    const re = /\[\[LEAD\s+name="([^"]*)"\s+contact="([^"]*)"\s+request="([^"]*)"\]\]\s*$/;
+    const match = reply.match(re);
+    if (!match) return { cleanReply: reply, lead: null };
+    return {
+      cleanReply: reply.slice(0, match.index).trim(),
+      lead: { name: match[1], contact: match[2], request: match[3] }
+    };
+  }
+
+  async function submitNicoleLead(lead) {
+    try {
+      const body = new URLSearchParams({
+        'form-name': 'nicole-lead',
+        name: lead.name,
+        contact: lead.contact,
+        request: lead.request,
+        page: window.location.pathname
+      }).toString();
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+      });
+      return res.ok;
+    } catch (err) {
+      console.error('Lead submit error:', err);
+      return false;
+    }
+  }
+
   async function sendMessage() {
     const text = chatInput?.value?.trim();
     if (!text) return;
@@ -207,11 +240,18 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ messages: chatHistory })
       });
       const data = await res.json();
-      const reply = data.reply || "I'd be happy to help — please email us at info@novexgrowth.com and we'll get back to you shortly.";
+      const rawReply = data.reply || "I'd be happy to help — please email us at info@novexgrowth.com and we'll get back to you shortly.";
+      const { cleanReply, lead } = extractLeadMarker(rawReply);
       typing?.remove();
-      addChatBubble('bot', reply);
-      chatHistory.push({ role: 'assistant', content: reply });
-      if (voiceModeActive) nicoleSpeak(reply);
+      addChatBubble('bot', cleanReply);
+      chatHistory.push({ role: 'assistant', content: cleanReply });
+      if (voiceModeActive) nicoleSpeak(cleanReply);
+      if (lead) {
+        const delivered = await submitNicoleLead(lead);
+        addChatBubble('bot', delivered
+          ? "✅ Got it — I've passed your details to the team, they'll reach out shortly."
+          : "I couldn't get that through just now — please email info@novexgrowth.com directly so it doesn't get missed.");
+      }
     } catch {
       typing?.remove();
       const fallbackMsg = "I'm having a small hiccup — please email info@novexgrowth.com or book a call from our Contact page!";
@@ -378,11 +418,28 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ---- Contact form ----
-  document.querySelector('.contact-form')?.addEventListener('submit', e => {
+  document.querySelector('.contact-form')?.addEventListener('submit', async e => {
     e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    if (btn) { btn.textContent = "Sent! We'll be in touch soon."; btn.disabled = true; }
-    setTimeout(() => { e.target.reset(); if (btn) { btn.textContent = 'Send message'; btn.disabled = false; } }, 3500);
+    const form = e.target;
+    const btn = form.querySelector('button[type="submit"]');
+    const originalBtnText = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+    try {
+      const formData = new FormData(form);
+      const body = new URLSearchParams(formData).toString();
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+      });
+      if (!res.ok) throw new Error('Submit failed: ' + res.status);
+      if (btn) btn.textContent = "Sent! We'll be in touch soon.";
+      setTimeout(() => { form.reset(); if (btn) { btn.textContent = originalBtnText; btn.disabled = false; } }, 3500);
+    } catch (err) {
+      console.error('Contact form submit error:', err);
+      if (btn) { btn.textContent = "Couldn't send — please email info@novexgrowth.com directly"; btn.disabled = false; }
+      setTimeout(() => { if (btn) btn.textContent = originalBtnText; }, 5000);
+    }
   });
 
 

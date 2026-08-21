@@ -606,6 +606,18 @@ function endTavusConversation() {
   </div>
 </section>
 
+<!-- Hidden static form so Netlify's build-time bot registers this form type.
+     Nicole's actual submissions are sent via JS fetch, not this form directly —
+     this declaration just needs to exist once, anywhere in the built site. -->
+<form name="nicole-lead" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="hidden" name="form-name" value="nicole-lead">
+  <input name="bot-field">
+  <input type="text" name="name">
+  <input type="text" name="contact">
+  <input type="text" name="request">
+  <input type="text" name="page">
+</form>
+
 <!-- AI CHAT WIDGET (ambient greeter) -->
 <div class="chat-widget">
   <div class="chat-panel" id="chatPanel">
