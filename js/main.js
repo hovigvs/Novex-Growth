@@ -281,20 +281,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const voiceMuteBtn = document.getElementById('voiceMuteBtn');
   let voiceMuted = false, isListening = false, micStream = null, silenceTimer = null;
   let audioUnlockedForIOS = false;
-  // iOS Safari blocks audio/speech playback unless it's initiated within the
-  // same synchronous tick as a genuine user tap — our actual reply audio only
-  // becomes available after two async round-trips (chat, then TTS), by which
-  // point WebKit no longer considers it "user-initiated" and silently blocks
-  // it. Playing something (even silent/empty) synchronously on the tap itself
-  // unlocks both the Audio element and speechSynthesis for the rest of the
-  // page session, so the real playback later actually works.
+  // One persistent <audio> element, reused for every reply. iOS Safari's
+  // unlock (play something within a real tap) doesn't reliably transfer to a
+  // brand-new Audio object created later — it tracks activation per-element
+  // in practice, not globally per-page. So we unlock THIS element in the tap
+  // handler, then only ever change its .src later rather than constructing a
+  // new one, which is the documented reliable version of this workaround.
+  const ttsAudioEl = new Audio();
   function unlockAudioForIOS() {
     if (audioUnlockedForIOS || !isIOSSafari) return;
     audioUnlockedForIOS = true;
     try {
-      const silentAudio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQxAADB8AhSmxhIIEVCSiJrDCQBTcu3UrAIwUdkRgQbFAZC7k1BiEEBRAAAAAAAAAAAAAAJPB4W6NxrCTggAAA');
-      silentAudio.volume = 0.01;
-      silentAudio.play().catch(() => {});
+      ttsAudioEl.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQxAADB8AhSmxhIIEVCSiJrDCQBTcu3UrAIwUdkRgQbFAZC7k1BiEEBRAAAAAAAAAAAAAAJPB4W6NxrCTggAAA';
+      ttsAudioEl.volume = 0.01;
+      ttsAudioEl.play().catch(() => {});
     } catch {}
     try {
       if (window.speechSynthesis) {
@@ -416,9 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   micBtn?.addEventListener('click', () => isListening ? stopListening() : startListening());
 
-  let currentAudio = null;
   function nicoleStopSpeaking() {
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    try { ttsAudioEl.pause(); } catch {}
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (voiceStatusText && voiceModeActive) voiceStatusText.textContent = 'Tap the mic and start talking';
   }
@@ -465,19 +464,20 @@ document.addEventListener('DOMContentLoaded', () => {
           reader.onerror = reject;
           reader.readAsDataURL(blob);
         });
-        currentAudio = new Audio(dataUrl);
-        currentAudio.onplay = () => { clearNicoleThinking(); if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
-        currentAudio.onended = () => { if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
-        currentAudio.onerror = () => {
+        ttsAudioEl.src = dataUrl;
+        ttsAudioEl.volume = 1;
+        ttsAudioEl.onplay = () => { clearNicoleThinking(); if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
+        ttsAudioEl.onended = () => { if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
+        ttsAudioEl.onerror = () => {
           // TEMPORARY diagnostic — shows the real MediaError code on screen
           // instead of silently falling back, so we can see what's actually
           // failing on iOS without needing a Mac + cable + Web Inspector.
-          const code = currentAudio?.error?.code;
+          const code = ttsAudioEl?.error?.code;
           const codes = { 1: 'ABORTED', 2: 'NETWORK', 3: 'DECODE', 4: 'SRC_NOT_SUPPORTED' };
           if (voiceStatusText) voiceStatusText.textContent = 'DEBUG audio error: ' + (codes[code] || code || 'unknown');
           setTimeout(() => browserSpeak(text), 4000);
         };
-        currentAudio.play().catch(err => {
+        ttsAudioEl.play().catch(err => {
           if (voiceStatusText) voiceStatusText.textContent = 'DEBUG play() rejected: ' + (err?.name || err?.message || String(err));
           setTimeout(() => browserSpeak(text), 4000);
         });
