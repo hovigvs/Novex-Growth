@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/.netlify/functions/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: chatHistory })
+        body: JSON.stringify({ messages: chatHistory, voiceMode: voiceModeActive })
       });
       const data = await res.json();
       const rawReply = data.reply || "I'd be happy to help — please email us at info@novexgrowth.com and we'll get back to you shortly.";

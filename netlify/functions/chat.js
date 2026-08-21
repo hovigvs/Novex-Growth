@@ -18,10 +18,18 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request' }) };
   }
 
-  const { messages } = body;
+  const { messages, voiceMode } = body;
   if (!messages || !Array.isArray(messages)) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Messages required' }) };
   }
+
+  // Voice replies go through two full generation steps before anything plays
+  // (this reply, then the whole thing gets turned into audio) — shorter text
+  // means less to generate and less audio to wait for, so voice specifically
+  // gets a tighter length ceiling than text.
+  const voiceLengthNote = voiceMode
+    ? '\n\nVOICE MODE: this reply will be spoken aloud, not read — keep it under 40 words (the LEAD block, if included, does not count toward that). Say only what actually matters for a spoken answer; skip anything that only helps in writing.'
+    : '';
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -33,7 +41,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
+        max_tokens: voiceMode ? 300 : 1000,
         system: `You are Nicole, the AI growth consultant for Novex Growth — an AI automation agency that builds custom AI growth systems for catering companies and event venues.
 
 WHAT WE OFFER:
@@ -83,7 +91,7 @@ request: one-line summary of what they want
 [[/LEAD]]
 Use plain text only in that block — no quotation marks, no bold, no other formatting. This block is invisible to the visitor and is stripped before they see it — never mention it, never explain it, never describe it, just include it exactly as shown when the conditions above are met. Only emit it once per completed capture, not on every message.
 
-Keep responses warm, concise (2-4 sentences max, longer only when working through an objection), and conversational — not a script being read aloud. Always reply in the same language the visitor writes in — if they switch languages mid-conversation, switch with them.`,
+Keep responses warm, concise (2-4 sentences max, longer only when working through an objection), and conversational — not a script being read aloud. Always reply in the same language the visitor writes in — if they switch languages mid-conversation, switch with them.${voiceLengthNote}`,
         messages: messages.slice(-10) // Keep last 10 messages for context
       })
     });
