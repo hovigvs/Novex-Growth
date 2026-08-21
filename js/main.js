@@ -468,13 +468,25 @@ document.addEventListener('DOMContentLoaded', () => {
         currentAudio = new Audio(dataUrl);
         currentAudio.onplay = () => { clearNicoleThinking(); if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
         currentAudio.onended = () => { if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
-        currentAudio.onerror = () => browserSpeak(text);
-        currentAudio.play().catch(() => browserSpeak(text));
+        currentAudio.onerror = () => {
+          // TEMPORARY diagnostic — shows the real MediaError code on screen
+          // instead of silently falling back, so we can see what's actually
+          // failing on iOS without needing a Mac + cable + Web Inspector.
+          const code = currentAudio?.error?.code;
+          const codes = { 1: 'ABORTED', 2: 'NETWORK', 3: 'DECODE', 4: 'SRC_NOT_SUPPORTED' };
+          if (voiceStatusText) voiceStatusText.textContent = 'DEBUG audio error: ' + (codes[code] || code || 'unknown');
+          setTimeout(() => browserSpeak(text), 4000);
+        };
+        currentAudio.play().catch(err => {
+          if (voiceStatusText) voiceStatusText.textContent = 'DEBUG play() rejected: ' + (err?.name || err?.message || String(err));
+          setTimeout(() => browserSpeak(text), 4000);
+        });
       } else {
         browserSpeak(text); // server signaled fallback (no ElevenLabs key configured yet)
       }
-    } catch {
-      browserSpeak(text);
+    } catch (err) {
+      if (voiceStatusText) voiceStatusText.textContent = 'DEBUG fetch/setup error: ' + (err?.message || String(err));
+      setTimeout(() => browserSpeak(text), 4000);
     }
   }
 
