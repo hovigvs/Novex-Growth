@@ -195,13 +195,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Pulls Nicole's hidden lead-capture marker out of a reply, if present,
   // and returns the visitor-facing text separately from the captured lead.
   function extractLeadMarker(reply) {
-    const re = /\[\[LEAD\s+name="([^"]*)"\s+contact="([^"]*)"\s+request="([^"]*)"\]\]\s*$/;
+    // Block format, not quote-delimited — quote-style drift (straight vs
+    // curly) was silently breaking the old one-line marker, so submissions
+    // never fired even though the marker text leaked into the visible reply.
+    const re = /\[\[LEAD\]\]([\s\S]*?)\[\[\/LEAD\]\]/i;
     const match = reply.match(re);
     if (!match) return { cleanReply: reply, lead: null };
-    return {
-      cleanReply: reply.slice(0, match.index).trim(),
-      lead: { name: match[1], contact: match[2], request: match[3] }
+    const block = match[1];
+    const field = key => {
+      const m = block.match(new RegExp(key + '\\s*:\\s*(.+)', 'i'));
+      return m ? m[1].trim() : '';
     };
+    const lead = { name: field('name'), contact: field('contact'), request: field('request') };
+    const cleanReply = (reply.slice(0, match.index) + reply.slice(match.index + match[0].length)).trim();
+    if (!lead.name && !lead.contact) return { cleanReply: reply, lead: null }; // sanity guard against a malformed block
+    return { cleanReply, lead };
   }
 
   async function submitNicoleLead(lead) {
@@ -241,7 +249,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await res.json();
       const rawReply = data.reply || "I'd be happy to help — please email us at info@novexgrowth.com and we'll get back to you shortly.";
-      const { cleanReply, lead } = extractLeadMarker(rawReply);
+      let { cleanReply, lead } = extractLeadMarker(rawReply);
+      // Safety net: never show raw internal syntax to a visitor, even if the
+      // block came back malformed and extraction above couldn't parse it.
+      if (cleanReply.includes('[[LEAD')) cleanReply = cleanReply.split('[[LEAD')[0].trim();
       typing?.remove();
       addChatBubble('bot', cleanReply);
       chatHistory.push({ role: 'assistant', content: cleanReply });
