@@ -280,6 +280,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const voiceStatusText = document.getElementById('voiceStatusText');
   const voiceMuteBtn = document.getElementById('voiceMuteBtn');
   let voiceMuted = false, isListening = false, micStream = null, silenceTimer = null;
+  let audioUnlockedForIOS = false;
+  // iOS Safari blocks audio/speech playback unless it's initiated within the
+  // same synchronous tick as a genuine user tap — our actual reply audio only
+  // becomes available after two async round-trips (chat, then TTS), by which
+  // point WebKit no longer considers it "user-initiated" and silently blocks
+  // it. Playing something (even silent/empty) synchronously on the tap itself
+  // unlocks both the Audio element and speechSynthesis for the rest of the
+  // page session, so the real playback later actually works.
+  function unlockAudioForIOS() {
+    if (audioUnlockedForIOS || !isIOSSafari) return;
+    audioUnlockedForIOS = true;
+    try {
+      const silentAudio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQxAADB8AhSmxhIIEVCSiJrDCQBTcu3UrAIwUdkRgQbFAZC7k1BiEEBRAAAAAAAAAAAAAAJPB4W6NxrCTggAAA');
+      silentAudio.volume = 0.01;
+      silentAudio.play().catch(() => {});
+    } catch {}
+    try {
+      if (window.speechSynthesis) {
+        const primer = new SpeechSynthesisUtterance('');
+        primer.volume = 0;
+        window.speechSynthesis.speak(primer);
+      }
+    } catch {}
+  }
 
   // Fills the gap between "she stopped listening" and "her reply starts
   // playing" — without this, that pause (API calls in flight) looks like
@@ -364,6 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       return;
     }
+    unlockAudioForIOS();
     nicoleStopSpeaking();
     pauseNicoleWave();
     recognition.lang = micLangSelect ? micLangSelect.value : 'en-US';
