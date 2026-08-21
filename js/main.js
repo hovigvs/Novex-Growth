@@ -455,10 +455,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const contentType = res.headers.get('Content-Type') || '';
       if (contentType.includes('audio')) {
         const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        currentAudio = new Audio(url);
+        // iOS Safari's blob-URL audio playback is documented as unreliable —
+        // especially past ~70KB, which a few seconds of speech regularly
+        // exceeds — 'loadeddata'/'error' events silently never fire. A
+        // base64 data URL is the documented reliable alternative there.
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        currentAudio = new Audio(dataUrl);
         currentAudio.onplay = () => { clearNicoleThinking(); if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
-        currentAudio.onended = () => { URL.revokeObjectURL(url); if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
+        currentAudio.onended = () => { if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
         currentAudio.onerror = () => browserSpeak(text);
         currentAudio.play().catch(() => browserSpeak(text));
       } else {
