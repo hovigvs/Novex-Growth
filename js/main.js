@@ -326,6 +326,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const isIOS = /iPhone|iPad|iPod/i.test(_ua);
   const isIOSSafari = isIOS && /Safari/i.test(_ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(_ua);
   let recognition = null;
+  // Guards against onresult and onend both trying to react to the same
+  // finished utterance — on iOS specifically, onend fires shortly after
+  // onresult already handled everything, sees the (by-then-cleared) input
+  // as empty, and falls into its own stopListening() call — which stomps
+  // the "Nicole is thinking" text back to idle right after it appears.
+  let resultAlreadyHandled = false;
   if (SpeechRec && !/Firefox/i.test(_ua)) {
     recognition = new SpeechRec();
     recognition.continuous = !isIOSSafari;
@@ -342,26 +348,28 @@ document.addEventListener('DOMContentLoaded', () => {
         // Single-utterance mode: WebKit already waited for the natural pause
         // before firing this, so send immediately instead of running our own
         // silence timer (which assumes continuous mode).
-        if (final) { stopListening(); showNicoleThinking(); sendMessage(); }
+        if (final) { resultAlreadyHandled = true; stopListening(); showNicoleThinking(); sendMessage(); }
         return;
       }
       if (silenceTimer) clearTimeout(silenceTimer);
       if (final) {
-        silenceTimer = setTimeout(() => { stopListening(); showNicoleThinking(); sendMessage(); }, 1500);
+        silenceTimer = setTimeout(() => { resultAlreadyHandled = true; stopListening(); showNicoleThinking(); sendMessage(); }, 1500);
       } else if (interim) {
         silenceTimer = setTimeout(() => {
-          if (chatInput?.value.trim()) { stopListening(); showNicoleThinking(); sendMessage(); }
+          if (chatInput?.value.trim()) { resultAlreadyHandled = true; stopListening(); showNicoleThinking(); sendMessage(); }
         }, 2500);
       }
     };
     recognition.onerror = () => stopListening();
     recognition.onend = () => {
+      if (resultAlreadyHandled) return; // already sent via onresult/silence-timer — don't reset the thinking/speaking UI
       const hasText = chatInput && chatInput.value.trim().length > 0;
       if (hasText) {
         // The recognition session ended on its own (common — browsers auto-end
         // continuous sessions after a pause) while we already had a transcript.
         // Send it now instead of silently dropping it.
         if (silenceTimer) clearTimeout(silenceTimer);
+        resultAlreadyHandled = true;
         stopListening();
         showNicoleThinking();
         sendMessage();
@@ -391,6 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
     unlockAudioForIOS();
     nicoleStopSpeaking();
     pauseNicoleWave();
+    resultAlreadyHandled = false;
     recognition.lang = micLangSelect ? micLangSelect.value : 'en-US';
     function doStart() {
       try {
@@ -468,25 +477,13 @@ document.addEventListener('DOMContentLoaded', () => {
         ttsAudioEl.volume = 1;
         ttsAudioEl.onplay = () => { clearNicoleThinking(); if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
         ttsAudioEl.onended = () => { if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
-        ttsAudioEl.onerror = () => {
-          // TEMPORARY diagnostic — shows the real MediaError code on screen
-          // instead of silently falling back, so we can see what's actually
-          // failing on iOS without needing a Mac + cable + Web Inspector.
-          const code = ttsAudioEl?.error?.code;
-          const codes = { 1: 'ABORTED', 2: 'NETWORK', 3: 'DECODE', 4: 'SRC_NOT_SUPPORTED' };
-          if (voiceStatusText) voiceStatusText.textContent = 'DEBUG audio error: ' + (codes[code] || code || 'unknown');
-          setTimeout(() => browserSpeak(text), 4000);
-        };
-        ttsAudioEl.play().catch(err => {
-          if (voiceStatusText) voiceStatusText.textContent = 'DEBUG play() rejected: ' + (err?.name || err?.message || String(err));
-          setTimeout(() => browserSpeak(text), 4000);
-        });
+        ttsAudioEl.onerror = () => browserSpeak(text);
+        ttsAudioEl.play().catch(() => browserSpeak(text));
       } else {
         browserSpeak(text); // server signaled fallback (no ElevenLabs key configured yet)
       }
-    } catch (err) {
-      if (voiceStatusText) voiceStatusText.textContent = 'DEBUG fetch/setup error: ' + (err?.message || String(err));
-      setTimeout(() => browserSpeak(text), 4000);
+    } catch {
+      browserSpeak(text);
     }
   }
 
