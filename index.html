@@ -189,7 +189,7 @@
       <button onclick="startTavusConversation()" class="btn-primary" style="font-size:16px;padding:16px 36px;gap:10px;margin-bottom:16px;">
         <i class="ti ti-video" aria-hidden="true"></i> Start a live conversation
       </button>
-      <p style="font-size:12px;color:rgba(255,255,255,0.35);">Your camera and microphone will be requested · No sign-up required · Ends automatically after 10 minutes</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.35);">Your microphone will be requested · No sign-up required · Ends automatically after 10 minutes</p>
     </div>
 
     <!-- Loading state -->
@@ -198,10 +198,10 @@
       <p style="color:rgba(255,255,255,0.60);font-size:14px;">Starting your conversation...</p>
     </div>
 
-    <!-- Iframe embed -->
+    <!-- Live video embed -->
     <div id="tavus-embed" style="display:none;">
       <div style="position:relative;border-radius:var(--radius-xl);overflow:hidden;background:#000;aspect-ratio:16/9;max-width:720px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,0.50);">
-        <iframe id="tavus-iframe" allow="camera;microphone;fullscreen;display-capture" style="width:100%;height:100%;border:none;" title="Novex Growth AI Digital Human"></iframe>
+        <video id="tavus-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover;" title="Novex Growth AI Digital Human"></video>
       </div>
       <button onclick="endTavusConversation()" style="margin-top:16px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.60);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-pill);padding:9px 20px;font-size:13px;cursor:pointer;font-family:inherit;">
         End conversation
@@ -211,6 +211,7 @@
     <!-- Error state -->
     <div id="tavus-error" style="display:none;">
       <p style="color:#f87171;font-size:14px;margin-bottom:12px;">Something went wrong starting the conversation.</p>
+      <p id="tavus-error-msg" style="color:rgba(255,255,255,0.40);font-size:12px;margin-bottom:12px;"></p>
       <button onclick="startTavusConversation()" class="btn-ghost">Try again</button>
     </div>
 
@@ -222,28 +223,33 @@
 </style>
 
 <script>
+let anamClient = null;
+
 async function startTavusConversation() {
   document.getElementById('tavus-pre').style.display = 'none';
   document.getElementById('tavus-loading').style.display = 'block';
   document.getElementById('tavus-error').style.display = 'none';
 
   try {
-    const res = await fetch('/.netlify/functions/tavus', { method: 'POST' });
+    const res = await fetch('/.netlify/functions/anam', { method: 'POST' });
     const data = await res.json();
 
     if (data.error) {
       throw new Error(data.error);
     }
-    if (!res.ok || !data.conversation_url) {
-      throw new Error('No conversation URL returned: ' + JSON.stringify(data));
+    if (!res.ok || !data.sessionToken) {
+      throw new Error('No session token returned: ' + JSON.stringify(data));
     }
 
     document.getElementById('tavus-loading').style.display = 'none';
     document.getElementById('tavus-embed').style.display = 'block';
-    document.getElementById('tavus-iframe').src = data.conversation_url;
+
+    const { createClient } = await import('https://esm.sh/@anam-ai/js-sdk@latest');
+    anamClient = createClient(data.sessionToken);
+    await anamClient.streamToVideoElement('tavus-video');
 
   } catch (err) {
-    console.error('Tavus error:', err);
+    console.error('Anam error:', err);
     document.getElementById('tavus-loading').style.display = 'none';
     document.getElementById('tavus-error').style.display = 'block';
     document.getElementById('tavus-error-msg').textContent = err.message || 'Something went wrong. ' + JSON.stringify(err);
@@ -251,7 +257,10 @@ async function startTavusConversation() {
 }
 
 function endTavusConversation() {
-  document.getElementById('tavus-iframe').src = '';
+  if (anamClient) {
+    try { anamClient.stopStreaming(); } catch (e) {}
+    anamClient = null;
+  }
   document.getElementById('tavus-embed').style.display = 'none';
   document.getElementById('tavus-pre').style.display = 'block';
 }
@@ -479,7 +488,7 @@ function endTavusConversation() {
       </div>
       <div class="faq-item">
         <button class="faq-q">How is this different from a regular chatbot?<i class="ti ti-chevron-down faq-icon"></i></button>
-        <div class="faq-a"><p>A chatbot is text-based and reactive — it waits for someone to type. An AI digital human is a live face-to-face video conversation. It reads facial expressions, understands tone, responds with emotion, and feels like talking to a real person. The trust and engagement levels are completely different.</p></div>
+        <div class="faq-a"><p>A chatbot is text-based and reactive — it waits for someone to type. An AI digital human is a live face-to-face video conversation. It understands tone, responds naturally with real emotion in its voice and expression, and feels like talking to a real person. The trust and engagement levels are completely different.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">How much does this cost?<i class="ti ti-chevron-down faq-icon"></i></button>

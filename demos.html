@@ -239,7 +239,7 @@
         <button onclick="startTavusConversation()" class="btn-primary" style="font-size:16px;padding:16px 36px;gap:10px;margin-bottom:16px;">
           <i class="ti ti-video"></i> Start a live conversation
         </button>
-        <p style="font-size:12px;color:rgba(255,255,255,.35);">Camera and microphone will be requested · No sign-up required · Best in Chrome or Edge</p>
+        <p style="font-size:12px;color:rgba(255,255,255,.35);">Microphone will be requested · No sign-up required · Best in Chrome or Edge</p>
       </div>
 
       <div id="dh-loading" style="display:none;">
@@ -249,7 +249,7 @@
 
       <div id="dh-embed" style="display:none;">
         <div style="position:relative;border-radius:var(--radius-xl);overflow:hidden;background:#000;aspect-ratio:16/9;max-width:720px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.50);">
-          <iframe id="dh-iframe" allow="camera;microphone;fullscreen;display-capture" style="width:100%;height:100%;border:none;" title="Novex Growth AI Digital Human"></iframe>
+          <video id="dh-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover;" title="Novex Growth AI Digital Human"></video>
         </div>
         <button onclick="endTavusConversation()" style="margin-top:16px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.60);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius-pill);padding:9px 20px;font-size:13px;cursor:pointer;font-family:inherit;">
           End conversation
@@ -258,6 +258,7 @@
 
       <div id="dh-error" style="display:none;">
         <p style="color:#f87171;font-size:14px;margin-bottom:12px;">Something went wrong starting the conversation.</p>
+        <p id="dh-error-msg" style="color:rgba(255,255,255,0.40);font-size:12px;margin-bottom:12px;"></p>
         <button onclick="startTavusConversation()" class="btn-ghost">Try again</button>
       </div>
     </div>
@@ -405,27 +406,38 @@ function switchDemo(id, btn) {
   btn.classList.add('active');
 }
 
-// Tavus digital human
+// Anam digital human
+let anamClient = null;
+
 async function startTavusConversation() {
   document.getElementById('dh-pre').style.display = 'none';
   document.getElementById('dh-loading').style.display = 'block';
   document.getElementById('dh-error').style.display = 'none';
   try {
-    const res = await fetch('/.netlify/functions/tavus', { method: 'POST' });
+    const res = await fetch('/.netlify/functions/anam', { method: 'POST' });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    if (!data.conversation_url) throw new Error('No conversation URL returned');
+    if (!data.sessionToken) throw new Error('No session token returned');
     document.getElementById('dh-loading').style.display = 'none';
     document.getElementById('dh-embed').style.display = 'block';
-    document.getElementById('dh-iframe').src = data.conversation_url;
+
+    const { createClient } = await import('https://esm.sh/@anam-ai/js-sdk@latest');
+    anamClient = createClient(data.sessionToken);
+    await anamClient.streamToVideoElement('dh-video');
   } catch (err) {
+    console.error('Anam error:', err);
     document.getElementById('dh-loading').style.display = 'none';
     document.getElementById('dh-error').style.display = 'block';
+    const msgEl = document.getElementById('dh-error-msg');
+    if (msgEl) msgEl.textContent = err.message || 'Something went wrong.';
   }
 }
 
 function endTavusConversation() {
-  document.getElementById('dh-iframe').src = '';
+  if (anamClient) {
+    try { anamClient.stopStreaming(); } catch (e) {}
+    anamClient = null;
+  }
   document.getElementById('dh-embed').style.display = 'none';
   document.getElementById('dh-pre').style.display = 'block';
 }
