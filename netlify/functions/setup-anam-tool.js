@@ -32,8 +32,7 @@ exports.handler = async (event) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
-        type: 'server',
-        subtype: 'webhook',
+        type: 'SERVER_WEBHOOK',
         name: 'capture_lead',
         description: "Call this when a customer wants someone from the Novex Growth team to call or text them back, or wants to leave their contact info for a follow-up. Ask for their name and a phone number or email first if you don't have both. Never claim you will personally call, text, or email them yourself — only that you'll pass it along to the team.",
         config: {
