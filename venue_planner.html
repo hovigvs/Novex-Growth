@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Novex Growth — Interactive Venue Planner (Demo)</title>
+<link rel="icon" href="https://novexgrowth.com/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!--
+  NOVEX GROWTH · Interactive Venue Planner — self-contained demo (single file, no build step).
+  Brand palette + logo taken from novexgrowth.com.
+
+  IMPLEMENTED FOR REAL:
+    - Room presets with capacity + no-go zones (stage/dancefloor/bar/entrance)
+    - Add / move / remove tables with guardrails, live capacity vs fire-code max
+    - Optional head table (wedding party), one-sided seating
+    - Pre-booking estimate calculator + lead-capture form (simulated handoff)
+    - Guest list upload (.xlsx/.csv) parsed in-browser
+    - Auto-fill seats + "Arrange for me" smart seating (real heuristic)
+    - Drag a guest between seats to move / swap
+    - Floor-plan / table-list views
+    - Guest SMS preview + simulated send
+    - Venue-staff view with enquiry panel + lock layout
+
+  SWAP POINTS (search "// SWAP:") — wire to the venue's real services:
+    - lead capture  -> POST plan + contact to the booking-system / automation layer
+    - SMS send      -> messaging provider (one-time sender setup required)
+    - smart seating -> model call using the guest columns
+    - persistence   -> save layout + guest list per event
+-->
+<style>
+  :root{
+    /* Novex Growth brand */
+    --navy:#0F1729; --navy2:#1A2340;
+    --purple:#6B75D9; --purple-dark:#4A52C4; --purple-light:#8B94E8;
+    --cyan:#5CE0FF; --periwinkle:#B8C4F8;
+    --logo-grad:linear-gradient(90deg,#5CE0FF 0%,#6B75D9 55%,#4A52C4 100%);
+
+    --bg:#EEF1FB; --surface:#ffffff; --surface-2:#F4F6FF;
+    --ink:var(--navy); --muted:#7880B0; --text2:#3D4470;
+    --line:#E2E6F7; --line-soft:rgba(107,117,217,.20);
+    --accent:var(--purple); --accent-ink:var(--purple-dark); --accent-soft:#E9EBFB;
+    --danger:#D5455B; --ok:#2FA37A;
+    --shadow:0 1px 2px rgba(15,23,41,.05),0 10px 30px rgba(15,23,41,.09);
+    --r-sm:8px; --r-md:14px; --r-lg:20px; --r-pill:999px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font:14px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:Inter,sans-serif; font-weight:700; margin:0; letter-spacing:-.01em}
+  button{font:inherit; cursor:pointer}
+  .wrap{max-width:1180px; margin:0 auto; padding:18px 20px 70px}
+
+  /* top bar */
+  .topbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:6px}
+  .brand{display:flex; align-items:baseline; gap:10px}
+  .logo{
+    font-family:"Baloo 2",Inter,sans-serif; font-weight:700; font-size:23px; letter-spacing:.2px;
+    background:var(--logo-grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-decoration:none; line-height:1;
+  }
+  .brand-sub{color:var(--muted); font-size:12.5px; font-weight:500}
+  .venue-tag{padding:4px 10px; border:1px solid var(--line); border-radius:var(--r-pill); background:var(--surface); color:var(--text2); font-size:12px; font-weight:500}
+  .spacer{flex:1}
+  .seg{display:inline-flex; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:3px; box-shadow:var(--shadow)}
+  .seg button{border:0; background:transparent; color:var(--muted); padding:8px 13px; border-radius:10px; font-weight:600; font-size:12.5px; transition:.12s}
+  .seg button.on{background:var(--accent); color:#fff}
+  .seg button .sub{display:block; font-size:10.5px; font-weight:500; opacity:.75; margin-top:1px}
+  .seg button .badge{display:inline-block; margin-left:6px; font-size:10px; background:var(--cyan); color:var(--navy); border-radius:var(--r-pill); padding:1px 6px; font-weight:700}
+  .seg button.on .badge{display:none}
+
+  /* explainer */
+  .explain{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 55%,#2b2f66 100%); color:#fff; border-radius:var(--r-lg); padding:14px 16px; margin:12px 0 14px; display:flex; gap:14px; align-items:flex-start; box-shadow:var(--shadow)}
+  .explain .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);margin-top:6px;flex:none;box-shadow:0 0 0 4px rgba(92,224,255,.18)}
+  .explain p{margin:0; font-size:12.7px; line-height:1.6; color:rgba(255,255,255,.9)}
+  .explain b{color:#fff}
+  .explain .qbtn{margin-left:auto; flex:none; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); color:#fff; border-radius:var(--r-pill); padding:5px 12px; font-size:12px; font-weight:600}
+  .explain .qbtn:hover{background:rgba(255,255,255,.2)}
+
+  .seg-help{font-size:12px; color:var(--muted); margin:2px 2px 12px}
+
+  .layout{display:grid; grid-template-columns:308px 1fr; gap:16px}
+  @media (max-width:940px){ .layout{grid-template-columns:1fr} }
+
+  .panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); box-shadow:var(--shadow)}
+  .panel .hd{padding:12px 14px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:8px}
+  .panel .hd h3{font-size:14px}
+  .panel .bd{padding:14px}
+  .panel + .panel{margin-top:14px}
+  .kicker{font-size:10.5px; text-transform:uppercase; letter-spacing:.13em; color:var(--accent); font-weight:700}
+
+  label.fld{display:block; margin:10px 0 4px; font-size:12px; color:var(--text2); font-weight:600}
+  input[type=text],input[type=date],input[type=number],input[type=email],input[type=tel],select,textarea{
+    width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface-2); color:var(--ink); font:inherit;
+  }
+  textarea{resize:vertical; min-height:58px; line-height:1.5}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft); border-color:var(--accent)}
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:9px 12px; border-radius:var(--r-sm); font-weight:600; font-size:12.5px; transition:.12s}
+  .btn:hover{border-color:var(--accent); color:var(--accent-ink)}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  .btn.primary:hover{background:var(--accent-ink); color:#fff}
+  .btn.ghost{background:transparent}
+  .btn.wide{width:100%}
+  .btn.sm{padding:6px 9px; font-size:12px; border-radius:var(--r-sm)}
+  .btn[disabled]{opacity:.42; cursor:not-allowed}
+  .btn[disabled]:hover{border-color:var(--line); color:var(--ink)}
+  .btnrow{display:flex; gap:8px; flex-wrap:wrap}
+
+  .stat-strip{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px}
+  .stat{flex:1; min-width:96px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:9px 12px; box-shadow:var(--shadow)}
+  .stat .n{font-family:"Baloo 2",Inter,sans-serif; font-weight:700; font-size:20px; line-height:1.15}
+  .stat .l{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; font-weight:600}
+  .stat.warn .n{color:var(--danger)}
+  .stat.ok .n{color:var(--ok)}
+
+  .canvas-card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); box-shadow:var(--shadow); overflow:hidden}
+  .canvas-tools{display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:10px 12px; border-bottom:1px solid var(--line); background:var(--surface-2)}
+  .canvas-tools .grow{flex:1}
+  svg.floor{display:block; width:100%; height:auto; background:
+     linear-gradient(0deg,rgba(107,117,217,.06) 1px,transparent 1px) 0 0/100% 32px,
+     linear-gradient(90deg,rgba(107,117,217,.06) 1px,transparent 1px) 0 0/32px 100%,
+     var(--surface)}
+  .nogo{fill:rgba(107,117,217,.11); stroke:rgba(74,82,196,.45); stroke-dasharray:5 4}
+  .nogo-lbl{fill:var(--purple-dark); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em}
+  .room-outline{fill:none; stroke:var(--accent); stroke-width:2}
+  .tbl-body{fill:#fff; stroke:var(--accent); stroke-width:1.5}
+  .tbl-body.sel{stroke-width:3; stroke:var(--purple-dark)}
+  .tbl-lbl{fill:var(--accent-ink); font-size:11px; font-weight:700; text-anchor:middle; dominant-baseline:middle}
+  .seat{fill:var(--surface-2); stroke:var(--line); stroke-width:1}
+  .seat.filled{fill:var(--accent-soft); stroke:var(--accent)}
+  .seat-ini{fill:var(--accent-ink); font-size:8px; text-anchor:middle; dominant-baseline:middle; font-weight:700; pointer-events:none}
+  .tbl-head{fill:#EEF0FF; stroke:var(--purple-dark); stroke-width:2}
+  .tbl-head.sel{stroke-width:3.5}
+  .drag-ghost{position:fixed; z-index:70; pointer-events:none; transform:translate(-50%,-150%);
+    background:var(--accent); color:#fff; font-size:11px; font-weight:700; padding:3px 9px;
+    border-radius:var(--r-pill); box-shadow:var(--shadow); white-space:nowrap}
+
+  .tablelist{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:10px; padding:14px}
+  .tl-card{border:1px solid var(--line); border-radius:var(--r-md); padding:10px 11px; background:var(--surface-2)}
+  .tl-card h4{margin:0 0 6px; font:700 13px Inter,sans-serif}
+  .tl-card ol{margin:0; padding-left:18px}
+  .tl-card li{font-size:12.5px; padding:1px 0}
+  .tl-card li.empty{color:var(--muted); list-style:none; margin-left:-18px}
+
+  .hint{font-size:12px; color:var(--muted); margin-top:8px}
+  .callout{font-size:12px; background:var(--accent-soft); border:1px solid var(--line-soft); border-left:3px solid var(--accent); border-radius:var(--r-sm); padding:9px 11px; margin-top:10px; color:var(--text2)}
+  .callout b{color:var(--ink)}
+  .note{font-size:12px; background:var(--surface-2); border:1px solid var(--line); border-left:3px solid var(--navy2); border-radius:var(--r-sm); padding:8px 10px; margin-top:10px; color:var(--text2)}
+  .note b{color:var(--ink)}
+
+  /* modal */
+  .modal-bg{position:fixed; inset:0; background:rgba(15,23,41,.5); display:none; align-items:center; justify-content:center; padding:20px; z-index:50}
+  .modal-bg.on{display:flex}
+  .modal{background:var(--surface); border-radius:var(--r-lg); box-shadow:var(--shadow); max-width:560px; width:100%; max-height:86vh; display:flex; flex-direction:column}
+  .modal .hd{padding:14px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center}
+  .modal .hd h3{font-size:15px}
+  .modal .bd{padding:16px; overflow:auto}
+  .modal .ft{padding:12px 16px; border-top:1px solid var(--line); display:flex; gap:8px; justify-content:flex-end}
+  .x{margin-left:auto; border:0; background:transparent; font-size:18px; color:var(--muted); line-height:1}
+  .modal .bd h4{font-size:13px; margin:14px 0 4px}
+  .modal .bd h4:first-child{margin-top:0}
+  .modal .bd p{margin:0 0 6px; font-size:13px; color:var(--text2); line-height:1.6}
+
+  .sms{border:1px solid var(--line); border-radius:var(--r-sm); padding:9px 11px; margin-bottom:8px; background:var(--surface-2); font-size:12.5px}
+  .sms .to{font-weight:700; color:var(--accent-ink); font-size:11.5px; margin-bottom:2px}
+  .quote-row{display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line); font-size:13px}
+  .quote-row.total{border-bottom:0; font-weight:700; font-size:15px; padding-top:8px}
+  .seat-picker{position:fixed; z-index:60; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); box-shadow:var(--shadow); width:240px; display:none; padding:10px}
+  .seat-picker.on{display:block}
+  .seat-picker input{margin-bottom:6px}
+  .seat-picker .list{max-height:200px; overflow:auto}
+  .seat-picker .row{padding:6px 8px; border-radius:7px; font-size:12.5px; cursor:pointer; display:flex; gap:6px; align-items:center}
+  .seat-picker .row:hover{background:var(--accent-soft)}
+  .seat-picker .row .grp{font-size:10px; color:var(--muted)}
+  .lock-banner{display:none; background:#fff; border:1px solid var(--accent); color:var(--accent-ink); border-radius:var(--r-md); padding:9px 12px; font-size:12.5px; font-weight:600; margin-bottom:12px; box-shadow:var(--shadow)}
+  .lock-banner.on{display:block}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:2px;vertical-align:middle}
+  .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--navy); color:#fff; padding:10px 16px; border-radius:var(--r-md); font-size:13px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:80}
+  .toast.on{opacity:1}
+  details.mini summary{cursor:pointer; font-size:12px; color:var(--accent-ink); font-weight:600}
+  .upload-lbl{position:relative; overflow:hidden}
+  .upload-lbl input{position:absolute; inset:0; opacity:0; cursor:pointer; font-size:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <a class="logo" href="https://www.novexgrowth.com" target="_blank" rel="noopener">novexgrowth</a>
+      <span class="brand-sub">Interactive Venue Planner</span>
+    </div>
+    <span class="venue-tag" id="venueTag">The Carlyle Estate · Toronto</span>
+    <div class="spacer"></div>
+    <div class="seg" id="roleSeg">
+      <button data-role="customer" class="on">Customer view<span class="sub">the event booker</span></button>
+      <button data-role="staff">Venue staff view<span class="sub">the coordinator</span></button>
+    </div>
+    <button class="btn sm ghost" id="embedBtn">&lt;/&gt; Embed</button>
+  </div>
+
+  <div class="explain">
+    <span class="dot"></span>
+    <p><b>What this is:</b> a planner a venue puts on its own website. A prospective client designs their event layout and requests a quote (<b>Step&nbsp;1</b>). After they book, they upload their guest list, drop each guest onto a seat, and the venue texts every guest their table number (<b>Step&nbsp;2</b>). The venue’s coordinator can review and lock everything (<b>Venue staff view</b>).</p>
+    <button class="qbtn" id="howBtn">How it works</button>
+  </div>
+
+  <div class="seg" id="stageSeg">
+    <button data-stage="plan" class="on">Step 1 · Design &amp; quote<span class="sub">before booking</span></button>
+    <button data-stage="seat">Step 2 · Seat guests<span class="sub">after booking</span><span class="badge">guest upload here</span></button>
+  </div>
+  <div class="seg-help" id="segHelp"></div>
+
+  <div class="lock-banner" id="lockBanner">🔒 Layout locked by the venue — contact your coordinator to make changes.</div>
+
+  <div class="layout">
+    <!-- LEFT -->
+    <div>
+      <div class="panel" id="planPanel">
+        <div class="hd"><span class="kicker">Step 1</span><h3>Room &amp; layout</h3></div>
+        <div class="bd">
+          <label class="fld">Room</label>
+          <select id="roomSel"></select>
+          <div id="roomMeta" class="hint"></div>
+
+          <label class="fld">Add a table</label>
+          <div class="btnrow">
+            <button class="btn sm" data-add="round8">Round · 8</button>
+            <button class="btn sm" data-add="round10">Round · 10</button>
+            <button class="btn sm" data-add="rect12">Long · 12</button>
+          </div>
+          <div class="btnrow" style="margin-top:8px">
+            <button class="btn sm ghost" id="delTableBtn" disabled>Remove selected</button>
+            <button class="btn sm ghost" id="clearTablesBtn">Clear all tables</button>
+          </div>
+          <div class="hint">Drag a table to move it. Tables can’t overlap the stage, dancefloor, bar or entrance, or leave the room.</div>
+
+          <label class="fld">Wedding options</label>
+          <label class="btn wide" style="justify-content:space-between">
+            <span>Head table (wedding party)</span>
+            <input type="checkbox" id="headChk" />
+          </label>
+          <div id="headOpts" style="display:none; margin-top:8px">
+            <label class="fld">Head-table seats</label>
+            <input type="number" id="headSeats" value="8" min="2" max="16" />
+            <button class="btn sm wide" id="headRotateBtn" style="margin-top:8px">⟳ Rotate — along the top / left / bottom / right</button>
+            <div class="hint">Set to 2 for a sweetheart table. Seats face the room; auto-seating leaves it for you to fill.</div>
+          </div>
+
+          <div class="callout" id="toStep2Hint"><b>Guest list &amp; seating</b> live in <b>Step&nbsp;2 · Seat guests</b> (top tab) — available once the client has booked.</div>
+        </div>
+      </div>
+
+      <div class="panel" id="quotePanel">
+        <div class="hd"><span class="kicker">Step 1</span><h3>Get an estimate</h3></div>
+        <div class="bd">
+          <label class="fld">Event name</label>
+          <input type="text" id="qName" value="Sarah &amp; James — Wedding Reception" />
+          <label class="fld">Guest count</label>
+          <input type="number" id="qGuests" value="140" min="1" />
+          <label class="fld">Preferred date</label>
+          <input type="date" id="qDate" />
+          <label class="fld">Notes for the venue <span class="hint" style="font-weight:400">(optional)</span></label>
+          <textarea id="qNotes" rows="3" placeholder="e.g. wheelchair access near the entrance · cake table by the window · kids' table, no assigned seats · allergy summary · AV for a slideshow"></textarea>
+          <button class="btn primary wide" id="quoteBtn" style="margin-top:12px">Calculate estimate</button>
+          <div id="quoteOut" style="margin-top:12px"></div>
+          <div class="note"><b>How pricing works:</b> the venue enters its rates once in the planner’s pricing settings (room fees, per-head catering tiers, add-ons, tax). The planner does the maths from those. It’s an <b>estimate</b> — the venue sends the firm quote.</div>
+        </div>
+      </div>
+
+      <div class="panel" id="seatPanel" hidden>
+        <div class="hd"><span class="kicker">Step 2</span><h3>Guest list</h3></div>
+        <div class="bd">
+          <div class="btnrow">
+            <label class="btn sm primary upload-lbl">
+              ⬆ Upload .xlsx / .csv
+              <input type="file" id="fileIn" accept=".xlsx,.xls,.csv" />
+            </label>
+            <button class="btn sm ghost" id="tplBtn">Template</button>
+          </div>
+          <button class="btn sm wide" id="sampleBtn" style="margin-top:8px">▶ Load &amp; seat a sample guest list</button>
+          <div id="guestSummary" class="hint">No guest list yet — upload a spreadsheet of names + phone numbers, or hit <b>Load &amp; seat a sample guest list</b> to watch it fill every chair instantly.</div>
+
+          <label class="fld">Seat them</label>
+          <div class="btnrow">
+            <button class="btn sm" id="autofillBtn" disabled>Auto-fill seats</button>
+            <button class="btn sm primary" id="arrangeBtn" disabled>✨ Arrange for me</button>
+          </div>
+          <button class="btn sm ghost" id="clearSeatsBtn" style="margin-top:8px" disabled>Clear seating</button>
+          <div id="arrangeWhy" class="hint"></div>
+
+          <label class="fld">Tell your guests</label>
+          <button class="btn wide" id="smsBtn" disabled>Preview &amp; send seating SMS</button>
+          <div class="note">Each guest gets a text with their table, the venue’s name and an opt-out line. A one-time messaging setup is needed before the first send.</div>
+        </div>
+      </div>
+
+      <div class="panel" id="staffPanel" hidden>
+        <div class="hd"><span class="kicker">Venue</span><h3>Coordinator controls</h3></div>
+        <div class="bd">
+          <div id="enquiryBox"></div>
+          <p class="hint">This is what your venue client’s staff see. They don’t edit the layout — they review the customer’s plan and lock it before the event.</p>
+          <label class="btn wide" style="justify-content:space-between; margin-top:6px">
+            Lock layout for this event
+            <input type="checkbox" id="lockChk" />
+          </label>
+          <div class="hint">When locked, the customer can still view the floor plan and seating chart but can’t move tables.</div>
+          <label class="fld">Fire-code capacity override</label>
+          <input type="number" id="capOverride" placeholder="(use room default)" />
+          <div class="hint">Demo only — in production this is set per room from the venue’s licence.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <div class="stat-strip" id="statStrip"></div>
+      <div class="canvas-card">
+        <div class="canvas-tools">
+          <div class="seg" id="viewSeg" style="box-shadow:none">
+            <button data-view="floor" class="on">Floor plan</button>
+            <button data-view="list">Table list</button>
+          </div>
+          <div class="grow"></div>
+          <span id="legend" class="hint"></span>
+        </div>
+        <div id="floorView">
+          <svg class="floor" id="svg" viewBox="0 0 1000 640" role="img" aria-label="Venue floor plan"></svg>
+        </div>
+        <div id="listView" class="tablelist" hidden></div>
+      </div>
+      <div class="hint" id="canvasHint"></div>
+    </div>
+  </div>
+</div>
+
+<div class="seat-picker" id="seatPicker">
+  <input type="text" id="pickerSearch" placeholder="Search guests…" />
+  <div class="list" id="pickerList"></div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="hd"><h3 id="modalTitle">Title</h3><button class="x" id="modalX">×</button></div>
+    <div class="bd" id="modalBody"></div>
+    <div class="ft" id="modalFoot"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+const ROOMS = {
+  ballroom:{ name:"Grand Ballroom", cap:320, roomFee:4800, outline:[60,70,880,500],
+    nogo:[{x:60,y:70,w:280,h:90,l:"Stage"},{x:390,y:210,w:230,h:170,l:"Dancefloor"},{x:770,y:70,w:170,h:120,l:"Bar"},{x:410,y:520,w:180,h:50,l:"Entrance"}] },
+  garden:{ name:"Garden Room", cap:90, roomFee:1900, outline:[120,80,620,440],
+    nogo:[{x:120,y:80,w:180,h:70,l:"Stage"},{x:330,y:200,w:150,h:120,l:"Dancefloor"},{x:300,y:470,w:150,h:40,l:"Entrance"}] },
+  terrace:{ name:"Rooftop Terrace", cap:130, roomFee:2800, outline:[80,80,780,430],
+    nogo:[{x:600,y:80,w:180,h:110,l:"Bar"},{x:330,y:200,w:180,h:120,l:"Dancefloor"},{x:380,y:470,w:160,h:40,l:"Entrance"}] }
+};
+const TABLE_KINDS = {
+  round8:{shape:"round", seats:8, r:32},
+  round10:{shape:"round", seats:10, r:38},
+  rect12:{shape:"rect", seats:12, w:150, h:46},
+  head:{shape:"head", seats:8, w:210, h:38}
+};
+const GROUP_COLORS = ["#6B75D9","#2FA37A","#E0A32F","#D5455B","#3D8BD5","#8B5CF6","#C4617F","#4AB0B8"];
+
+let S = {
+  role:"customer", stage:"plan", view:"floor",
+  room:"ballroom",
+  tables:[], guests:[], selTable:null,
+  locked:false, capOverride:null, seq:1,
+  enquiry:null
+};
+
+function room(){ return ROOMS[S.room]; }
+function capacity(){ return S.capOverride || room().cap; }
+function seatsPlaced(){ return S.tables.reduce((n,t)=>n+t.seats.length,0); }
+function guestsSeated(){ return S.tables.reduce((n,t)=>n+t.seats.filter(Boolean).length,0); }
+function firstName(n){ return (n||"").trim().split(/\s+/)[0] || n; }
+function initials(n){ const p=(n||"").trim().split(/\s+/); return ((p[0]||"")[0]||"")+((p[1]||"")[0]||""); }
+function guestById(id){ return S.guests.find(g=>g.id===id); }
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"),2200); }
+function fmt(n){ return "$"+n.toLocaleString("en-CA",{maximumFractionDigits:0}); }
+function editable(){ return !(S.role==="customer" && S.locked); }
+function defaultDate(){ const d=new Date(); d.setMonth(d.getMonth()+7); d.setDate(14); return d.toISOString().slice(0,10); }
+
+function seatXY(t,i){
+  const k=TABLE_KINDS[t.kind];
+  if(k.shape==="round"){
+    const ang=(i/k.seats)*Math.PI*2 - Math.PI/2, rr=k.r+15;
+    return [t.x+Math.cos(ang)*rr, t.y+Math.sin(ang)*rr];
+  }
+  if(k.shape==="head"){
+    const n=k.seats, L=k.w, off=k.h/2+14, o=t.orient||"bottom", step=L/(n+1);
+    if(o==="bottom") return [t.x - L/2 + step*(i+1), t.y + off];
+    if(o==="top")    return [t.x - L/2 + step*(i+1), t.y - off];
+    if(o==="left")   return [t.x - off, t.y - L/2 + step*(i+1)];
+    return [t.x + off, t.y - L/2 + step*(i+1)]; // right
+  }
+  const perSide=k.seats/2, side=i<perSide?-1:1, idx=i%perSide, gap=k.w/(perSide+1);
+  return [t.x - k.w/2 + gap*(idx+1), t.y + side*(k.h/2+14)];
+}
+function tableBounds(t){
+  const k=TABLE_KINDS[t.kind];
+  if(k.shape==="round"){ const R=k.r+22; return [t.x-R,t.y-R,t.x+R,t.y+R]; }
+  if(k.shape==="head"){
+    const hz = !t.orient || t.orient==="top" || t.orient==="bottom";
+    const hw=(hz?k.w:k.h)/2, hh=(hz?k.h:k.w)/2;
+    return [t.x-hw-22, t.y-hh-22, t.x+hw+22, t.y+hh+22];
+  }
+  return [t.x-k.w/2-10,t.y-k.h/2-20,t.x+k.w/2+10,t.y+k.h/2+20];
+}
+function rectsOverlap(a,b){ return !(a[2]<b[0]||a[0]>b[2]||a[3]<b[1]||a[1]>b[3]); }
+function validPos(t,x,y){
+  const test={...t,x,y}, [x0,y0,x1,y1]=tableBounds(test), [rx,ry,rw,rh]=room().outline;
+  if(x0<rx||y0<ry||x1>rx+rw||y1>ry+rh) return false;
+  for(const z of room().nogo){ if(rectsOverlap([x0,y0,x1,y1],[z.x,z.y,z.x+z.w,z.y+z.h])) return false; }
+  for(const o of S.tables){ if(o.id===t.id) continue; if(rectsOverlap(tableBounds(test),tableBounds(o))) return false; }
+  return true;
+}
+function findSpot(kind){
+  const [rx,ry,rw,rh]=room().outline;
+  for(let y=ry+60;y<ry+rh-40;y+=44) for(let x=rx+60;x<rx+rw-40;x+=54){
+    const t={id:"tmp",kind,x,y}; if(validPos(t,x,y)) return [x,y];
+  }
+  return [rx+rw/2, ry+rh/2];
+}
+function fitsRoom(t,x,y){
+  const test={...t,x,y}, [x0,y0,x1,y1]=tableBounds(test), [rx,ry,rw,rh]=room().outline;
+  if(x0<rx||y0<ry||x1>rx+rw||y1>ry+rh) return false;
+  for(const z of room().nogo){ if(rectsOverlap([x0,y0,x1,y1],[z.x,z.y,z.x+z.w,z.y+z.h])) return false; }
+  return true;
+}
+function findSpotFor(tpl){
+  const [rx,ry,rw,rh]=room().outline;
+  for(let y=ry+40;y<ry+rh-40;y+=38) for(let x=rx+40;x<rx+rw-40;x+=46){
+    if(fitsRoom({...tpl,x,y},x,y)) return [x,y];
+  }
+  return null;
+}
+function addTable(kind){
+  if(!editable()) return toast("Layout is locked by the venue.");
+  const [x,y]=findSpot(kind), k=TABLE_KINDS[kind];
+  S.tables.push({id:"T"+(S.seq++),kind,x,y,seats:new Array(k.seats).fill(null)});
+  render();
+}
+function delSelected(){ if(!editable()||!S.selTable) return; S.tables=S.tables.filter(t=>t.id!==S.selTable); S.selTable=null; render(); }
+function tableNumbers(){ let n=0; const m={}; S.tables.forEach(t=>{ m[t.id]= t.kind==="head" ? "Head" : String(++n); }); return m; }
+function addHeadTable(){
+  if(!editable()) return toast("Layout is locked by the venue.");
+  if(S.tables.some(t=>t.kind==="head")) return;
+  const n=Math.max(2,Math.min(16,+$("#headSeats").value||8));
+  const [rx,ry,rw]=room().outline;
+  const ht={id:"H"+(S.seq++), kind:"head", orient:"bottom", x:rx+rw*0.62, y:ry+46, seats:new Array(n).fill(null)};
+  if(!validPos(ht,ht.x,ht.y)){ const s=findSpot("head"); ht.x=s[0]; ht.y=s[1]; }
+  S.tables.unshift(ht);
+  render();
+}
+
+function render(){
+  syncModes(); drawStats();
+  if(S.view==="floor"){ $("#floorView").hidden=false; $("#listView").hidden=true; drawFloor(); }
+  else { $("#floorView").hidden=true; $("#listView").hidden=false; drawList(); }
+  drawLegend();
+  $("#delTableBtn").disabled = !S.selTable || !editable();
+  const hasGuests=S.guests.length>0;
+  $("#autofillBtn").disabled=!hasGuests;
+  $("#arrangeBtn").disabled=!hasGuests;
+  $("#clearSeatsBtn").disabled=guestsSeated()===0;
+  $("#smsBtn").disabled=guestsSeated()===0;
+}
+function groupColorMap(){
+  const map={}; let i=0;
+  for(const g of S.guests){ const key=g.group||("_"+g.id); if(!(key in map)){ map[key]=GROUP_COLORS[i%GROUP_COLORS.length]; i++; } }
+  return map;
+}
+function drawFloor(){
+  const svg=$("#svg"), R=room(), gc=groupColorMap(), TN=tableNumbers();
+  const [rx,ry,rw,rh]=R.outline;
+  let h=`<rect class="room-outline" x="${rx}" y="${ry}" width="${rw}" height="${rh}" rx="10"/>`;
+  for(const z of R.nogo){
+    h+=`<rect class="nogo" x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="6"/>`;
+    h+=`<text class="nogo-lbl" x="${z.x+z.w/2}" y="${z.y+z.h/2+4}" text-anchor="middle">${z.l}</text>`;
+  }
+  S.tables.forEach((t)=>{
+    const k=TABLE_KINDS[t.kind], sel=t.id===S.selTable?" sel":"";
+    h+=`<g class="tbl" data-id="${t.id}" style="cursor:${editable()?'grab':'default'}">`;
+    if(k.shape==="round"){ h+=`<circle class="tbl-body${sel}" cx="${t.x}" cy="${t.y}" r="${k.r}"/>`; }
+    else if(k.shape==="head"){
+      const hz = !t.orient || t.orient==="top" || t.orient==="bottom";
+      const W=hz?k.w:k.h, H=hz?k.h:k.w;
+      h+=`<rect class="tbl-body tbl-head${sel}" x="${t.x-W/2}" y="${t.y-H/2}" width="${W}" height="${H}" rx="6"/>`;
+    }
+    else { h+=`<rect class="tbl-body${sel}" x="${t.x-k.w/2}" y="${t.y-k.h/2}" width="${k.w}" height="${k.h}" rx="8"/>`; }
+    h+=`<text class="tbl-lbl" x="${t.x}" y="${t.y}">${t.kind==="head"?"HEAD":"T"+TN[t.id]}</text>`;
+    t.seats.forEach((gid,si)=>{
+      const [sx,sy]=seatXY(t,si), g=gid?guestById(gid):null;
+      const col=g?gc[g.group||("_"+g.id)]:null;
+      h+=`<g class="seatg" data-tid="${t.id}" data-si="${si}" style="cursor:pointer">`;
+      h+=`<circle class="seat${g?' filled':''}" cx="${sx}" cy="${sy}" r="9" ${col?`style="stroke:${col}"`:''}/>`;
+      if(g) h+=`<text class="seat-ini" x="${sx}" y="${sy}">${initials(g.name)}</text>`;
+      h+=`</g>`;
+    });
+    h+=`</g>`;
+  });
+  svg.innerHTML=h; wireFloor();
+}
+function wireFloor(){
+  $$("#svg .seatg").forEach(el=>{
+    el.addEventListener("pointerdown",e=>{
+      e.stopPropagation();
+      const tid=el.dataset.tid, si=+el.dataset.si;
+      const t=S.tables.find(x=>x.id===tid), gid=t.seats[si];
+      const sx=e.clientX, sy=e.clientY;
+      let moved=false, ghost=null;
+      el.setPointerCapture(e.pointerId);
+      const onMove=ev=>{
+        if(!moved && Math.hypot(ev.clientX-sx,ev.clientY-sy)>5 && gid && S.stage==="seat"){
+          moved=true;
+          ghost=document.createElement("div");
+          ghost.className="drag-ghost";
+          ghost.textContent=(guestById(gid)||{}).name||"";
+          document.body.appendChild(ghost);
+          document.body.style.userSelect="none";
+        }
+        if(ghost){ ghost.style.left=ev.clientX+"px"; ghost.style.top=ev.clientY+"px"; }
+      };
+      const onUp=ev=>{
+        el.releasePointerCapture(e.pointerId);
+        el.removeEventListener("pointermove",onMove);
+        el.removeEventListener("pointerup",onUp);
+        if(ghost){ ghost.remove(); document.body.style.userSelect=""; }
+        if(moved){
+          const hit=document.elementFromPoint(ev.clientX,ev.clientY);
+          const tgt=hit && hit.closest(".seatg");
+          if(tgt && !(tgt.dataset.tid===tid && +tgt.dataset.si===si)){
+            const tt=S.tables.find(x=>x.id===tgt.dataset.tid), tsi=+tgt.dataset.si;
+            const other=tt.seats[tsi];
+            tt.seats[tsi]=gid; t.seats[si]=other||null;   // move, or swap if target occupied
+            render();
+          }
+        } else {
+          openPicker(tid,si,ev.clientX,ev.clientY);
+        }
+      };
+      el.addEventListener("pointermove",onMove);
+      el.addEventListener("pointerup",onUp);
+    });
+  });
+  $$("#svg .tbl").forEach(g=>{
+    const id=g.dataset.id;
+    g.addEventListener("pointerdown",e=>{
+      if(e.target.closest(".seatg")) return;
+      S.selTable=id; drawStats(); $("#delTableBtn").disabled=!editable();
+      $$("#svg .tbl-body, #svg .tbl-head").forEach(b=>b.classList.remove("sel"));
+      const bodyEl=g.querySelector(".tbl-body, .tbl-head"); if(bodyEl) bodyEl.classList.add("sel");
+      if(!editable()) return;
+      const t=S.tables.find(x=>x.id===id), pt=svgPoint(e), dx=pt.x-t.x, dy=pt.y-t.y;
+      g.setPointerCapture(e.pointerId); g.style.cursor="grabbing";
+      let lastX=t.x,lastY=t.y;
+      const move=ev=>{ const p=svgPoint(ev), nx=p.x-dx, ny=p.y-dy;
+        const ok = t.kind==="head" ? fitsRoom(t,nx,ny) : validPos(t,nx,ny);
+        if(ok){ lastX=nx; lastY=ny; g.setAttribute("transform",`translate(${nx-t.x},${ny-t.y})`); } };
+      const up=()=>{ g.releasePointerCapture(e.pointerId); g.removeEventListener("pointermove",move); g.removeEventListener("pointerup",up); t.x=lastX; t.y=lastY; render(); };
+      g.addEventListener("pointermove",move); g.addEventListener("pointerup",up);
+    });
+  });
+}
+function svgPoint(e){ const svg=$("#svg"), p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
+
+function drawList(){
+  const box=$("#listView");
+  if(!S.tables.length){ box.innerHTML=`<div class="hint" style="padding:14px">No tables yet — add some from the left.</div>`; return; }
+  const TN=tableNumbers();
+  box.innerHTML=S.tables.map((t)=>{
+    const rows=t.seats.map((gid,si)=>{
+      const g=gid?guestById(gid):null;
+      return g?`<li>${g.name}${g.group?` <span style="color:var(--muted)">· ${g.group}</span>`:""}</li>`:`<li class="empty">— seat ${si+1} —</li>`;
+    }).join("");
+    const title=t.kind==="head" ? "Head Table" : "Table "+TN[t.id];
+    return `<div class="tl-card"><h4>${title} <span class="hint">(${t.seats.filter(Boolean).length}/${t.seats.length})</span></h4><ol>${rows}</ol></div>`;
+  }).join("");
+}
+function drawStats(){
+  const placed=seatsPlaced(), seated=guestsSeated(), cap=capacity(), over=placed>cap;
+  $("#statStrip").innerHTML=`
+    <div class="stat"><div class="n">${S.tables.length}</div><div class="l">Tables</div></div>
+    <div class="stat ${over?'warn':''}"><div class="n">${placed}</div><div class="l">Seats / ${cap} max</div></div>
+    <div class="stat ${seated?'ok':''}"><div class="n">${seated}</div><div class="l">Guests seated</div></div>
+    <div class="stat"><div class="n">${S.guests.length}</div><div class="l">On guest list</div></div>`;
+}
+function drawLegend(){
+  if(S.stage!=="seat" || !S.guests.length){ $("#legend").textContent=""; return; }
+  const gc=groupColorMap();
+  const groups=[...new Set(S.guests.map(g=>g.group).filter(Boolean))].slice(0,6);
+  $("#legend").innerHTML=groups.map(g=>`<span class="swatch" style="background:${gc[g]}"></span>${g}`).join("&nbsp;&nbsp;");
+}
+
+let pickerCtx=null;
+function openPicker(tid,si,cx,cy){
+  if(S.stage!=="seat"){ toast('Switch to “Step 2 · Seat guests” to assign seats.'); return; }
+  const t=S.tables.find(x=>x.id===tid); pickerCtx={tid,si};
+  const cur=t.seats[si], p=$("#seatPicker");
+  p.style.left=Math.min(cx,innerWidth-260)+"px";
+  p.style.top=Math.min(cy,innerHeight-260)+"px";
+  p.classList.add("on"); $("#pickerSearch").value=""; $("#pickerSearch").focus();
+  renderPicker("");
+  function renderPicker(q){
+    const seatedIds=new Set(S.tables.flatMap(x=>x.seats).filter(Boolean));
+    const list=S.guests.filter(g=>{
+      if(g.id===cur) return true;
+      if(seatedIds.has(g.id)) return false;
+      return g.name.toLowerCase().includes(q.toLowerCase());
+    }).slice(0,40);
+    let h="";
+    if(cur){ const g=guestById(cur); h+=`<div class="row" data-act="clear" style="color:var(--danger)">✕ Clear ${g?g.name:''}</div>`; }
+    h+=list.map(g=>`<div class="row" data-id="${g.id}">${g.name}${g.group?` <span class="grp">· ${g.group}</span>`:""}</div>`).join("");
+    if(!list.length && !cur) h+=`<div class="hint" style="padding:6px">No unseated guests match.</div>`;
+    $("#pickerList").innerHTML=h;
+    $$("#pickerList .row").forEach(r=>r.addEventListener("click",()=>{
+      if(r.dataset.act==="clear"){ t.seats[si]=null; }
+      else { S.tables.forEach(x=>x.seats.forEach((v,k)=>{ if(v===r.dataset.id) x.seats[k]=null; })); t.seats[si]=r.dataset.id; }
+      closePicker(); render();
+    }));
+  }
+  $("#pickerSearch").oninput=e=>renderPicker(e.target.value);
+}
+function closePicker(){ $("#seatPicker").classList.remove("on"); pickerCtx=null; }
+document.addEventListener("click",e=>{ if(!e.target.closest("#seatPicker") && !e.target.closest(".seatg")) closePicker(); });
+
+const COL_ALIASES={
+  name:["name","full name","guest","guest name"],
+  phone:["phone","mobile","cell","phone number","number"],
+  group:["group","party","family","table group"],
+  side:["side","affiliation"],
+  keepWith:["keepwith","keep with","seat with","with"],
+  keepApart:["keepapart","keep apart","not with","away from"],
+  age:["age","age group","category"],
+  dietary:["dietary","diet","meal","allergy","allergies"]
+};
+function normKey(k){ return String(k||"").trim().toLowerCase(); }
+function mapRow(row){
+  const out={}, keys=Object.keys(row);
+  for(const field in COL_ALIASES){
+    const hit=keys.find(k=>COL_ALIASES[field].includes(normKey(k)));
+    out[field]= hit!=null ? String(row[hit]).trim() : "";
+  }
+  return out;
+}
+function ingestRows(rows){
+  const gs=[];
+  rows.forEach((r,i)=>{
+    const m=mapRow(r); if(!m.name) return;
+    gs.push({ id:"G"+(i+1)+"_"+Math.random().toString(36).slice(2,6),
+      name:m.name, phone:m.phone||"", group:m.group||"", side:m.side||"",
+      keepWith:m.keepWith||"", keepApart:m.keepApart||"", age:(m.age||"").toLowerCase(), dietary:m.dietary||"" });
+  });
+  S.guests=gs;
+  S.tables.forEach(t=>t.seats=t.seats.map(()=>null));
+  const withGroups=gs.filter(g=>g.group).length;
+  $("#guestSummary").innerHTML=`<b>${gs.length}</b> guests loaded${withGroups?` · ${withGroups} have a group/party`:""}${gs.some(g=>g.keepApart)?` · keep-apart rules detected`:""}.`;
+  $("#arrangeWhy").textContent=""; render();
+}
+$("#fileIn").addEventListener("change",async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
+    if(!rows.length) return toast("That sheet looks empty.");
+    ingestRows(rows); toast("Guest list imported.");
+  }catch(err){ console.error(err); toast("Couldn’t read that file."); }
+  e.target.value="";
+});
+$("#tplBtn").addEventListener("click",()=>{
+  const rows=[
+    {Name:"Jordan Avery",Phone:"+1 416 555 0142",Group:"Avery Family",Side:"Bride",KeepWith:"Sam Avery",KeepApart:"",Age:"adult",Dietary:"none"},
+    {Name:"Sam Avery",Phone:"+1 416 555 0143",Group:"Avery Family",Side:"Bride",KeepWith:"Jordan Avery",KeepApart:"",Age:"elderly",Dietary:"vegetarian"},
+    {Name:"Chris Lin",Phone:"+1 647 555 0197",Group:"College Friends",Side:"Groom",KeepWith:"",KeepApart:"Pat Lin",Age:"adult",Dietary:"none"}
+  ];
+  const ws=XLSX.utils.json_to_sheet(rows), wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Guests");
+  XLSX.writeFile(wb,"novex-guest-list-template.xlsx");
+});
+$("#sampleBtn").addEventListener("click",()=>{
+  if(S.stage!=="seat"){ S.stage="seat"; $$("#stageSeg button").forEach(x=>x.classList.toggle("on",x.dataset.stage==="seat")); }
+  ingestRows(SAMPLE());
+  if(S.tables.length){ const res=smartArrange(); $("#arrangeWhy").innerHTML=res.summary; }
+  render();
+  toast("Sample list loaded & seated ✓");
+});
+
+function allSeatSlots(){ const s=[]; S.tables.forEach(t=>{ if(t.kind==="head") return; t.seats.forEach((_,si)=>s.push({t,si})); }); return s; }
+function clearSeats(includeHead){ S.tables.forEach(t=>{ if(!includeHead && t.kind==="head") return; t.seats=t.seats.map(()=>null); }); }
+$("#autofillBtn").addEventListener("click",()=>{
+  if(!S.tables.length) return toast("Add some tables first.");
+  clearSeats(false);
+  const slots=allSeatSlots();
+  S.guests.forEach((g,i)=>{ if(slots[i]) slots[i].t.seats[slots[i].si]=g.id; });
+  const left=S.guests.length-Math.min(S.guests.length,slots.length);
+  const hh=S.tables.some(t=>t.kind==="head")?" Head table left for you to fill.":"";
+  $("#arrangeWhy").textContent = (left>0 ? `Seated ${slots.length}. ${left} guest(s) need more seats — add ${Math.ceil(left/8)} table(s).` : `All ${S.guests.length} guests seated in list order.`)+hh;
+  render();
+});
+$("#clearSeatsBtn").addEventListener("click",()=>{ clearSeats(true); $("#arrangeWhy").textContent=""; render(); });
+
+function nameKey(n){ return (n||"").trim().toLowerCase(); }
+function dist(ax,ay,bx,by){ return Math.hypot(ax-bx,ay-by); }
+function loudZones(){ return room().nogo.filter(z=>/dancefloor|stage|dj|band|speaker/i.test(z.l)); }
+function tableQuietScore(t){ const zs=loudZones(); if(!zs.length) return 0; return Math.min(...zs.map(z=>dist(t.x,t.y,z.x+z.w/2,z.y+z.h/2))); }
+$("#arrangeBtn").addEventListener("click",()=>{
+  if(!S.tables.length) return toast("Add some tables first.");
+  const res=smartArrange(); render(); $("#arrangeWhy").innerHTML=res.summary;
+});
+function smartArrange(){
+  clearSeats(false);
+  const G=S.guests, byName={}; G.forEach(g=>byName[nameKey(g.name)]=g);
+  const parent={}; G.forEach(g=>parent[g.id]=g.id);
+  const find=x=>parent[x]===x?x:(parent[x]=find(parent[x]));
+  const union=(a,b)=>{ a=find(a); b=find(b); if(a!==b) parent[a]=b; };
+  const groupBuckets={};
+  G.forEach(g=>{ if(g.group){ (groupBuckets[g.group]=groupBuckets[g.group]||[]).push(g); } });
+  Object.values(groupBuckets).forEach(arr=>arr.forEach(g=>union(g.id,arr[0].id)));
+  G.forEach(g=>(g.keepWith||"").split(/[;,/]/).map(s=>s.trim()).filter(Boolean).forEach(nm=>{
+    const o=byName[nameKey(nm)]; if(o) union(g.id,o.id);
+  }));
+  const clusters={};
+  G.forEach(g=>{ const r=find(g.id); (clusters[r]=clusters[r]||[]).push(g); });
+  let clusterList=Object.values(clusters);
+  const apart=[];
+  G.forEach(g=>(g.keepApart||"").split(/[;,/]/).map(s=>s.trim()).filter(Boolean).forEach(nm=>{
+    const o=byName[nameKey(nm)]; if(o) apart.push([g.id,o.id]);
+  }));
+  const apartOf=id=>apart.filter(p=>p[0]===id||p[1]===id).map(p=>p[0]===id?p[1]:p[0]);
+  let tables=S.tables.filter(t=>t.kind!=="head").map(t=>({t,quiet:tableQuietScore(t),cap:t.seats.length}));
+  const needsQuiet=c=>c.some(g=>/eld|senior|70|80|90/.test(g.age));
+  clusterList.sort((a,b)=>(needsQuiet(b)-needsQuiet(a))||(b.length-a.length));
+  tables.sort((a,b)=>b.quiet-a.quiet);
+  const tableMembers={}; tables.forEach(x=>tableMembers[x.t.id]=[]);
+  let apartViol=0, splitCount=0, rulesApart=apart.length/2;
+  const canSit=(tid,g)=>!tableMembers[tid].some(m=>apartOf(g.id).includes(m.id));
+  const seatsLeft=x=>x.cap-tableMembers[x.t.id].length;
+  for(const cluster of clusterList){
+    const members=[...cluster]; let placed=false;
+    const pref = needsQuiet(cluster) ? tables : [...tables].sort((a,b)=>seatsLeft(b)-seatsLeft(a));
+    for(const x of pref){
+      if(seatsLeft(x)>=members.length && members.every(g=>canSit(x.t.id,g))){
+        members.forEach(g=>tableMembers[x.t.id].push(g)); placed=true; break;
+      }
+    }
+    if(placed) continue;
+    splitCount++;
+    for(const g of members){
+      let done=false;
+      for(const x of [...tables].sort((a,b)=>seatsLeft(b)-seatsLeft(a))){
+        if(seatsLeft(x)>0 && canSit(x.t.id,g)){ tableMembers[x.t.id].push(g); done=true; break; }
+      }
+      if(!done) for(const x of tables){ if(seatsLeft(x)>0){ tableMembers[x.t.id].push(g); apartViol++; done=true; break; } }
+    }
+  }
+  tables.forEach(x=>{ const mem=tableMembers[x.t.id]; x.t.seats=x.t.seats.map((_,i)=>mem[i]?mem[i].id:null); });
+  const unseated=S.guests.length-guestsSeated();
+  let bits=[`<b>${clusterList.length}</b> parties placed`];
+  if(rulesApart) bits.push(`${rulesApart} keep-apart rule${rulesApart>1?"s":""} ${apartViol?`(${apartViol} couldn’t be honoured — add tables)`:"respected"}`);
+  if(loudZones().length) bits.push(`older guests seated away from the ${loudZones()[0].l.toLowerCase()}`);
+  if(splitCount) bits.push(`${splitCount} large part${splitCount>1?"ies":"y"} split across tables`);
+  if(S.tables.some(t=>t.kind==="head")) bits.push(`head table left for the wedding party`);
+  if(unseated>0) bits.push(`<span style="color:var(--danger)">${unseated} guest(s) unseated — need ${Math.ceil(unseated/8)} more table(s)</span>`);
+  return {summary:"✨ "+bits.join(" · ")+`. <details class="mini"><summary>How this was decided</summary>Heuristic: merge explicit groups + “keep&nbsp;with” names into parties, seat each party at one table, never seat “keep&nbsp;apart” names together, prefer quiet tables for older guests, split only parties bigger than a table. The full version also weighs finer judgement — plus-ones, a kids’ table, history between guests.</details>`};
+}
+
+$("#quoteBtn").addEventListener("click",()=>{
+  const guests=Math.max(1,+$("#qGuests").value||0), rm=room();
+  const perHead=92, servicePerHead=14, tax=0.13;
+  const cateringSub=guests*perHead, serviceSub=guests*servicePerHead;
+  const sub=rm.roomFee+cateringSub+serviceSub, hst=Math.round(sub*tax), total=sub+hst, deposit=Math.round(total*0.25);
+  const over=seatsPlaced() && guests>capacity();
+  $("#quoteOut").innerHTML=`
+    <div class="quote-row"><span>${rm.name} — room fee</span><b>${fmt(rm.roomFee)}</b></div>
+    <div class="quote-row"><span>Catering · ${guests} × $${perHead}</span><b>${fmt(cateringSub)}</b></div>
+    <div class="quote-row"><span>Service &amp; linens · ${guests} × $${servicePerHead}</span><b>${fmt(serviceSub)}</b></div>
+    <div class="quote-row"><span>HST 13%</span><b>${fmt(hst)}</b></div>
+    <div class="quote-row total"><span>Estimated total</span><span>${fmt(total)}</span></div>
+    <div class="hint">Indicative deposit to hold the date: <b>${fmt(deposit)}</b></div>
+    <div class="callout"><b>Estimate only</b> — based on ${rm.name}’s published rates. The venue confirms the final quote.</div>
+    ${over?`<div class="callout" style="border-left-color:var(--danger)"><b>Heads up:</b> ${guests} guests is above this room’s ${capacity()} capacity.</div>`:""}
+    <button class="btn primary wide" id="reqQuoteBtn" style="margin-top:10px">Request full quote</button>`;
+  $("#reqQuoteBtn").addEventListener("click",openLeadForm);
+});
+function openLeadForm(){
+  modal("Request your quote",`
+    <p class="hint" style="margin-top:0">Your layout, guest count, date and notes are sent with this — the venue gets the whole plan, not just your details.</p>
+    <label class="fld">Your name</label><input type="text" id="ldName" />
+    <label class="fld">Email</label><input type="email" id="ldEmail" />
+    <label class="fld">Mobile</label><input type="tel" id="ldPhone" />`,
+    [{label:"Cancel",cls:"ghost",act:closeModal},
+     {label:"Send request",cls:"primary",act:()=>{
+        const nm=$("#ldName").value.trim(), em=$("#ldEmail").value.trim();
+        if(!nm||!em) return toast("Name and email please.");
+        const notes=$("#qNotes").value.trim();
+        // SWAP: lead capture -> POST { contact, event, room, guests, date, notes, layout:S.tables } to the booking-system / automation layer
+        S.enquiry={
+          name:nm, email:em, phone:$("#ldPhone").value.trim(),
+          notes, guests:+$("#qGuests").value||0, date:$("#qDate").value||"(no date)",
+          room:room().name, tables:S.tables.length, at:new Date().toLocaleString("en-CA",{dateStyle:"medium",timeStyle:"short"})
+        };
+        render();
+        closeModal();
+        modal("Request received ✓",`
+          <div style="font-size:13px;line-height:1.8">
+            <div>✓ Enquiry + contact recorded (<b>${em}</b>)</div>
+            <div>✓ Layout (${S.tables.length} tables), ${S.enquiry.guests} guests, ${S.enquiry.date} attached</div>
+            <div>✓ ${notes?"Setup notes included":"No setup notes"} · floor-plan PDF generated</div>
+            <div>✓ Tentative hold placed · the venue’s team is notified</div>
+          </div>
+          <div class="note" style="margin-top:12px">Demo — nothing really sent. Open <b>Venue staff view</b> (top right) to see the enquiry land with all of the above. Once set up for a venue, this delivers straight into their booking system, inbox and team chat.</div>`,
+          [{label:"Close",cls:"primary",act:closeModal}]);
+     }}]);
+}
+
+$("#smsBtn").addEventListener("click",()=>{
+  const ev=$("#qName").value.trim()||"the event";
+  const venue=$("#venueTag").textContent.split("·")[0].trim();
+  const date=$("#qDate").value ? new Date($("#qDate").value+"T00:00").toLocaleDateString("en-CA",{month:"long",day:"numeric"}) : "";
+  const msgs=[], TN=tableNumbers();
+  S.tables.forEach((t)=>t.seats.forEach(gid=>{
+    if(!gid) return; const g=guestById(gid);
+    const where = t.kind==="head" ? "the Head Table" : "Table "+TN[t.id];
+    msgs.push({to:g.name, phone:g.phone||"(no number on file)",
+      body:`Hi ${firstName(g.name)} — you’re at ${where} for ${ev} at ${venue}${date?`, ${date}`:""}. See you there! Reply STOP to opt out.`});
+  }));
+  if(!msgs.length) return toast("Seat some guests first.");
+  const noPhone=msgs.filter(m=>/no number/.test(m.phone)).length;
+  modal(`Send seating SMS · ${msgs.length} guests`,`
+    <div class="hint" style="margin-top:0">${noPhone?`<b>${noPhone}</b> guest(s) have no phone number and will be skipped. `:""}Preview:</div>
+    <div style="margin-top:8px">${msgs.slice(0,60).map(m=>`<div class="sms"><div class="to">${m.to} · ${m.phone}</div>${m.body}</div>`).join("")}</div>
+    ${msgs.length>60?`<div class="hint">…and ${msgs.length-60} more</div>`:""}
+    <div class="note">Demo — no texts are actually sent. Going live needs a one-time messaging setup (about 1–2 weeks).</div>`,
+    [{label:"Cancel",cls:"ghost",act:closeModal},
+     {label:`Send ${msgs.length-noPhone} messages`,cls:"primary",act:()=>{
+        // SWAP: SMS send -> provider API (batch), respect opt-outs
+        closeModal(); toast(`Simulated: ${msgs.length-noPhone} seating texts sent ✓`);
+     }}]);
+});
+
+function modal(title,bodyHTML,buttons){
+  $("#modalTitle").textContent=title;
+  $("#modalBody").innerHTML=bodyHTML;
+  $("#modalFoot").innerHTML="";
+  (buttons||[]).forEach(b=>{
+    const el=document.createElement("button");
+    el.className="btn "+(b.cls==="primary"?"primary":b.cls==="ghost"?"ghost":"");
+    el.textContent=b.label; el.addEventListener("click",b.act);
+    $("#modalFoot").appendChild(el);
+  });
+  $("#modalBg").classList.add("on");
+}
+function closeModal(){ $("#modalBg").classList.remove("on"); }
+$("#modalX").addEventListener("click",closeModal);
+$("#modalBg").addEventListener("click",e=>{ if(e.target===$("#modalBg")) closeModal(); });
+
+$("#howBtn").addEventListener("click",()=>{
+  modal("How the planner works",`
+    <h4>Who uses it</h4>
+    <p>It lives on the venue’s own website, embedded the same way Novex adds its other tools. The venue’s <b>customer</b> — the person booking an event — uses it themselves.</p>
+    <h4>Step 1 · Design &amp; estimate <span class="hint">(before booking)</span></h4>
+    <p>Pick a room, drag tables into a layout within the venue’s rules, enter guest count + date, and get an instant <b>estimate</b> calculated from the venue’s own price list. Requesting the full quote sends the whole plan — layout, guest count, date, notes and contact details — to the venue’s booking system.</p>
+    <h4>Step 2 · Seat guests <span class="hint">(after booking)</span></h4>
+    <p>The client uploads a spreadsheet of guest names + phone numbers, then either auto-fills seats, uses <b>Arrange for me</b> (groups together, keep-apart respected, elderly away from the dancefloor), or drags people onto seats by hand. Then one click texts every guest their table number.</p>
+    <h4>Venue staff view</h4>
+    <p>The same plan seen by the venue’s coordinator. They don’t redesign it — they review the customer’s layout and hit <b>Lock layout</b> so it can’t change close to the event.</p>
+    <h4>&lt;/&gt; Embed</h4>
+    <p>Shows the one-line snippet a venue pastes into its website to make the planner appear there. Just signalling that it’s embeddable — it isn’t a separate site.</p>
+    <div class="note">This is a working front-end demo. The booking-system handoff, guest texts and smart seating connect to live services when it’s set up for a venue.</div>`,
+    [{label:"Got it",cls:"primary",act:closeModal}]);
+});
+$("#embedBtn").addEventListener("click",()=>{
+  modal("Embed on your website",`
+    <p class="hint" style="margin-top:0">The venue drops this where the planner should appear (e.g. a “Plan your event” page).</p>
+    <pre style="background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px;overflow:auto">&lt;script src="https://planner.novexgrowth.com/embed.js"
+        data-venue="the-carlyle-estate"&gt;&lt;/script&gt;
+&lt;div id="novex-planner"&gt;&lt;/div&gt;</pre>
+    <div class="note">Same delivery model as your AI Digital Human widget — one snippet, styled per venue.</div>`,
+    [{label:"Close",cls:"primary",act:closeModal}]);
+});
+
+$("#roleSeg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  $$("#roleSeg button").forEach(x=>x.classList.toggle("on",x===b));
+  S.role=b.dataset.role; render();
+});
+$("#stageSeg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  $$("#stageSeg button").forEach(x=>x.classList.toggle("on",x===b));
+  S.stage=b.dataset.stage; render();
+});
+$("#viewSeg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  $$("#viewSeg button").forEach(x=>x.classList.toggle("on",x===b));
+  S.view=b.dataset.view; render();
+});
+$("#lockChk").addEventListener("change",e=>{ S.locked=e.target.checked; render(); toast(S.locked?"Layout locked":"Layout unlocked"); });
+$("#capOverride").addEventListener("input",e=>{ S.capOverride=+e.target.value||null; render(); });
+$("#delTableBtn").addEventListener("click",delSelected);
+$("#clearTablesBtn").addEventListener("click",()=>{ if(!editable())return toast("Layout is locked."); S.tables=[]; S.selTable=null; render(); });
+$$("[data-add]").forEach(b=>b.addEventListener("click",()=>addTable(b.dataset.add)));
+
+function syncHeadUI(){
+  const has=S.tables.some(t=>t.kind==="head");
+  $("#headChk").checked=has;
+  $("#headOpts").style.display=has?"block":"none";
+  if(has) $("#headSeats").value=S.tables.find(t=>t.kind==="head").seats.length;
+}
+$("#headChk").addEventListener("change",e=>{
+  if(!editable()){ e.target.checked=!e.target.checked; return toast("Layout is locked by the venue."); }
+  if(e.target.checked) addHeadTable();
+  else { S.tables=S.tables.filter(t=>t.kind!=="head"); render(); }
+  syncHeadUI();
+});
+$("#headSeats").addEventListener("input",e=>{
+  const n=Math.max(2,Math.min(16,+e.target.value||8));
+  const ht=S.tables.find(t=>t.kind==="head"); if(!ht) return;
+  const old=ht.seats;
+  ht.seats=new Array(n).fill(null).map((_,i)=>old[i]||null);
+  render();
+});
+$("#headRotateBtn").addEventListener("click",()=>{
+  if(!editable()) return toast("Layout is locked by the venue.");
+  const ht=S.tables.find(t=>t.kind==="head"); if(!ht) return toast("Add the head table first.");
+  const seq=["bottom","left","top","right"], prev=ht.orient||"bottom", px=ht.x, py=ht.y;
+  ht.orient=seq[(seq.indexOf(prev)+1)%4];
+  // nudge the rotated table back inside the room (table overlaps are fine — drag to resolve)
+  let nx=ht.x, ny=ht.y;
+  for(let i=0;i<4;i++){
+    const [x0,y0,x1,y1]=tableBounds({...ht,x:nx,y:ny}), [rx,ry,rw,rh]=room().outline;
+    if(x0<rx) nx+=rx-x0; if(x1>rx+rw) nx-=x1-(rx+rw);
+    if(y0<ry) ny+=ry-y0; if(y1>ry+rh) ny-=y1-(ry+rh);
+  }
+  if(fitsRoom(ht,nx,ny)){ ht.x=nx; ht.y=ny; render(); }
+  else { const s=findSpotFor(ht);
+         if(s){ ht.x=s[0]; ht.y=s[1]; render(); }
+         else { ht.orient=prev; ht.x=px; ht.y=py; toast("This room is too tight to turn the head table."); } }
+});
+$("#roomSel").addEventListener("change",e=>{
+  S.room=e.target.value;
+  S.tables=S.tables.filter(t=>validPos(t,t.x,t.y)); S.selTable=null;
+  $("#roomMeta").textContent=`${room().name} · up to ${room().cap} guests · room fee ${fmt(room().roomFee)}`;
+  render(); syncHeadUI();
+});
+
+function syncModes(){
+  const staff=S.role==="staff";
+  $("#staffPanel").hidden=!staff;
+  $("#planPanel").hidden=false;
+  $("#quotePanel").hidden = staff || S.stage!=="plan";
+  $("#seatPanel").hidden = staff || S.stage!=="seat";
+  $("#toStep2Hint").style.display = (!staff && S.stage==="plan") ? "block":"none";
+  $("#lockBanner").classList.toggle("on", S.role==="customer" && S.locked);
+  $("#stageSeg").style.display = staff ? "none":"inline-flex";
+  $("#segHelp").style.display = staff ? "none":"block";
+  $("#segHelp").textContent = "Step 1 = what a prospect uses before booking. Step 2 = what they use afterwards to upload guests and assign seats.";
+  $("#canvasHint").textContent = S.stage==="seat"
+    ? "Tip: drag a guest from one seat to another to move them (drop on a taken seat to swap). Click an empty seat to add someone from the list."
+    : "Tip: drag a table to move it. Add tables from the left.";
+  if(staff){
+    const e=S.enquiry;
+    $("#enquiryBox").innerHTML = e ? `
+      <div class="callout"><b>Enquiry from</b><br>
+        ${e.name} &nbsp;·&nbsp; ${e.email} &nbsp;·&nbsp; ${e.phone||"no phone"}<br>
+        <span class="hint" style="margin-top:2px">${e.room} · ${e.guests} guests · ${e.date} · ${e.tables} tables · received ${e.at}</span>
+        ${e.notes?`<div style="margin-top:8px"><b>Setup notes:</b> ${e.notes}</div>`:`<div class="hint" style="margin-top:4px">No setup notes.</div>`}
+      </div>` : `
+      <div class="note">No enquiry yet. When the customer submits <b>Request full quote</b> in Step 1, their name, email, phone, layout, guest count, date and notes arrive here.</div>`;
+  }
+}
+
+function SAMPLE(){
+  return [
+    {Name:"Eleanor Whit",Phone:"+1 416 555 0111",Group:"Whit Family",Side:"Bride",Age:"elderly",KeepWith:"Harold Whit"},
+    {Name:"Harold Whit",Phone:"+1 416 555 0112",Group:"Whit Family",Side:"Bride",Age:"elderly",KeepWith:"Eleanor Whit"},
+    {Name:"Megan Whit",Phone:"+1 416 555 0113",Group:"Whit Family",Side:"Bride",Age:"adult"},
+    {Name:"Daniel Whit",Phone:"+1 416 555 0114",Group:"Whit Family",Side:"Bride",Age:"adult"},
+    {Name:"Priya Raman",Phone:"+1 647 555 0121",Group:"College Friends",Side:"Bride",Age:"adult",KeepApart:"Tom Beckett"},
+    {Name:"Aisha Khan",Phone:"+1 647 555 0122",Group:"College Friends",Side:"Bride",Age:"adult"},
+    {Name:"Marcus Bell",Phone:"+1 647 555 0123",Group:"College Friends",Side:"Bride",Age:"adult"},
+    {Name:"Sophie Tran",Phone:"+1 647 555 0124",Group:"College Friends",Side:"Bride",Age:"adult"},
+    {Name:"Tom Beckett",Phone:"+1 416 555 0131",Group:"Groom Work",Side:"Groom",Age:"adult",KeepApart:"Priya Raman"},
+    {Name:"Rachel Ng",Phone:"+1 416 555 0132",Group:"Groom Work",Side:"Groom",Age:"adult"},
+    {Name:"David Park",Phone:"+1 416 555 0133",Group:"Groom Work",Side:"Groom",Age:"adult"},
+    {Name:"Olivia Frost",Phone:"+1 416 555 0134",Group:"Groom Work",Side:"Groom",Age:"adult"},
+    {Name:"Ken Frost",Phone:"+1 416 555 0135",Group:"Groom Work",Side:"Groom",Age:"adult"},
+    {Name:"Grace Okafor",Phone:"+1 905 555 0141",Group:"Okafor Family",Side:"Groom",Age:"adult",KeepWith:"Sam Okafor"},
+    {Name:"Sam Okafor",Phone:"+1 905 555 0142",Group:"Okafor Family",Side:"Groom",Age:"adult",KeepWith:"Grace Okafor"},
+    {Name:"Ada Okafor",Phone:"+1 905 555 0143",Group:"Okafor Family",Side:"Groom",Age:"elderly"},
+    {Name:"Chidi Okafor",Phone:"",Group:"Okafor Family",Side:"Groom",Age:"child"},
+    {Name:"Liam Doyle",Phone:"+1 416 555 0151",Group:"Neighbours",Side:"Bride",Age:"adult"},
+    {Name:"Nora Doyle",Phone:"+1 416 555 0152",Group:"Neighbours",Side:"Bride",Age:"adult"},
+    {Name:"Pat Sena",Phone:"+1 416 555 0153",Group:"Neighbours",Side:"Bride",Age:"elderly"},
+    {Name:"Ruth Sena",Phone:"+1 416 555 0154",Group:"Neighbours",Side:"Bride",Age:"elderly"},
+    {Name:"Victor Alvarez",Phone:"+1 647 555 0161",Side:"Groom",Age:"adult"},
+    {Name:"Bianca Alvarez",Phone:"+1 647 555 0162",Side:"Groom",Age:"adult"},
+    {Name:"Henry Cole",Phone:"+1 647 555 0163",Side:"Bride",Age:"adult"},
+    {Name:"Iris Cole",Phone:"+1 647 555 0164",Side:"Bride",Age:"adult"},
+    {Name:"Jack Mensah",Phone:"+1 416 555 0171",Group:"Rugby Club",Side:"Groom",Age:"adult"},
+    {Name:"Leo Mensah",Phone:"+1 416 555 0172",Group:"Rugby Club",Side:"Groom",Age:"adult"},
+    {Name:"Omar Said",Phone:"+1 416 555 0173",Group:"Rugby Club",Side:"Groom",Age:"adult"},
+    {Name:"Ben Carter",Phone:"+1 416 555 0174",Group:"Rugby Club",Side:"Groom",Age:"adult"},
+    {Name:"Zoe Adler",Phone:"+1 905 555 0181",Group:"Adler Family",Side:"Bride",Age:"adult",KeepWith:"Mia Adler"},
+    {Name:"Mia Adler",Phone:"+1 905 555 0182",Group:"Adler Family",Side:"Bride",Age:"child",KeepWith:"Zoe Adler"},
+    {Name:"Paul Adler",Phone:"+1 905 555 0183",Group:"Adler Family",Side:"Bride",Age:"adult"},
+    {Name:"Sara Lund",Phone:"+1 647 555 0191",Side:"Bride",Age:"adult"},
+    {Name:"Nils Lund",Phone:"+1 647 555 0192",Side:"Bride",Age:"adult"},
+    {Name:"Trevor Ash",Phone:"+1 416 555 0201",Group:"Uni Housemates",Side:"Groom",Age:"adult"},
+    {Name:"Gina Ash",Phone:"+1 416 555 0202",Group:"Uni Housemates",Side:"Groom",Age:"adult"},
+    {Name:"Kofi Boateng",Phone:"+1 416 555 0203",Group:"Uni Housemates",Side:"Groom",Age:"adult"},
+    {Name:"Dana Reyes",Phone:"+1 416 555 0204",Group:"Uni Housemates",Side:"Groom",Age:"adult"}
+  ];
+}
+
+function boot(){
+  $("#roomSel").innerHTML=Object.entries(ROOMS).map(([k,v])=>`<option value="${k}">${v.name} — ${v.cap} max</option>`).join("");
+  $("#qDate").value=defaultDate();
+  $("#roomMeta").textContent=`${room().name} · up to ${room().cap} guests · room fee ${fmt(room().roomFee)}`;
+  ["round10","round10","round10","round10","round10","round10","round8","round8","round8","round8"].forEach(k=>addTable(k));
+  render();
+}
+boot();
+})();
+</script>
+</body>
+</html>
