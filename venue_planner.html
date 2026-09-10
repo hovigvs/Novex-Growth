@@ -204,7 +204,6 @@
       <button data-role="customer" class="on">Customer view<span class="sub">the event booker</span></button>
       <button data-role="staff">Venue staff view<span class="sub">the coordinator</span></button>
     </div>
-    <button class="btn sm ghost" id="embedBtn">&lt;/&gt; Embed</button>
   </div>
 
   <div class="explain">
@@ -883,19 +882,8 @@ $("#howBtn").addEventListener("click",()=>{
     <p>The client uploads a spreadsheet of guest names + phone numbers, then either auto-fills seats, uses <b>Arrange for me</b> (groups together, keep-apart respected, elderly away from the dancefloor), or drags people onto seats by hand. Then one click texts every guest their table number.</p>
     <h4>Venue staff view</h4>
     <p>The same plan seen by the venue’s coordinator. They don’t redesign it — they review the customer’s layout and hit <b>Lock layout</b> so it can’t change close to the event.</p>
-    <h4>&lt;/&gt; Embed</h4>
-    <p>Shows the one-line snippet a venue pastes into its website to make the planner appear there. Just signalling that it’s embeddable — it isn’t a separate site.</p>
     <div class="note">This is a working front-end demo. The booking-system handoff, guest texts and smart seating connect to live services when it’s set up for a venue.</div>`,
     [{label:"Got it",cls:"primary",act:closeModal}]);
-});
-$("#embedBtn").addEventListener("click",()=>{
-  modal("Embed on your website",`
-    <p class="hint" style="margin-top:0">The venue drops this where the planner should appear (e.g. a “Plan your event” page).</p>
-    <pre style="background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px;overflow:auto">&lt;script src="https://planner.novexgrowth.com/embed.js"
-        data-venue="the-carlyle-estate"&gt;&lt;/script&gt;
-&lt;div id="novex-planner"&gt;&lt;/div&gt;</pre>
-    <div class="note">Same delivery model as your AI Digital Human widget — one snippet, styled per venue.</div>`,
-    [{label:"Close",cls:"primary",act:closeModal}]);
 });
 
 $("#roleSeg").addEventListener("click",e=>{
