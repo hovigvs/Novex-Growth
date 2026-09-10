@@ -241,6 +241,22 @@ document.addEventListener('DOMContentLoaded', () => {
     addChatBubble('user', text);
     chatHistory.push({ role: 'user', content: text });
     const typing = addTyping();
+
+    // Voice mode: try the streaming endpoint so Nicole can start speaking the
+    // first sentence while the rest is still being generated. Any failure
+    // (unsupported browser, network, empty stream) falls back to buffered.
+    if (voiceModeActive) {
+      try {
+        const spoke = await streamVoiceReply(typing);
+        if (spoke) return;
+      } catch (e) {
+        console.warn('voice stream failed, falling back to buffered:', e);
+      }
+    }
+    await bufferedReply(typing);
+  }
+
+  async function bufferedReply(typing) {
     try {
       const res = await fetch('/.netlify/functions/chat', {
         method: 'POST',
@@ -271,6 +287,80 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Streams the reply from chat-stream, updates the chat bubble as text
+  // arrives, and feeds each completed sentence into the speech queue so audio
+  // starts before generation finishes. Returns true if it handled the reply,
+  // false/throws to signal the caller should fall back to bufferedReply.
+  async function streamVoiceReply(typing) {
+    const res = await fetch('/.netlify/functions/chat-stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatHistory })
+    });
+    if (!res.ok || !res.body || typeof res.body.getReader !== 'function') {
+      throw new Error('stream unavailable (' + res.status + ')');
+    }
+
+    nicoleStopSpeaking(false); // clear any leftover audio, keep "thinking" up
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let full = '';
+    let spokenUpTo = 0;          // chars of the speakable region already queued
+    let bubble = null;
+
+    // Everything before a [[LEAD marker is what the visitor sees / hears.
+    const speakable = s => {
+      const cut = s.indexOf('[[LEAD');
+      return cut >= 0 ? s.slice(0, cut) : s;
+    };
+    const flushSentences = (finalFlush) => {
+      const region = speakable(full);
+      let rest = region.slice(spokenUpTo);
+      const re = /([.!?…]+["'’”)\]]*)(\s+|\n|$)/g;
+      let m, lastEnd = 0;
+      while ((m = re.exec(rest)) !== null) {
+        const end = m.index + m[1].length;
+        const sentence = rest.slice(lastEnd, end).trim();
+        if (sentence.length >= 3) enqueueSpeech(sentence);
+        lastEnd = re.lastIndex;
+      }
+      spokenUpTo += lastEnd;
+      if (finalFlush) {
+        const tail = speakable(full).slice(spokenUpTo).trim();
+        if (tail.length >= 1) { enqueueSpeech(tail); spokenUpTo += tail.length; }
+      }
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      full += decoder.decode(value, { stream: true });
+      const visible = speakable(full).trim();
+      if (visible) {
+        if (!bubble) { typing?.remove(); bubble = addChatBubble('bot', visible); }
+        else { bubble.textContent = visible; if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight; }
+      }
+      flushSentences(false);
+    }
+    flushSentences(true);
+
+    if (!full.trim()) throw new Error('empty stream'); // -> fall back
+
+    let { cleanReply, lead } = extractLeadMarker(full.trim());
+    if (cleanReply.includes('[[LEAD')) cleanReply = cleanReply.split('[[LEAD')[0].trim();
+    if (!bubble) { typing?.remove(); bubble = addChatBubble('bot', cleanReply || '…'); }
+    else if (bubble.textContent !== cleanReply) bubble.textContent = cleanReply;
+    chatHistory.push({ role: 'assistant', content: cleanReply });
+
+    if (lead) {
+      const delivered = await submitNicoleLead(lead);
+      addChatBubble('bot', delivered
+        ? "✅ Got it — I've passed your details to the team, they'll reach out shortly."
+        : "I couldn't get that through just now — please email info@novexgrowth.com directly so it doesn't get missed.");
+    }
+    return true;
+  }
+
   chatSend?.addEventListener('click', sendMessage);
   chatInput?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
@@ -281,6 +371,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const voiceMuteBtn = document.getElementById('voiceMuteBtn');
   let voiceMuted = false, isListening = false, micStream = null, silenceTimer = null;
   let audioUnlockedForIOS = false;
+  // Sequential speech queue. Chunks are fetched in parallel the moment they're
+  // enqueued, but play strictly in order through the one unlocked <audio>
+  // element. The streaming voice path feeds this sentence-by-sentence so Nicole
+  // starts talking before the whole reply is generated; the buffered fallback
+  // feeds the whole reply as one chunk.
+  let speechQueue = [], speechBusy = false;
   // One persistent <audio> element, reused for every reply. iOS Safari's
   // unlock (play something within a real tap) doesn't reliably transfer to a
   // brand-new Audio object created later — it tracks activation per-element
@@ -426,13 +522,15 @@ document.addEventListener('DOMContentLoaded', () => {
   micBtn?.addEventListener('click', () => isListening ? stopListening() : startListening());
 
   function nicoleStopSpeaking(resetStatusText = true) {
+    speechQueue = [];
+    speechBusy = false;
     try { ttsAudioEl.pause(); } catch {}
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (resetStatusText && voiceStatusText && voiceModeActive) voiceStatusText.textContent = 'Tap the mic and start talking';
   }
 
-  function browserSpeak(text) {
-    if (!window.speechSynthesis) return;
+  function browserSpeak(text, onDone) {
+    if (!window.speechSynthesis) { if (onDone) onDone(); return; }
     const utt = new SpeechSynthesisUtterance(text);
     utt.lang = micLangSelect ? micLangSelect.value : 'en-US';
     utt.rate = 0.95;
@@ -447,47 +545,74 @@ document.addEventListener('DOMContentLoaded', () => {
       if (pick) utt.voice = pick;
     }
     utt.onstart = () => { clearNicoleThinking(); if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
-    utt.onend = () => { if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
+    utt.onend = () => { if (voiceStatusText && voiceModeActive) voiceStatusText.textContent = 'Tap the mic and start talking'; if (onDone) onDone(); };
     window.speechSynthesis.speak(utt);
   }
 
-  async function nicoleSpeak(text) {
-    if (voiceMuted || !text) return;
-    // false: this is clearing any leftover audio before a NEW reply starts
-    // preparing, not the visitor stopping her mid-sentence — the "Nicole is
-    // thinking" text set moments ago should stay up until audio is ready.
-    nicoleStopSpeaking(false);
+  // Add a piece of text to the speech queue and kick off its audio fetch.
+  function enqueueSpeech(text) {
+    const t = (text || '').replace(/\s+/g, ' ').trim();
+    if (voiceMuted || !t) return;
+    const item = { text: t, audio: null, ready: false, failed: false };
+    speechQueue.push(item);
+    fetchSpeech(item);
+    pumpSpeech();
+  }
+
+  async function fetchSpeech(item) {
     try {
       const res = await fetch('/.netlify/functions/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text: item.text })
       });
       const contentType = res.headers.get('Content-Type') || '';
       if (contentType.includes('audio')) {
         const blob = await res.blob();
         // iOS Safari's blob-URL audio playback is documented as unreliable —
-        // especially past ~70KB, which a few seconds of speech regularly
-        // exceeds — 'loadeddata'/'error' events silently never fire. A
-        // base64 data URL is the documented reliable alternative there.
-        const dataUrl = await new Promise((resolve, reject) => {
+        // a base64 data URL is the reliable alternative there.
+        item.audio = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result);
           reader.onerror = reject;
           reader.readAsDataURL(blob);
         });
-        ttsAudioEl.src = dataUrl;
-        ttsAudioEl.volume = 1;
-        ttsAudioEl.onplay = () => { clearNicoleThinking(); if (voiceStatusText) voiceStatusText.textContent = 'Nicole is speaking…'; };
-        ttsAudioEl.onended = () => { if (voiceStatusText) voiceStatusText.textContent = 'Tap the mic and start talking'; };
-        ttsAudioEl.onerror = () => browserSpeak(text);
-        ttsAudioEl.play().catch(() => browserSpeak(text));
       } else {
-        browserSpeak(text); // server signaled fallback (no ElevenLabs key configured yet)
+        item.failed = true; // server signalled fallback (no ElevenLabs key)
       }
     } catch {
-      browserSpeak(text);
+      item.failed = true;
     }
+    item.ready = true;
+    pumpSpeech();
+  }
+
+  function pumpSpeech() {
+    if (speechBusy) return;
+    const item = speechQueue[0];
+    if (!item || !item.ready) return;      // wait for the next chunk's audio
+    speechQueue.shift();
+    speechBusy = true;
+    clearNicoleThinking();
+    if (voiceStatusText && voiceModeActive) voiceStatusText.textContent = 'Nicole is speaking…';
+    const done = () => {
+      speechBusy = false;
+      if (!speechQueue.length && voiceStatusText && voiceModeActive) voiceStatusText.textContent = 'Tap the mic and start talking';
+      pumpSpeech();
+    };
+    if (item.failed || !item.audio) { browserSpeak(item.text, done); return; }
+    ttsAudioEl.src = item.audio;
+    ttsAudioEl.volume = 1;
+    ttsAudioEl.onended = done;
+    ttsAudioEl.onerror = () => browserSpeak(item.text, done);
+    ttsAudioEl.play().catch(() => browserSpeak(item.text, done));
+  }
+
+  // Buffered fallback entry point: speak a whole reply as one chunk.
+  function nicoleSpeak(text) {
+    if (voiceMuted || !text) return;
+    nicoleStopSpeaking(false);
+    enqueueSpeech(text);
   }
 
   voiceMuteBtn?.addEventListener('click', () => {
