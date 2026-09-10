@@ -1,11 +1,19 @@
 // Text-to-speech proxy for Nicole's voice mode.
 // Keeps the ElevenLabs key server-side, same pattern as chat.js keeps ANTHROPIC_API_KEY server-side.
 //
-// One voice, every language: eleven_multilingual_v2 keeps a single voice's identity
-// (including gender) consistent across ~29 languages, so Nicole doesn't need — and
+// One voice, every language: a single voice ID keeps Nicole's identity
+// (including gender) consistent across languages, so she doesn't need — and
 // shouldn't use — a different voice ID per language. That was the old catering-demo
 // pattern and it risked mixing male and female voices across languages.
 // Voice: Emma — confirmed female, multilingual, chosen from ElevenLabs' voice library.
+//
+// Model: eleven_turbo_v2_5 — the low-latency multilingual model. The older
+// eleven_multilingual_v2 rendered ~1.5-3s of extra wait per reply; turbo cuts
+// that a lot at negligible quality cost for conversational speech. If quality
+// ever needs a bump, eleven_multilingual_v2 is the trade-back; if speed still
+// isn't enough, eleven_flash_v2_5 is faster still.
+// output_format mp3_44100_64: half the default bitrate — smaller payload to
+// generate, transfer and decode, imperceptible for voice.
 const NICOLE_VOICE_ID = 'BVsq7dMRQW9XpXw9o5Rq';
 
 exports.handler = async (event) => {
@@ -41,7 +49,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${NICOLE_VOICE_ID}`, {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${NICOLE_VOICE_ID}?output_format=mp3_44100_64`, {
       method: 'POST',
       headers: {
         'xi-api-key': apiKey,
@@ -49,7 +57,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         text,
-        model_id: 'eleven_multilingual_v2',
+        model_id: 'eleven_turbo_v2_5',
         voice_settings: {
           stability: /[؀-ۿ]/.test(text) ? 0.6 : 0.5,
           similarity_boost: 0.8,

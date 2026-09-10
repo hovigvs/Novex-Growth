@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (silenceTimer) clearTimeout(silenceTimer);
       if (final) {
-        silenceTimer = setTimeout(() => { resultAlreadyHandled = true; stopListening(); showNicoleThinking(); sendMessage(); }, 1500);
+        silenceTimer = setTimeout(() => { resultAlreadyHandled = true; stopListening(); showNicoleThinking(); sendMessage(); }, 900);
       } else if (interim) {
         silenceTimer = setTimeout(() => {
           if (chatInput?.value.trim()) { resultAlreadyHandled = true; stopListening(); showNicoleThinking(); sendMessage(); }
