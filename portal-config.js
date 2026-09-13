@@ -32,6 +32,14 @@ window.NOVEX_PORTAL_CONFIG = {
    howItWorks: short array of plain-English steps shown in the collapsible
    "How does this work?" panel above the demo — keep each line to one idea. */
 window.NOVEX_MODULE_INFO = {
+  "missed-call": { name: "AI Missed-Call & Lead Recovery", tagline: "You didn't lose that lead. Your phone did.", vertical: "trades", icon:"📲",
+    demo:{ type:"iframe", src:"missed_call_recovery_demo.html" },
+    howItWorks:[
+      "The moment a call is missed, an auto-text goes out within seconds — before the caller can call a competitor.",
+      "The AI asks 2-3 quick questions by text to qualify the lead (scope, timeline, contact info) with zero staff time.",
+      "A full lead summary — service needed, details, typical job value — is built automatically and pushed to the owner.",
+      "A follow-up sequence runs in the background over the following days, and cancels automatically the moment the lead books."
+    ] },
   "front-desk": { name: "AI Front Desk & CRM", tagline: "Every inquiry answered, 24/7", vertical: "both", icon:"☎️",
     demo:{ type:"card", html:'<div class="card"><h2>Talk to Nicole live</h2><p>Call right now and experience the AI receptionist — answers 24/7, multiple languages, never misses a call.</p><a class="phone" href="tel:+14374762332">📞 (437) 476-2332</a></div>' },
     howItWorks:[

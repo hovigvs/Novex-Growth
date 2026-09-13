@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AI Missed-Call &amp; Lead Recovery — Novex Growth</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap"/>
+<style>
+:root{--dark:#1E1E3A;--amber:#5558B8;--gold:#7782D4;--cream:#F0F2FF;--muted:#646BC1;--border:#D4D8F5;--bg:#EEEEFF;--good:#1E8E5A;--warn:#B8790E;--bad:#B8341E;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--dark);}
+.wrap{max-width:1320px;margin:0 auto;padding:28px 24px 60px;}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px;}
+.logo{font-family:'DM Sans';font-weight:700;font-size:22px;}
+.logo span{background:linear-gradient(90deg,#82DFFF,#7782D4,#646BC1);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.headline{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--dark);}
+.subhead{color:var(--muted);font-size:14px;margin-top:4px;}
+.replay-btn{background:var(--dark);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans';}
+.replay-btn:hover{background:var(--amber);}
+
+.verticals{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.vbtn{background:#fff;border:1px solid var(--border);color:var(--dark);font-family:'DM Sans';font-size:13px;font-weight:600;padding:8px 14px;border-radius:20px;cursor:pointer;}
+.vbtn.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+
+.grid{display:grid;grid-template-columns:1fr 1.15fr;gap:22px;align-items:start;}
+@media(max-width:960px){.grid{grid-template-columns:1fr;}}
+
+.panel{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.panel-head .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(30,142,90,.15);}
+.panel-title{font-weight:700;font-size:14px;}
+.panel-sub{font-size:12px;color:var(--muted);margin-left:auto;}
+
+/* Phone/SMS side */
+.chat-body{padding:18px 20px;min-height:520px;max-height:600px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+.miss-card{align-self:center;background:var(--bg);border:1px dashed var(--border);border-radius:10px;padding:10px 16px;font-size:12.5px;color:var(--muted);text-align:center;opacity:0;transform:translateY(6px);animation:rise .35s ease forwards;display:flex;align-items:center;gap:8px;}
+.miss-card .ring{width:8px;height:8px;border-radius:50%;background:var(--bad);animation:ringpulse 1.1s infinite;}
+@keyframes ringpulse{0%,100%{opacity:.3;}50%{opacity:1;}}
+.msg{max-width:82%;padding:11px 14px;border-radius:12px;font-size:14px;line-height:1.45;opacity:0;transform:translateY(6px);animation:rise .35s ease forwards;}
+@keyframes rise{to{opacity:1;transform:translateY(0);}}
+.msg.customer{align-self:flex-end;background:var(--dark);color:#fff;border-bottom-right-radius:3px;}
+.msg.biz{align-self:flex-start;background:var(--bg);color:var(--dark);border-bottom-left-radius:3px;}
+.msg .who{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;opacity:.6;margin-bottom:3px;}
+.typing{align-self:flex-start;background:var(--bg);border-radius:12px;padding:11px 14px;display:none;}
+.typing.show{display:flex;gap:4px;}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;}
+.typing i:nth-child(2){animation-delay:.2s;}.typing i:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
+.chat-input{border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:8px;}
+.chat-input input{flex:1;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Sans';font-size:13px;}
+.chat-input button{background:var(--amber);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;}
+
+/* Lead record side */
+.lead-body{padding:22px;min-height:520px;}
+.lead-empty{color:var(--muted);font-size:13px;text-align:center;padding:80px 20px;}
+.lead-doc{opacity:0;}
+.lead-doc.show{opacity:1;}
+.lead-brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--dark);padding-bottom:14px;margin-bottom:16px;}
+.lead-brand h1{font-family:'Playfair Display',serif;font-size:20px;}
+.lead-brand .meta{text-align:right;font-size:11px;color:var(--muted);line-height:1.6;}
+.lead-status{display:inline-block;background:#E6F4EC;color:var(--good);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:14px;}
+.sec{margin-bottom:18px;opacity:0;transform:translateY(6px);transition:all .4s ease;}
+.sec.in{opacity:1;transform:translateY(0);}
+.sec-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;}
+.detail-grid div b{display:block;font-size:11px;color:var(--muted);font-weight:600;}
+.value-box{background:var(--bg);border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.6;}
+.value-box b{color:var(--dark);}
+.value-note{font-size:10.5px;color:var(--muted);margin-top:4px;display:block;}
+.timeline{display:flex;flex-direction:column;gap:8px;}
+.tstep{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:9px 12px;font-size:12.5px;opacity:0;transform:translateY(6px);transition:all .35s ease;}
+.tstep.in{opacity:1;transform:translateY(0);}
+.tstep .ticon{font-size:15px;flex-shrink:0;}
+.tstep .ttext{flex:1;}
+.tstep .ttext b{display:block;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.tstep.done{background:#E6F4EC;}
+.followup-list{font-size:13px;line-height:1.9;}
+.followup-list .fitem{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);}
+.followup-list .fitem:last-child{border-bottom:none;}
+.followup-list .flabel{color:var(--muted);font-size:11px;}
+.actions{display:flex;gap:10px;margin-top:20px;}
+.actions button{flex:1;padding:11px;border-radius:8px;font-size:13px;font-weight:600;font-family:'DM Sans';cursor:pointer;border:none;}
+.actions .primary{background:var(--dark);color:#fff;}
+.actions .primary:disabled{opacity:.5;cursor:default;}
+.actions .ghost{background:#fff;border:1px solid var(--border);color:var(--dark);}
+.timer{position:absolute;top:16px;right:20px;font-size:11px;color:var(--muted);}
+
+.footer-note{margin-top:26px;text-align:center;color:var(--muted);font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="logo"><span>novexgrowth</span></div>
+      <div class="headline">You didn't lose that lead. Your phone did.</div>
+      <div class="subhead">Every missed call gets an instant text back, a few qualifying questions, and a follow-up sequence — automatically, with zero staff time.</div>
+    </div>
+    <button class="replay-btn" onclick="restart()">▶ Replay demo</button>
+  </div>
+
+  <div class="verticals" id="verticalBtns"></div>
+
+  <div class="grid">
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="dot"></div>
+        <div class="panel-title">Owner's Business Line — Live</div>
+        <div class="panel-sub">SMS thread</div>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <div class="typing" id="typingIndicator"><i></i><i></i><i></i></div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="tryInput" placeholder="Try your own: e.g. 'need a quote for a fence, about 80ft'"/>
+        <button onclick="tryCustom()">Send</button>
+      </div>
+    </div>
+
+    <div class="panel" style="position:relative;">
+      <div class="panel-head">
+        <div class="dot" style="background:var(--gold);box-shadow:0 0 0 4px rgba(119,130,212,.15);"></div>
+        <div class="panel-title">Lead Record — Auto-Captured</div>
+        <div class="panel-sub" id="genTimer"></div>
+      </div>
+      <div class="lead-body">
+        <div class="lead-empty" id="leadEmpty">Waiting for the call to come in…<br>the lead record builds itself the moment the conversation starts.</div>
+        <div class="lead-doc" id="leadDoc">
+          <div class="lead-status" id="leadStatus">● New lead — auto-captured</div>
+          <div class="lead-brand">
+            <div>
+              <h1 id="bizName">ABC Company</h1>
+              <div style="font-size:11px;color:var(--muted);" id="bizType">Missed-Call Recovery</div>
+            </div>
+            <div class="meta">
+              Lead #<span id="leadNum">—</span><br>
+              Captured <span id="leadDate">—</span><br>
+              Source: Missed Call
+            </div>
+          </div>
+
+          <div class="sec" id="secLead">
+            <div class="sec-title">What They Need</div>
+            <div class="detail-grid">
+              <div><b>Service</b><span id="leadService">—</span></div>
+              <div><b>Details</b><span id="leadDetails">—</span></div>
+              <div><b>Timeline</b><span id="leadTimeline">—</span></div>
+              <div><b>Best contact</b><span id="leadContact">—</span></div>
+            </div>
+          </div>
+
+          <div class="sec" id="secValue">
+            <div class="sec-title">Typical Job Value</div>
+            <div class="value-box"><b id="valueRange">—</b><span class="value-note">General range for this type of job — not a claim about this specific lead. Helps the owner triage what to call back first.</span></div>
+          </div>
+
+          <div class="sec" id="secTimeline">
+            <div class="sec-title">What Just Happened, Automatically</div>
+            <div class="timeline" id="timelineList"></div>
+          </div>
+
+          <div class="sec" id="secFollowup">
+            <div class="sec-title">Follow-Up Sequence (auto-cancels if they book)</div>
+            <div class="followup-list" id="followupList"></div>
+          </div>
+
+          <div class="actions">
+            <button class="ghost">Edit</button>
+            <button class="primary" id="notifyBtn" onclick="runNotify()">Notify Owner Now</button>
+          </div>
+
+          <div class="timeline" id="notifyFlow" style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">This is a working concept demo — in production, this runs on the business's own phone number: a missed-call webhook fires the auto-text within seconds, the AI conversation qualifies the lead, and the owner gets notified instantly while a follow-up sequence runs in the background. "Try your own" runs a lightweight simulation of that flow, not a live phone system yet. Job-value ranges shown are general benchmarks for the selected trade, not a claim about any real business.</div>
+</div>
+
+<script>
+const VERTICALS = {
+  reno: {
+    label: 'Renovation Contractor',
+    bizName: 'ABC Renovations',
+    bizType: 'Kitchen & Basement Renovation',
+    script: [
+      {who:'customer', text:"Hey, I called about a kitchen reno quote — went to voicemail I think?"},
+      {who:'biz', text:"Sorry we missed your call! This is ABC Renovations — happy to help. What's the scope, roughly — full kitchen, or partial?"},
+      {who:'customer', text:"Full kitchen. Cabinets, counters, floor. About 180 sq ft."},
+      {who:'biz', text:"Got it. Any rough timeline in mind, and is this your primary residence?"},
+      {who:'customer', text:"Yeah primary residence. Hoping to start within 2 months."}
+    ],
+    leadService: 'Full kitchen renovation',
+    leadDetails: '~180 sq ft — cabinets, counters, flooring',
+    leadTimeline: 'Wants to start within 2 months',
+    leadContact: 'This number, texted back',
+    valueRange: '$18,000 – $40,000 typical range for a full kitchen reno',
+    followups: ['Day 2 — "Any questions on scope before we quote?"', 'Day 5 — "Still want to move forward on the kitchen?"', 'Day 14 — "Reno slots are booking up — want to lock a date?"']
+  },
+  clean: {
+    label: 'Commercial Cleaning',
+    bizName: 'ABC Commercial Cleaning',
+    bizType: 'Office & Facility Cleaning',
+    script: [
+      {who:'customer', text:"Hi, sorry — I called about a cleaning quote for our office, missed you I guess"},
+      {who:'biz', text:"No problem, this is ABC Commercial Cleaning. How big is the space, and what type of facility?"},
+      {who:'customer', text:"About 6,000 sq ft, it's an open-plan office. Two floors."},
+      {who:'biz', text:"Perfect. How often were you thinking — nightly, a few times a week?"},
+      {who:'customer', text:"3x per week ideally, evenings after 6pm."}
+    ],
+    leadService: 'Recurring office cleaning',
+    leadDetails: '~6,000 sq ft, 2 floors, open-plan',
+    leadTimeline: '3x/week, evenings after 6pm',
+    leadContact: 'This number, texted back',
+    valueRange: '$900 – $2,400/month typical recurring contract',
+    followups: ['Day 2 — "Want us to schedule a site walkthrough?"', 'Day 5 — "Following up on the office cleaning quote"', 'Day 10 — "Still interested? Happy to adjust the plan"']
+  },
+  land: {
+    label: 'Landscaping / Hardscape',
+    bizName: 'ABC Landscaping',
+    bizType: 'Interlock & Outdoor Living',
+    script: [
+      {who:'customer', text:"Hi, I called about interlock for our backyard, must've missed you"},
+      {who:'biz', text:"Hey, this is ABC Landscaping — sorry we missed you! What's the project — patio, walkway, retaining wall?"},
+      {who:'customer', text:"A backyard patio, roughly 500 sq ft, maybe a small retaining wall too."},
+      {who:'biz', text:"Nice project. Rough timeline — this season, or planning ahead for next spring?"},
+      {who:'customer', text:"This season if possible, we want it done before summer."}
+    ],
+    leadService: 'Backyard patio + retaining wall',
+    leadDetails: '~500 sq ft interlock patio',
+    leadTimeline: 'Wants completion before summer',
+    leadContact: 'This number, texted back',
+    valueRange: '$12,000 – $28,000 typical range for this scope',
+    followups: ['Day 2 — "Want to book a site visit this week?"', 'Day 5 — "Still thinking about the patio project?"', 'Day 14 — "Spring/summer slots are filling — want to lock one in?"']
+  },
+  detail: {
+    label: 'Auto Detailing / PPF',
+    bizName: 'ABC Auto Detailing',
+    bizType: 'Ceramic Coating & PPF',
+    script: [
+      {who:'customer', text:"Hey, called about ceramic coating pricing for my car, sorry if I missed you"},
+      {who:'biz', text:"This is ABC Auto Detailing — no worries! What's the vehicle, and are you thinking ceramic coating, PPF, or both?"},
+      {who:'customer', text:"2023 BMW X5. Just ceramic coating for now."},
+      {who:'biz', text:"Great choice. When were you hoping to bring it in?"},
+      {who:'customer', text:"Sometime in the next couple weeks, whenever you have an opening."}
+    ],
+    leadService: 'Ceramic coating',
+    leadDetails: '2023 BMW X5',
+    leadTimeline: 'Flexible — next 2 weeks',
+    leadContact: 'This number, texted back',
+    valueRange: '$600 – $1,800 typical range depending on package',
+    followups: ['Day 2 — "Want to grab a spot this week?"', 'Day 5 — "A few openings left this month"', 'Day 10 — "Still want that ceramic coating booked?"']
+  }
+};
+
+let currentKey = 'reno';
+const chatBody = document.getElementById('chatBody');
+const typingEl = document.getElementById('typingIndicator');
+let startTime;
+
+function buildVerticalButtons(){
+  const wrap = document.getElementById('verticalBtns');
+  wrap.innerHTML = '';
+  Object.keys(VERTICALS).forEach(key => {
+    const b = document.createElement('button');
+    b.className = 'vbtn' + (key === currentKey ? ' active' : '');
+    b.textContent = VERTICALS[key].label;
+    b.onclick = () => { currentKey = key; buildVerticalButtons(); restart(); };
+    wrap.appendChild(b);
+  });
+}
+
+function addMsg(who, text){
+  const div = document.createElement('div');
+  div.className = 'msg ' + who;
+  div.innerHTML = '<span class="who">'+(who==='customer'?'Caller':'Auto-Text · AI')+'</span>'+text;
+  chatBody.insertBefore(div, typingEl);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function addMissCard(){
+  const div = document.createElement('div');
+  div.className = 'miss-card';
+  div.innerHTML = '<span class="ring"></span> Missed call — auto-text sent in <b>&nbsp;' + missTextDelaySec() + 's</b>';
+  chatBody.insertBefore(div, typingEl);
+}
+
+function missTextDelaySec(){
+  return ((Date.now() - startTime) / 1000).toFixed(0) > 0 ? '~7' : '~7';
+}
+
+function showTyping(on){
+  typingEl.classList.toggle('show', on);
+  if(on){ chatBody.scrollTop = chatBody.scrollHeight; }
+}
+
+function fadeIn(id, delay){
+  setTimeout(()=>{ document.getElementById(id).classList.add('in'); }, delay);
+}
+
+function runScript(idx){
+  const v = VERTICALS[currentKey];
+  if(idx === 0){
+    addMissCard();
+  }
+  if(idx >= v.script.length){
+    setTimeout(()=>buildLead(v), 500);
+    return;
+  }
+  const step = v.script[idx];
+  showTyping(true);
+  setTimeout(()=>{
+    showTyping(false);
+    addMsg(step.who, step.text);
+    setTimeout(()=> runScript(idx+1), step.who==='customer' ? 500 : 900);
+  }, step.who==='biz' ? 900 : 500);
+}
+
+/* ---------- Lightweight free-text simulation for "Try your own" ---------- */
+
+function tryCustom(){
+  const val = document.getElementById('tryInput').value.trim();
+  if(!val) return;
+  addMsg('customer', val);
+  document.getElementById('tryInput').value='';
+  showTyping(true);
+
+  setTimeout(()=>{
+    showTyping(false);
+    const v = VERTICALS[currentKey];
+    const reply = "Got it — thanks for the details. I've noted that down, and someone from " + v.bizName + " will follow up shortly. Building your lead record now…";
+    addMsg('biz', reply);
+
+    const custom = Object.assign({}, v, {
+      leadService: v.leadService,
+      leadDetails: val.length > 60 ? val.slice(0,57) + '…' : val,
+      leadTimeline: 'From free-text — needs confirming',
+      leadContact: 'This number, texted back'
+    });
+    startTime = Date.now();
+    setTimeout(()=> buildLead(custom), 700);
+  }, 900);
+}
+
+/* ---------- Lead record builder ---------- */
+
+function resetLeadDoc(){
+  document.getElementById('timelineList').innerHTML = '';
+  document.getElementById('followupList').innerHTML = '';
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('in'));
+  document.getElementById('notifyFlow').innerHTML = '';
+  notifyPlayed = false;
+  const btn = document.getElementById('notifyBtn');
+  btn.disabled = false;
+  btn.textContent = 'Notify Owner Now';
+}
+
+function buildLead(v){
+  resetLeadDoc();
+
+  document.getElementById('leadEmpty').style.display = 'none';
+  document.getElementById('leadDoc').classList.add('show');
+  document.getElementById('bizName').textContent = v.bizName;
+  document.getElementById('bizType').textContent = v.bizType;
+  document.getElementById('leadNum').textContent = 'LEAD-' + Math.floor(1000 + Math.random() * 8999);
+  document.getElementById('leadDate').textContent = new Date().toLocaleDateString('en-CA', {year:'numeric', month:'short', day:'numeric'});
+
+  fadeIn('secLead', 200);
+  setTimeout(() => {
+    document.getElementById('leadService').textContent = v.leadService;
+    document.getElementById('leadDetails').textContent = v.leadDetails;
+    document.getElementById('leadTimeline').textContent = v.leadTimeline;
+    document.getElementById('leadContact').textContent = v.leadContact;
+  }, 400);
+
+  fadeIn('secValue', 1000);
+  setTimeout(() => {
+    document.getElementById('valueRange').textContent = v.valueRange;
+  }, 1200);
+
+  fadeIn('secTimeline', 1700);
+  const elapsed = (() => ((Date.now() - startTime) / 1000).toFixed(0))();
+  const timelineSteps = [
+    ['📵', 'Call missed', 'Detected instantly via phone webhook', false],
+    ['💬', 'Auto-text sent', 'Sent within ~7 seconds — before they can call a competitor', true],
+    ['🗣️', 'Lead qualified', 'AI asked 2–3 questions, no staff time used', true],
+    ['🔔', 'Owner notified', 'Full lead summary pushed to the owner\'s phone', true]
+  ];
+  setTimeout(() => {
+    const list = document.getElementById('timelineList');
+    timelineSteps.forEach((s, i) => {
+      setTimeout(() => {
+        const div = document.createElement('div');
+        div.className = 'tstep' + (s[3] ? ' done' : '');
+        div.innerHTML = `<span class="ticon">${s[0]}</span><span class="ttext"><b>${s[1]}</b>${s[2]}</span>`;
+        list.appendChild(div);
+        requestAnimationFrame(() => div.classList.add('in'));
+      }, i * 260);
+    });
+  }, 1900);
+
+  fadeIn('secFollowup', 3100);
+  setTimeout(() => {
+    const list = document.getElementById('followupList');
+    v.followups.forEach((f, i) => {
+      const parts = f.split(' — ');
+      setTimeout(() => {
+        const div = document.createElement('div');
+        div.className = 'fitem';
+        div.style.opacity = 0; div.style.transition = 'opacity .3s';
+        div.innerHTML = `<span class="flabel">${parts[0]}</span><span>${parts[1]}</span>`;
+        list.appendChild(div);
+        requestAnimationFrame(() => div.style.opacity = 1);
+      }, i * 200);
+    });
+  }, 3300);
+
+  setTimeout(() => {
+    document.getElementById('leadStatus').textContent = '✓ Ready — owner can call back anytime';
+    document.getElementById('genTimer').textContent = 'Captured in ' + elapsed + 's — zero manual entry';
+  }, 4100);
+}
+
+let notifyPlayed = false;
+function addNotifyStep(icon, label, text, delay, done){
+  setTimeout(()=>{
+    const flow = document.getElementById('notifyFlow');
+    const div = document.createElement('div');
+    div.className = 'tstep' + (done ? ' done' : '');
+    div.innerHTML = `<span class="ticon">${icon}</span><span class="ttext"><b>${label}</b>${text}</span>`;
+    flow.appendChild(div);
+    requestAnimationFrame(()=> div.classList.add('in'));
+  }, delay);
+}
+
+function runNotify(){
+  if(notifyPlayed) return;
+  notifyPlayed = true;
+  const btn = document.getElementById('notifyBtn');
+  btn.disabled = true;
+  btn.textContent = 'Notifying…';
+
+  addNotifyStep('📲', 'Step 1 — Instant push', 'Lead summary texted + emailed to the owner', 200, true);
+  addNotifyStep('📅', 'Step 2 — Auto-scheduled', 'Follow-up sequence loaded — cancels automatically if the lead books', 1400, true);
+  addNotifyStep('✅', 'Step 3 — No manual entry', 'Lead saved — nothing was typed by hand', 2600, true);
+
+  setTimeout(()=>{ btn.textContent = '✓ Owner Notified'; }, 2800);
+}
+
+function restart(){
+  chatBody.innerHTML=''; chatBody.appendChild(typingEl);
+  document.getElementById('leadDoc').classList.remove('show');
+  document.getElementById('leadEmpty').style.display='block';
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('in'));
+  document.getElementById('timelineList').innerHTML='';
+  document.getElementById('followupList').innerHTML='';
+  document.getElementById('genTimer').textContent='';
+  document.getElementById('notifyFlow').innerHTML='';
+  const btn = document.getElementById('notifyBtn');
+  btn.disabled = false;
+  btn.textContent = 'Notify Owner Now';
+  notifyPlayed = false;
+  startTime = Date.now();
+  setTimeout(()=>runScript(0), 600);
+}
+
+document.getElementById('tryInput').addEventListener('keydown', e=>{ if(e.key==='Enter' || e.keyCode===13){ e.preventDefault(); tryCustom(); } });
+
+buildVerticalButtons();
+startTime = Date.now();
+setTimeout(()=>runScript(0), 700);
+</script>
+</body>
+</html>
