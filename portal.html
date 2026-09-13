@@ -63,6 +63,15 @@
   .upsell-bar{background:#FFF3D6; color:#8A6100; font-size:12.5px; font-weight:600; padding:9px 26px; display:flex; align-items:center; gap:10px; flex:none}
   .upsell-bar a{color:#8A6100; font-weight:800; text-decoration:underline}
 
+  .explainer{border-bottom:1px solid var(--line); background:var(--surface-2); flex:none}
+  .explainer-toggle{width:100%; display:flex; align-items:center; gap:8px; padding:10px 26px; background:none; border:none; cursor:pointer; font:inherit; font-size:12.5px; font-weight:700; color:var(--accent-ink); text-align:left}
+  .explainer-toggle .chev{transition:transform .15s; font-size:10px}
+  .explainer-toggle.open .chev{transform:rotate(90deg)}
+  .explainer-body{max-height:0; overflow:hidden; transition:max-height .2s ease}
+  .explainer-body.open{max-height:260px; overflow-y:auto}
+  .explainer-body ol{margin:0; padding:2px 26px 16px 46px; font-size:13px; color:var(--text2); line-height:1.7}
+  .explainer-body li{margin-bottom:4px}
+
   .pane{flex:1; min-height:0; position:relative}
   .pane iframe{width:100%; height:100%; border:none; display:block}
   .pane-inner{height:100%; overflow:auto}
@@ -112,6 +121,10 @@
 
   <div class="content">
     <div class="topbar" id="topbar"></div>
+    <div class="explainer" id="explainer" hidden>
+      <button class="explainer-toggle" id="explainerToggle"><span class="chev">▶</span> How does this work?</button>
+      <div class="explainer-body" id="explainerBody"></div>
+    </div>
     <div class="upsell-bar" id="upsellBar" hidden></div>
     <div class="pane" id="pane"></div>
   </div>
@@ -132,8 +145,16 @@
   var loadingScreen = document.getElementById("loadingScreen");
   var navlist = document.getElementById("navlist");
   var topbar = document.getElementById("topbar");
+  var explainer = document.getElementById("explainer");
+  var explainerToggle = document.getElementById("explainerToggle");
+  var explainerBody = document.getElementById("explainerBody");
   var upsellBar = document.getElementById("upsellBar");
   var pane = document.getElementById("pane");
+
+  explainerToggle.addEventListener("click", function(){
+    explainerToggle.classList.toggle("open");
+    explainerBody.classList.toggle("open");
+  });
 
   document.getElementById("logoutBtn").addEventListener("click", async function(){
     if (isDemoMode) { window.location.href = "https://www.novexgrowth.com"; return; }
@@ -174,6 +195,7 @@
   function renderDashboard(){
     topbar.innerHTML = '<h2 style="font-size:16px">Dashboard</h2>';
     upsellBar.hidden = true;
+    explainer.hidden = true;
 
     var ids = Object.keys(MODULE_INFO).filter(function(id){
       var v = MODULE_INFO[id].vertical;
@@ -219,6 +241,15 @@
     topbar.innerHTML = '<div><h2>' + info.icon + ' ' + info.name + '</h2><div class="tagline">' + info.tagline + '</div></div>' +
       '<span class="status ' + statusCls + '">' + statusLbl + '</span><div class="spacer"></div>' +
       (info.demo.type === "iframe" ? '<a class="newtab" href="' + info.demo.src + '" target="_blank" rel="noopener">Open in new tab ↗</a>' : '');
+
+    if (info.howItWorks && info.howItWorks.length) {
+      explainer.hidden = false;
+      explainerToggle.classList.remove("open");
+      explainerBody.classList.remove("open");
+      explainerBody.innerHTML = '<ol>' + info.howItWorks.map(function(step){ return '<li>' + step + '</li>'; }).join("") + '</ol>';
+    } else {
+      explainer.hidden = true;
+    }
 
     if (!owned) {
       upsellBar.hidden = false;
