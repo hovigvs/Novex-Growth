@@ -7,13 +7,14 @@
 // pattern and it risked mixing male and female voices across languages.
 // Voice: Emma — confirmed female, multilingual, chosen from ElevenLabs' voice library.
 //
-// Model: eleven_turbo_v2_5 — the low-latency multilingual model. The older
-// eleven_multilingual_v2 rendered ~1.5-3s of extra wait per reply; turbo cuts
-// that a lot at negligible quality cost for conversational speech. If quality
-// ever needs a bump, eleven_multilingual_v2 is the trade-back; if speed still
-// isn't enough, eleven_flash_v2_5 is faster still.
-// output_format mp3_44100_64: half the default bitrate — smaller payload to
-// generate, transfer and decode, imperceptible for voice.
+// Model: eleven_multilingual_v2 — chosen for voice naturalness over latency.
+// eleven_turbo_v2_5 was tried for a while (cuts ~1.5-3s per reply) but reads
+// noticeably more robotic; traded back to multilingual_v2 since a natural-
+// sounding voice matters more here than shaving those seconds. If speed
+// becomes the priority again, turbo is the trade-back; eleven_flash_v2_5 is
+// faster still but sacrifices even more naturalness.
+// output_format: left at ElevenLabs' default bitrate (full quality) rather
+// than the reduced mp3_44100_64 — same reasoning, naturalness over payload size.
 const NICOLE_VOICE_ID = 'BVsq7dMRQW9XpXw9o5Rq';
 
 exports.handler = async (event) => {
@@ -49,7 +50,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${NICOLE_VOICE_ID}?output_format=mp3_44100_64`, {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${NICOLE_VOICE_ID}`, {
       method: 'POST',
       headers: {
         'xi-api-key': apiKey,
@@ -57,7 +58,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         text,
-        model_id: 'eleven_turbo_v2_5',
+        model_id: 'eleven_multilingual_v2',
         voice_settings: {
           stability: /[؀-ۿ]/.test(text) ? 0.6 : 0.5,
           similarity_boost: 0.8,
