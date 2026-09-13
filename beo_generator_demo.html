@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AI BEO Generator — Novex Growth</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap"/>
+<style>
+:root{--dark:#1E1E3A;--amber:#5558B8;--gold:#7782D4;--cream:#F0F2FF;--muted:#646BC1;--border:#D4D8F5;--bg:#EEEEFF;--good:#1E8E5A;--warn:#B8790E;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--dark);}
+.wrap{max-width:1320px;margin:0 auto;padding:28px 24px 60px;}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+.logo{font-family:'DM Sans';font-weight:700;font-size:22px;}
+.logo span{background:linear-gradient(90deg,#82DFFF,#7782D4,#646BC1);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.headline{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--dark);}
+.subhead{color:var(--muted);font-size:14px;margin-top:4px;}
+.replay-btn{background:var(--dark);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans';}
+.replay-btn:hover{background:var(--amber);}
+.grid{display:grid;grid-template-columns:1fr 1.15fr;gap:22px;align-items:start;}
+@media(max-width:960px){.grid{grid-template-columns:1fr;}}
+
+.panel{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.panel-head .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(30,142,90,.15);}
+.panel-title{font-weight:700;font-size:14px;}
+.panel-sub{font-size:12px;color:var(--muted);margin-left:auto;}
+
+/* Chat side */
+.chat-body{padding:18px 20px;min-height:520px;max-height:600px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+.msg{max-width:82%;padding:11px 14px;border-radius:12px;font-size:14px;line-height:1.45;opacity:0;transform:translateY(6px);animation:rise .35s ease forwards;}
+@keyframes rise{to{opacity:1;transform:translateY(0);}}
+.msg.customer{align-self:flex-end;background:var(--dark);color:#fff;border-bottom-right-radius:3px;}
+.msg.nicole{align-self:flex-start;background:var(--bg);color:var(--dark);border-bottom-left-radius:3px;}
+.msg .who{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;opacity:.6;margin-bottom:3px;}
+.typing{align-self:flex-start;background:var(--bg);border-radius:12px;padding:11px 14px;display:none;}
+.typing.show{display:flex;gap:4px;}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;}
+.typing i:nth-child(2){animation-delay:.2s;}.typing i:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
+.chat-input{border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:8px;}
+.chat-input input{flex:1;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Sans';font-size:13px;}
+.chat-input button{background:var(--amber);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;}
+
+/* BEO side */
+.beo-body{padding:22px;min-height:520px;}
+.beo-empty{color:var(--muted);font-size:13px;text-align:center;padding:80px 20px;}
+.beo-doc{opacity:0;}
+.beo-doc.show{opacity:1;}
+.beo-brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--dark);padding-bottom:14px;margin-bottom:16px;}
+.beo-brand h1{font-family:'Playfair Display',serif;font-size:20px;}
+.beo-brand .meta{text-align:right;font-size:11px;color:var(--muted);line-height:1.6;}
+.beo-status{display:inline-block;background:#E6F4EC;color:var(--good);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:14px;}
+.sec{margin-bottom:18px;opacity:0;transform:translateY(6px);transition:all .4s ease;}
+.sec.in{opacity:1;transform:translateY(0);}
+.sec-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;}
+.detail-grid div b{display:block;font-size:11px;color:var(--muted);font-weight:600;}
+.est{color:var(--warn);font-weight:600;font-size:10.5px;}
+table.menu{width:100%;border-collapse:collapse;font-size:13px;}
+table.menu th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);padding:6px 4px;}
+table.menu td{padding:8px 4px;border-bottom:1px solid var(--border);vertical-align:top;}
+.flag{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-right:4px;margin-top:3px;}
+.flag.gf{background:#FDF0E0;color:var(--warn);}
+.flag.v{background:#E6F4EC;color:var(--good);}
+.flag.nf{background:#FCE7E7;color:#B8341E;}
+.totals{margin-top:10px;font-size:13px;}
+.totals .row{display:flex;justify-content:space-between;padding:4px 0;}
+.totals .row.total{font-weight:700;font-size:15px;border-top:1px solid var(--dark);margin-top:6px;padding-top:8px;}
+.logi{font-size:13px;line-height:1.7;background:var(--bg);border-radius:8px;padding:12px 14px;}
+.actions{display:flex;gap:10px;margin-top:20px;}
+.actions button{flex:1;padding:11px;border-radius:8px;font-size:13px;font-weight:600;font-family:'DM Sans';cursor:pointer;border:none;}
+.actions .primary{background:var(--dark);color:#fff;}
+.actions .primary:disabled{opacity:.5;cursor:default;}
+.actions .ghost{background:#fff;border:1px solid var(--border);color:var(--dark);}
+.approval-flow{margin-top:16px;display:flex;flex-direction:column;gap:8px;}
+.astep{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:9px 12px;font-size:12.5px;opacity:0;transform:translateY(6px);transition:all .35s ease;}
+.astep.in{opacity:1;transform:translateY(0);}
+.astep .aicon{font-size:15px;flex-shrink:0;}
+.astep .atext{flex:1;}
+.astep .atext b{display:block;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.astep.done{background:#E6F4EC;}
+.timer{position:absolute;top:16px;right:20px;font-size:11px;color:var(--muted);}
+
+.footer-note{margin-top:26px;text-align:center;color:var(--muted);font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="logo"><span>novexgrowth</span></div>
+      <div class="headline">From inquiry to ready-to-send BEO — automatically</div>
+      <div class="subhead">No one manually builds this quote by hand. The AI captures the details and drafts the full Banquet Event Order while the conversation happens.</div>
+    </div>
+    <button class="replay-btn" onclick="restart()">▶ Replay demo</button>
+  </div>
+
+  <div class="grid">
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="dot"></div>
+        <div class="panel-title">Customer Inquiry — Live</div>
+        <div class="panel-sub" id="channelLabel">via Voice call</div>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <div class="typing" id="typingIndicator"><i></i><i></i><i></i></div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="tryInput" placeholder="Try your own: '60 people, Nov 14, need halal + 2 vegan, $30pp'"/>
+        <button onclick="tryCustom()">Send</button>
+      </div>
+    </div>
+
+    <div class="panel" style="position:relative;">
+      <div class="panel-head">
+        <div class="dot" style="background:var(--gold);box-shadow:0 0 0 4px rgba(119,130,212,.15);"></div>
+        <div class="panel-title">Generated Banquet Event Order</div>
+        <div class="panel-sub" id="genTimer"></div>
+      </div>
+      <div class="beo-body">
+        <div class="beo-empty" id="beoEmpty">Waiting for inquiry details…<br>the BEO will build itself section by section as information comes in.</div>
+        <div class="beo-doc" id="beoDoc">
+          <div class="beo-status" id="beoStatus">● Draft — auto-generated</div>
+          <div class="beo-brand">
+            <div>
+              <h1>ABC Company — Catering</h1>
+              <div style="font-size:11px;color:var(--muted);">Banquet Event Order</div>
+            </div>
+            <div class="meta">
+              BEO #<span id="beoNum">—</span><br>
+              Generated <span id="beoDate">—</span><br>
+              Status: Pending Review
+            </div>
+          </div>
+
+          <div class="sec" id="secEvent">
+            <div class="sec-title">Event Details</div>
+            <div class="detail-grid">
+              <div><b>Event Type</b><span id="evType">—</span></div>
+              <div><b>Guest Count</b><span id="evCount">—</span></div>
+              <div><b>Date</b><span id="evDate">—</span></div>
+              <div><b>Location</b><span id="evLoc">—</span></div>
+            </div>
+          </div>
+
+          <div class="sec" id="secMenu">
+            <div class="sec-title">Menu &amp; Per-Head Pricing</div>
+            <table class="menu" id="menuTable">
+              <thead><tr><th>Item</th><th>Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th></tr></thead>
+              <tbody id="menuBody"></tbody>
+            </table>
+          </div>
+
+          <div class="sec" id="secTotals">
+            <div class="totals">
+              <div class="row"><span>Subtotal</span><span id="tSub">—</span></div>
+              <div class="row"><span>HST (13%)</span><span id="tTax">—</span></div>
+              <div class="row total"><span>Total</span><span id="tTotal">—</span></div>
+              <div class="row"><span>Deposit due (30%)</span><span id="tDep">—</span></div>
+            </div>
+          </div>
+
+          <div class="sec" id="secLogi">
+            <div class="sec-title">Logistics</div>
+            <div class="logi" id="logiText">—</div>
+          </div>
+
+          <div class="actions">
+            <button class="ghost">Edit</button>
+            <button class="primary" id="sendBtn" onclick="runApproval()">Send for Approval</button>
+          </div>
+
+          <div class="approval-flow" id="approvalFlow"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">This is a working concept demo — in production, the AI intake happens over text, voice, or the in-store QR flow. The AI never sends a quote straight to the customer — it drafts it instantly, a staff member approves in seconds, then the deposit payment link goes out automatically. "Try your own" runs a real lightweight parser (guest count, date, budget, dietary needs) — it's not yet connected to a full LLM backend, so unusual phrasing may need a nudge.</div>
+</div>
+
+<script>
+const script = [
+  {who:'customer', text:"Hi, I need catering for a corporate event — about 65 people."},
+  {who:'nicole', text:"Happy to help! What date are you thinking, and is this a lunch or dinner event?"},
+  {who:'customer', text:"Friday November 14th, lunch, around noon. It's at our office in Mississauga."},
+  {who:'nicole', text:"Got it. Any dietary restrictions I should flag for the kitchen?"},
+  {who:'customer', text:"Yeah — we need it halal, and at least 8 vegan plates, plus 2 people are nut-allergic."},
+  {who:'nicole', text:"Noted — halal, 8 vegan, nut-free flagged for 2 guests. What's your rough budget per person?"},
+  {who:'customer', text:"Around $28 a head works for us."},
+  {who:'nicole', text:"Perfect — I've got everything I need. Building your event order now, one moment…"}
+];
+
+// The exact data behind the scripted demo above — kept separate from the
+// custom-input parser so the auto-playing demo never changes.
+const SCRIPTED_DATA = {
+  eventType: 'Corporate Lunch',
+  guestCount: 65, guestCountEstimated: false,
+  dateStr: 'Fri, Nov 14, 2026 · 12:00 PM',
+  location: 'Client office — Mississauga',
+  dietary: [{label:'HALAL',cls:'gf'},{label:'VEGAN',cls:'v'},{label:'NUT-FREE',cls:'nf'}],
+  menuItems: [
+    ['Mixed Mezze Platter (Halal)', 65, 6.50],
+    ['Chicken Shawarma Tray', 50, 9.00],
+    ['Vegan Falafel &amp; Grain Bowl <span class="flag v">VEGAN</span>', 8, 8.50],
+    ['Nut-Free Dessert Selection <span class="flag nf">NUT-FREE</span>', 2, 4.00],
+    ['Assorted Baklava Tray (Halal)', 65, 3.00],
+  ],
+  budgetPerHead: 28
+};
+
+const chatBody = document.getElementById('chatBody');
+const typingEl = document.getElementById('typingIndicator');
+let startTime;
+
+function addMsg(who, text){
+  const div = document.createElement('div');
+  div.className = 'msg ' + who;
+  div.innerHTML = '<span class="who">'+(who==='customer'?'Customer':'Nicole · AI')+'</span>'+text;
+  chatBody.insertBefore(div, typingEl);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function showTyping(on){
+  typingEl.classList.toggle('show', on);
+  if(on){ chatBody.scrollTop = chatBody.scrollHeight; }
+}
+
+function fadeIn(id, delay){
+  setTimeout(()=>{ document.getElementById(id).classList.add('in'); }, delay);
+}
+
+function runScript(idx){
+  if(idx >= script.length){
+    setTimeout(()=>buildBEO(SCRIPTED_DATA), 500);
+    return;
+  }
+  const step = script[idx];
+  showTyping(true);
+  setTimeout(()=>{
+    showTyping(false);
+    addMsg(step.who, step.text);
+    setTimeout(()=> runScript(idx+1), step.who==='customer' ? 500 : 900);
+  }, step.who==='nicole' ? 900 : 500);
+}
+
+function fmt(n){
+  return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/* ---------- Lightweight free-text parser for "Try your own" ---------- */
+
+function parseInquiry(raw){
+  const t = raw.toLowerCase();
+
+  // Guest count
+  let guestCount = null;
+  let m = t.match(/(\d{1,4})\s*(?:people|guests?|ppl|pax|persons?|attendees|heads?)\b/);
+  if (m) guestCount = parseInt(m[1], 10);
+  if (!guestCount){ m = t.match(/\bfor\s+(\d{1,4})\b/); if (m) guestCount = parseInt(m[1], 10); }
+  const guestCountEstimated = !guestCount;
+  if (!guestCount) guestCount = 40;
+
+  // Budget per head
+  let budgetPerHead = null;
+  m = t.match(/\$?\s*(\d{1,4})\s*(?:-|to)\s*\$?\s*(\d{1,4})\s*(?:pp\b|per\s*person|\/\s*person|a\s*head|per\s*head|per\s*plate)/);
+  if (m) budgetPerHead = Math.round((parseInt(m[1],10) + parseInt(m[2],10)) / 2);
+  if (!budgetPerHead){
+    m = t.match(/\$?\s*(\d{1,4})\s*(?:pp\b|per\s*person|\/\s*person|a\s*head|per\s*head|per\s*plate)/);
+    if (m) budgetPerHead = parseInt(m[1], 10);
+  }
+  if (!budgetPerHead){
+    m = t.match(/\$\s*(\d{2,4})\b/);
+    if (m) budgetPerHead = parseInt(m[1], 10);
+  }
+  const budgetEstimated = !budgetPerHead;
+  if (!budgetPerHead) budgetPerHead = 26;
+
+  // Date
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthPat = 'jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?';
+  let dateStr = null;
+  m = t.match(new RegExp('\\b(' + monthPat + ')\\.?\\s*(\\d{1,2})(?:st|nd|rd|th)?', 'i'));
+  if (m){
+    const idx = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].findIndex(mo => m[1].toLowerCase().startsWith(mo));
+    if (idx > -1) dateStr = monthNames[idx] + ' ' + m[2] + ', 2026';
+  }
+  if (!dateStr && /\btomorrow\b/.test(t)) dateStr = 'Tomorrow';
+  if (!dateStr && /\bnext week\b/.test(t)) dateStr = 'Next week (exact date TBC)';
+  if (!dateStr && /\bthis weekend\b/.test(t)) dateStr = 'This weekend (exact date TBC)';
+  const dateEstimated = !dateStr;
+  if (!dateStr) dateStr = 'Date to be confirmed';
+
+  // Dietary flags
+  const dietary = [];
+  if (/\bhalal\b/.test(t)) dietary.push({label:'HALAL', cls:'gf'});
+  if (/\bkosher\b/.test(t)) dietary.push({label:'KOSHER', cls:'gf'});
+  const isVegan = /\bvegan\b/.test(t);
+  const isVeg = /\bvegetarian\b/.test(t);
+  if (isVegan) dietary.push({label:'VEGAN', cls:'v'});
+  else if (isVeg) dietary.push({label:'VEGETARIAN', cls:'v'});
+  if (/\bgluten[\s-]?free\b|\bgf\b/.test(t)) dietary.push({label:'GLUTEN-FREE', cls:'gf'});
+  if (/\bnut[\s-]?free\b|\bnut allerg/.test(t)) dietary.push({label:'NUT-FREE', cls:'nf'});
+  if (/\bdairy[\s-]?free\b/.test(t)) dietary.push({label:'DAIRY-FREE', cls:'nf'});
+
+  // Event type
+  let eventType = 'Event';
+  if (/wedding/.test(t)) eventType = 'Wedding';
+  else if (/holiday party|christmas party|xmas party/.test(t)) eventType = 'Holiday Party';
+  else if (/birthday/.test(t)) eventType = 'Birthday Party';
+  else if (/shower/.test(t)) eventType = 'Shower';
+  else if (/retirement/.test(t)) eventType = 'Retirement Event';
+  else if (/graduation/.test(t)) eventType = 'Graduation Event';
+  else if (/funeral|memorial/.test(t)) eventType = 'Memorial Reception';
+  else if (/corporate|office|business/.test(t)) eventType = /dinner/.test(t) ? 'Corporate Dinner' : 'Corporate Lunch';
+
+  // Location — grab a trailing "at ___" / "in ___" phrase if present
+  let location = 'Venue address to confirm';
+  m = raw.match(/\b(?:at|in)\s+([A-Za-z0-9'\s]{3,30})$/i);
+  if (m) location = m[1].trim();
+
+  return {eventType, guestCount, guestCountEstimated, dateStr, dateEstimated, location, dietary, budgetPerHead, budgetEstimated};
+}
+
+function computeTotals(items){
+  let subtotal = 0;
+  items.forEach(it => subtotal += it[1] * it[2]);
+  const tax = +(subtotal * 0.13).toFixed(2);
+  const total = +(subtotal + tax).toFixed(2);
+  const deposit = +(total * 0.30).toFixed(2);
+  return {subtotal, tax, total, deposit};
+}
+
+function computeMenu(data){
+  const {guestCount, budgetPerHead, dietary, eventType} = data;
+  const labels = dietary.map(d => d.label);
+  const isHalal = labels.includes('HALAL');
+  const isKosher = labels.includes('KOSHER');
+  const isVegan = labels.includes('VEGAN');
+  const isVeg = isVegan || labels.includes('VEGETARIAN');
+  const isGF = labels.includes('GLUTEN-FREE');
+  const isNF = labels.includes('NUT-FREE');
+
+  const items = [];
+  const mainName = (isHalal ? 'Halal ' : isKosher ? 'Kosher ' : '') + 'Mixed Protein Tray' + (eventType === 'Wedding' ? " (Chef's Selection)" : '');
+  items.push([mainName, guestCount, +(budgetPerHead * 0.34).toFixed(2)]);
+  items.push(['Seasonal Sides &amp; Salad', guestCount, +(budgetPerHead * 0.22).toFixed(2)]);
+
+  if (isVeg){
+    const vegCount = Math.max(2, Math.round(guestCount * 0.15));
+    items.push([(isVegan ? 'Vegan' : 'Vegetarian') + ' Grain Bowl <span class="flag v">' + (isVegan?'VEGAN':'VEGETARIAN') + '</span>', vegCount, +(budgetPerHead * 0.30).toFixed(2)]);
+  }
+  if (isGF){
+    const gfCount = Math.max(1, Math.round(guestCount * 0.08));
+    items.push(['Gluten-Free Plate <span class="flag gf">GLUTEN-FREE</span>', gfCount, +(budgetPerHead * 0.28).toFixed(2)]);
+  }
+  items.push(['Dessert Platter' + (isNF ? ' <span class="flag nf">NUT-FREE</span>' : ''), guestCount, +(budgetPerHead * 0.14).toFixed(2)]);
+
+  return Object.assign({menuItems: items}, computeTotals(items));
+}
+
+/* ---------- BEO builder — drives both the scripted demo and custom input ---------- */
+
+function resetBEODoc(){
+  document.getElementById('menuBody').innerHTML = '';
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('in'));
+  document.getElementById('approvalFlow').innerHTML = '';
+  approvalPlayed = false;
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = false;
+  btn.textContent = 'Send for Approval';
+}
+
+function buildBEO(data){
+  resetBEODoc();
+  let computed = data.menuItems ? Object.assign({}, data) : Object.assign({}, data, computeMenu(data));
+  if (computed.subtotal === undefined){
+    Object.assign(computed, computeTotals(computed.menuItems));
+  }
+
+  document.getElementById('beoEmpty').style.display = 'none';
+  document.getElementById('beoDoc').classList.add('show');
+  document.getElementById('beoNum').textContent = 'BEO-' + Math.floor(1000 + Math.random() * 8999);
+  document.getElementById('beoDate').textContent = new Date().toLocaleDateString('en-CA', {year:'numeric', month:'short', day:'numeric'});
+
+  fadeIn('secEvent', 200);
+  setTimeout(() => {
+    document.getElementById('evType').textContent = computed.eventType;
+    document.getElementById('evCount').innerHTML = computed.guestCount + ' guests' + (computed.guestCountEstimated ? ' <span class="est">(estimated — confirm exact count)</span>' : '');
+    document.getElementById('evDate').innerHTML = computed.dateStr + (computed.dateEstimated ? ' <span class="est">(estimate)</span>' : '');
+    document.getElementById('evLoc').textContent = computed.location;
+  }, 400);
+
+  fadeIn('secMenu', 1100);
+  setTimeout(() => {
+    const body = document.getElementById('menuBody');
+    computed.menuItems.forEach((it, i) => {
+      setTimeout(() => {
+        const tr = document.createElement('tr');
+        tr.style.opacity = 0; tr.style.transition = 'opacity .3s';
+        tr.innerHTML = `<td>${it[0]}</td><td>${it[1]}</td><td style="text-align:right">${fmt(it[2])}</td><td style="text-align:right">${fmt(it[1]*it[2])}</td>`;
+        body.appendChild(tr);
+        requestAnimationFrame(() => tr.style.opacity = 1);
+      }, i * 220);
+    });
+  }, 1300);
+
+  fadeIn('secTotals', 2700);
+  setTimeout(() => {
+    document.getElementById('tSub').textContent = fmt(computed.subtotal);
+    document.getElementById('tTax').textContent = fmt(computed.tax);
+    document.getElementById('tTotal').textContent = fmt(computed.total);
+    document.getElementById('tDep').textContent = fmt(computed.deposit);
+  }, 2900);
+
+  fadeIn('secLogi', 3300);
+  setTimeout(() => {
+    let logi = '🕐 Setup ~45 min before start · 📍 ' + computed.location + '<br>';
+    if (computed.dietary && computed.dietary.length){
+      logi += '⚠️ ' + computed.dietary.map(d => d.label.toLowerCase()).join(', ') + ' items flagged &amp; packaged separately<br>';
+    }
+    logi += '👥 Staffing sized to ' + computed.guestCount + ' guests · 🧾 Deposit invoice attached, due within 5 days';
+    document.getElementById('logiText').innerHTML = logi;
+  }, 3500);
+
+  setTimeout(() => {
+    document.getElementById('beoStatus').textContent = '✓ Ready for review';
+    document.getElementById('beoStatus').style.background = '#E6F4EC';
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+    document.getElementById('genTimer').textContent = 'Built in ' + elapsed + 's — zero manual entry';
+  }, 4000);
+
+  setTimeout(runApproval, 5200);
+}
+
+let approvalPlayed = false;
+function addStep(icon, label, text, delay, done){
+  setTimeout(()=>{
+    const flow = document.getElementById('approvalFlow');
+    const div = document.createElement('div');
+    div.className = 'astep' + (done ? ' done' : '');
+    div.innerHTML = `<span class="aicon">${icon}</span><span class="atext"><b>${label}</b>${text}</span>`;
+    flow.appendChild(div);
+    requestAnimationFrame(()=> div.classList.add('in'));
+  }, delay);
+}
+
+function runApproval(){
+  if(approvalPlayed) return;
+  approvalPlayed = true;
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending for approval…';
+
+  addStep('🔔', 'Step 1 — Not sent to the customer yet', 'Draft pushed to the on-duty manager for a quick check', 200, false);
+  addStep('✅', 'Step 2 — Human approval (this is the fast part now)', 'Approved by Manager — reviewed in 22s, not the usual 1–3 hours to build by hand', 1800, true);
+  addStep('💳', 'Step 3 — Automatic, no staff time needed', 'Deposit payment link texted + emailed to the customer', 3200, true);
+
+  setTimeout(()=>{ btn.textContent = '✓ Sent & Approved'; }, 3400);
+}
+
+function restart(){
+  chatBody.innerHTML=''; chatBody.appendChild(typingEl);
+  document.getElementById('beoDoc').classList.remove('show');
+  document.getElementById('beoEmpty').style.display='block';
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('in'));
+  document.getElementById('menuBody').innerHTML='';
+  document.getElementById('genTimer').textContent='';
+  document.getElementById('approvalFlow').innerHTML='';
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = false;
+  btn.textContent = 'Send for Approval';
+  approvalPlayed = false;
+  startTime = Date.now();
+  setTimeout(()=>runScript(0), 600);
+}
+
+function tryCustom(){
+  const val = document.getElementById('tryInput').value.trim();
+  if(!val) return;
+  addMsg('customer', val);
+  document.getElementById('tryInput').value='';
+  showTyping(true);
+
+  setTimeout(()=>{
+    showTyping(false);
+    const parsed = parseInquiry(val);
+
+    const bits = [];
+    bits.push(parsed.eventType.toLowerCase() + ', ~' + parsed.guestCount + ' guests');
+    bits.push(parsed.dateEstimated ? "date TBC" : parsed.dateStr);
+    bits.push('~$' + parsed.budgetPerHead + '/head');
+    if (parsed.dietary.length) bits.push(parsed.dietary.map(d=>d.label.toLowerCase()).join(' + ') + ' flagged');
+
+    let reply = "Got it — " + bits.join(', ') + ". ";
+    if (parsed.guestCountEstimated || parsed.dateEstimated || parsed.budgetEstimated){
+      reply += "I estimated a couple of fields I didn't catch — a staff member will confirm the exact numbers when they review. ";
+    }
+    reply += "Building your event order now, one moment…";
+
+    addMsg('nicole', reply);
+    startTime = Date.now();
+    setTimeout(()=> buildBEO(parsed), 700);
+  }, 900);
+}
+
+document.getElementById('tryInput').addEventListener('keydown', e=>{ if(e.key==='Enter' || e.keyCode===13){ e.preventDefault(); tryCustom(); } });
+
+startTime = Date.now();
+setTimeout(()=>runScript(0), 700);
+</script>
+</body>
+</html>

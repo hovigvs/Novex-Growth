@@ -81,8 +81,16 @@ window.NOVEX_MODULE_INFO = {
       "Keeps your feed active without you ever having to sit down and write a post.",
       "You approve before anything goes live — this handles the busywork, not the final call."
     ] },
+  "qualification": { name: "AI Event Qualification", tagline: "From a DM to a qualified lead — before a human opens it", vertical: "both", icon:"🎯",
+    demo:{ type:"iframe", src:"qualification_demo.html" },
+    howItWorks:[
+      "Replies instantly the moment an inquiry lands — Instagram DM, website chat, phone, or WhatsApp, same AI everywhere.",
+      "Asks exactly what a staff member would ask: event type, date, guest count, budget, dietary needs — not a generic form.",
+      "Builds a scored, qualified lead card automatically as the conversation happens — nothing typed twice.",
+      "Routes the fully-qualified lead straight to the team, ready for a real quote instead of a blank inquiry."
+    ] },
   "event-order": { name: "AI Event Order Automation", tagline: "Inquiry to BEO in seconds", vertical: "catering", icon:"📝",
-    demo:{ type:"none" },
+    demo:{ type:"iframe", src:"beo_generator_demo.html" },
     howItWorks:[
       "Takes the details from a customer conversation — menu picks, headcount, dietary needs, budget.",
       "Drafts a full event order: menu, per-head pricing from your real price list, dietary flags, logistics notes.",

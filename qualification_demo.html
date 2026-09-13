@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AI Event Qualification — Novex Growth</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap"/>
+<style>
+:root{--dark:#1E1E3A;--amber:#5558B8;--gold:#7782D4;--cream:#F0F2FF;--muted:#646BC1;--border:#D4D8F5;--bg:#EEEEFF;--good:#1E8E5A;--warn:#B8790E;--hot:#B8341E;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--dark);}
+.wrap{max-width:1320px;margin:0 auto;padding:28px 24px 60px;}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+.logo{font-family:'DM Sans';font-weight:700;font-size:22px;}
+.logo span{background:linear-gradient(90deg,#82DFFF,#7782D4,#646BC1);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.headline{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--dark);}
+.subhead{color:var(--muted);font-size:14px;margin-top:4px;max-width:640px;}
+.replay-btn{background:var(--dark);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans';}
+.replay-btn:hover{background:var(--amber);}
+
+.channels{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.chip{font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:20px;border:1px solid var(--border);color:var(--muted);background:#fff;}
+.chip.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+
+.grid{display:grid;grid-template-columns:1fr 1.05fr;gap:22px;align-items:start;}
+@media(max-width:960px){.grid{grid-template-columns:1fr;}}
+
+.panel{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.panel-head .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(30,142,90,.15);}
+.panel-title{font-weight:700;font-size:14px;}
+.panel-sub{font-size:12px;color:var(--muted);margin-left:auto;}
+
+/* Chat side */
+.chat-body{padding:18px 20px;min-height:480px;max-height:560px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+.msg{max-width:82%;padding:11px 14px;border-radius:12px;font-size:14px;line-height:1.45;opacity:0;transform:translateY(6px);animation:rise .35s ease forwards;}
+@keyframes rise{to{opacity:1;transform:translateY(0);}}
+.msg.customer{align-self:flex-end;background:var(--dark);color:#fff;border-bottom-right-radius:3px;}
+.msg.nicole{align-self:flex-start;background:var(--bg);color:var(--dark);border-bottom-left-radius:3px;}
+.msg .who{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;opacity:.6;margin-bottom:3px;}
+.msg .rtime{display:block;font-size:10px;color:var(--good);font-weight:700;margin-top:5px;}
+.typing{align-self:flex-start;background:var(--bg);border-radius:12px;padding:11px 14px;display:none;}
+.typing.show{display:flex;gap:4px;}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;}
+.typing i:nth-child(2){animation-delay:.2s;}.typing i:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
+.chat-input{border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:8px;}
+.chat-input input{flex:1;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Sans';font-size:13px;}
+.chat-input button{background:var(--amber);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;}
+
+/* Lead card side */
+.card-body{padding:22px;min-height:480px;}
+.card-empty{color:var(--muted);font-size:13px;text-align:center;padding:80px 20px;}
+.leaddoc{opacity:0;}
+.leaddoc.show{opacity:1;}
+.lead-brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--dark);padding-bottom:14px;margin-bottom:16px;}
+.lead-brand h1{font-family:'Playfair Display',serif;font-size:20px;}
+.lead-brand .meta{text-align:right;font-size:11px;color:var(--muted);line-height:1.6;}
+.lead-status{display:inline-flex;align-items:center;gap:6px;background:#FCE7E7;color:var(--hot);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:14px;}
+.sec{margin-bottom:18px;opacity:0;transform:translateY(6px);transition:all .4s ease;}
+.sec.in{opacity:1;transform:translateY(0);}
+.sec-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;}
+.detail-grid div b{display:block;font-size:11px;color:var(--muted);font-weight:600;}
+.flags{display:flex;flex-wrap:wrap;gap:6px;}
+.flag{display:inline-block;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;}
+.flag.veg{background:#E6F4EC;color:var(--good);}
+.flag.gf{background:#FDF0E0;color:var(--warn);}
+.flag.urgent{background:#FCE7E7;color:var(--hot);}
+.score-row{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:10px;padding:12px 14px;}
+.score-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--dark);}
+.score-label{font-size:11px;color:var(--muted);line-height:1.5;}
+.actions{display:flex;gap:10px;margin-top:20px;}
+.actions button{flex:1;padding:11px;border-radius:8px;font-size:13px;font-weight:600;font-family:'DM Sans';cursor:pointer;border:none;}
+.actions .primary{background:var(--dark);color:#fff;}
+.actions .primary:disabled{opacity:.5;cursor:default;}
+.actions .ghost{background:#fff;border:1px solid var(--border);color:var(--dark);}
+.approval-flow{margin-top:16px;display:flex;flex-direction:column;gap:8px;}
+.astep{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:9px 12px;font-size:12.5px;opacity:0;transform:translateY(6px);transition:all .35s ease;}
+.astep.in{opacity:1;transform:translateY(0);}
+.astep .aicon{font-size:15px;flex-shrink:0;}
+.astep .atext{flex:1;}
+.astep .atext b{display:block;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.astep.done{background:#E6F4EC;}
+.timer{position:absolute;top:16px;right:20px;font-size:11px;color:var(--muted);}
+
+.footer-note{margin-top:26px;text-align:center;color:var(--muted);font-size:12px;max-width:900px;margin-left:auto;margin-right:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="logo"><span>novexgrowth</span></div>
+      <div class="headline">From a vague DM to a qualified lead — before a human ever opens it</div>
+      <div class="subhead">The AI replies the moment an inquiry lands, asks exactly what a staff member would ask, and hands off a fully-qualified lead — ready for a quote, not a guess.</div>
+    </div>
+    <button class="replay-btn" onclick="restart()">▶ Replay demo</button>
+  </div>
+
+  <div class="channels">
+    <span class="chip active">📸 Instagram DM — shown below</span>
+    <span class="chip">💬 Website Chat</span>
+    <span class="chip">☎️ Phone / Voice</span>
+    <span class="chip">🟢 WhatsApp</span>
+    <span class="chip" style="border:none;background:none;color:var(--dark);font-weight:700;">Same AI, every channel</span>
+  </div>
+
+  <div class="grid">
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="dot"></div>
+        <div class="panel-title">Instagram DM — Live</div>
+        <div class="panel-sub" id="channelLabel">@abccatering</div>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <div class="typing" id="typingIndicator"><i></i><i></i><i></i></div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="tryInput" placeholder="Try your own: 'need catering for 80, mid dec, some vegan'"/>
+        <button onclick="tryCustom()">Send</button>
+      </div>
+    </div>
+
+    <div class="panel" style="position:relative;">
+      <div class="panel-head">
+        <div class="dot" style="background:var(--gold);box-shadow:0 0 0 4px rgba(119,130,212,.15);"></div>
+        <div class="panel-title">Qualified Lead</div>
+        <div class="panel-sub" id="genTimer"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-empty" id="cardEmpty">Waiting for the conversation…<br>the lead card fills itself in as the AI gathers details — no form, no manual entry.</div>
+        <div class="leaddoc" id="leadDoc">
+          <div class="lead-status" id="leadStatus">🔥 Hot lead — flagged urgent</div>
+          <div class="lead-brand">
+            <div>
+              <h1>ABC Company — Catering</h1>
+              <div style="font-size:11px;color:var(--muted);">Lead Qualification Record</div>
+            </div>
+            <div class="meta">
+              Lead #<span id="leadNum">—</span><br>
+              Source: Instagram DM<br>
+              Captured <span id="leadDate">—</span>
+            </div>
+          </div>
+
+          <div class="sec" id="secContact">
+            <div class="sec-title">Contact</div>
+            <div class="detail-grid">
+              <div><b>Handle</b><span id="cHandle">—</span></div>
+              <div><b>First reply</b><span id="cReply">—</span></div>
+            </div>
+          </div>
+
+          <div class="sec" id="secEvent">
+            <div class="sec-title">Event Details</div>
+            <div class="detail-grid">
+              <div><b>Event Type</b><span id="evType">—</span></div>
+              <div><b>Guest Count</b><span id="evCount">—</span></div>
+              <div><b>Date</b><span id="evDate">—</span></div>
+              <div><b>Budget / Head</b><span id="evBudget">—</span></div>
+            </div>
+          </div>
+
+          <div class="sec" id="secFlags">
+            <div class="sec-title">Dietary &amp; Notes</div>
+            <div class="flags" id="flagsRow"></div>
+          </div>
+
+          <div class="sec" id="secScore">
+            <div class="sec-title">Lead Score</div>
+            <div class="score-row">
+              <div class="score-num" id="scoreNum">—</div>
+              <div class="score-label">Qualified on: date, headcount, budget, dietary needs.<br>Ready to hand off for a formal quote.</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="ghost">Edit</button>
+            <button class="primary" id="sendBtn" onclick="runApproval()">Route to Events Team</button>
+          </div>
+
+          <div class="approval-flow" id="approvalFlow"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">This is a working concept demo — shown here on Instagram DM, but the same AI, same qualifying questions, and same lead card run identically over website chat, voice calls, and WhatsApp. Nothing is invented here: every field on the lead card comes directly from what the customer actually typed. Once qualified, the lead routes to a human for the formal quote — see the AI BEO Generator demo for what happens next.</div>
+</div>
+
+<script>
+const script = [
+  {who:'customer', text:"hii do u guys do drop off catering? need something for like 50 people early dec, kinda urgent lol"},
+  {who:'nicole', text:"Hi! Yes, we do drop-off catering 🙂 Happy to help — what's the occasion, and do you have an exact date in December?", rtime:"Replied in 6s"},
+  {who:'customer', text:"office holiday party, probably dec 5th? not 100% locked yet"},
+  {who:'nicole', text:"Got it — Dec 5th, ~50 guests, office holiday party. Any dietary needs I should flag — vegetarian, halal, allergies?"},
+  {who:'customer', text:"yeah a few vegetarians and one person is gluten free"},
+  {who:'nicole', text:"Noted — vegetarian options + 1 gluten-free flagged. Last thing — rough budget per person, or want me to send a couple of package options?"},
+  {who:'customer', text:"maybe around $20-25pp"},
+  {who:'nicole', text:"Perfect, that's everything I need! You're all set — I'm looping in our events team right now so someone sends your formal quote today, not next week."}
+];
+
+const chatBody = document.getElementById('chatBody');
+const typingEl = document.getElementById('typingIndicator');
+let startTime;
+
+function addMsg(who, text, rtime){
+  const div = document.createElement('div');
+  div.className = 'msg ' + who;
+  div.innerHTML = '<span class="who">'+(who==='customer'?'Customer · IG':'Nicole · AI')+'</span>'+text+(rtime?'<span class="rtime">⚡ '+rtime+'</span>':'');
+  chatBody.insertBefore(div, typingEl);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function showTyping(on){
+  typingEl.classList.toggle('show', on);
+  if(on){ chatBody.scrollTop = chatBody.scrollHeight; }
+}
+
+function fadeIn(id, delay){
+  setTimeout(()=>{ document.getElementById(id).classList.add('in'); }, delay);
+}
+
+function runScript(idx){
+  if(idx >= script.length){
+    setTimeout(buildCard, 500);
+    return;
+  }
+  const step = script[idx];
+  showTyping(true);
+  setTimeout(()=>{
+    showTyping(false);
+    addMsg(step.who, step.text, step.rtime);
+    setTimeout(()=> runScript(idx+1), step.who==='customer' ? 500 : 900);
+  }, step.who==='nicole' ? 700 : 500);
+}
+
+function buildCard(){
+  document.getElementById('cardEmpty').style.display='none';
+  document.getElementById('leadDoc').classList.add('show');
+  document.getElementById('leadNum').textContent = 'LD-' + Math.floor(1000+Math.random()*8999);
+  document.getElementById('leadDate').textContent = new Date().toLocaleDateString('en-CA', {year:'numeric',month:'short',day:'numeric'});
+
+  fadeIn('secContact', 200);
+  setTimeout(()=>{
+    document.getElementById('cHandle').textContent = '@sarahk_events';
+    document.getElementById('cReply').textContent = 'AI replied in 6 seconds';
+  }, 400);
+
+  fadeIn('secEvent', 1000);
+  setTimeout(()=>{
+    document.getElementById('evType').textContent = 'Office Holiday Party';
+    document.getElementById('evCount').textContent = '~50 guests';
+    document.getElementById('evDate').textContent = 'Fri, Dec 5, 2026 (tentative)';
+    document.getElementById('evBudget').textContent = '$20–25 / person';
+  }, 1200);
+
+  fadeIn('secFlags', 2100);
+  setTimeout(()=>{
+    const row = document.getElementById('flagsRow');
+    const flags = [['veg','VEGETARIAN OPTIONS'],['gf','1 GLUTEN-FREE'],['urgent','FLAGGED URGENT']];
+    flags.forEach((f,i)=>{
+      setTimeout(()=>{
+        const span = document.createElement('span');
+        span.className = 'flag ' + f[0];
+        span.textContent = f[1];
+        row.appendChild(span);
+      }, i*180);
+    });
+  }, 2300);
+
+  fadeIn('secScore', 3000);
+  setTimeout(()=>{
+    document.getElementById('scoreNum').textContent = '92';
+  }, 3200);
+
+  setTimeout(()=>{
+    const elapsed = ((Date.now()-startTime)/1000).toFixed(0);
+    document.getElementById('genTimer').textContent = 'Qualified in ' + elapsed + 's — zero manual triage';
+  }, 3600);
+
+  setTimeout(runApproval, 4600);
+}
+
+let approvalPlayed = false;
+function addStep(icon, label, text, delay, done){
+  setTimeout(()=>{
+    const flow = document.getElementById('approvalFlow');
+    const div = document.createElement('div');
+    div.className = 'astep' + (done ? ' done' : '');
+    div.innerHTML = `<span class="aicon">${icon}</span><span class="atext"><b>${label}</b>${text}</span>`;
+    flow.appendChild(div);
+    requestAnimationFrame(()=> div.classList.add('in'));
+  }, delay);
+}
+
+function runApproval(){
+  if(approvalPlayed) return;
+  approvalPlayed = true;
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  btn.textContent = 'Routing…';
+
+  addStep('📥', 'Step 1 — Automatic, safe to run unattended', 'Lead auto-logged to CRM — name, contact, event details, all fields filled', 200, true);
+  addStep('👋', 'Step 2 — Human picks it up, not a form', 'Events team notified — they open a fully-qualified lead, not a blank inquiry', 1600, true);
+  addStep('📄', 'Step 3 — Next: AI BEO Generator', 'Same details flow straight into a drafted quote — see that demo tab', 3000, false);
+
+  setTimeout(()=>{ btn.textContent = '✓ Routed to Events Team'; }, 3200);
+}
+
+function restart(){
+  chatBody.innerHTML=''; chatBody.appendChild(typingEl);
+  document.getElementById('leadDoc').classList.remove('show');
+  document.getElementById('cardEmpty').style.display='block';
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('in'));
+  document.getElementById('flagsRow').innerHTML='';
+  document.getElementById('genTimer').textContent='';
+  document.getElementById('approvalFlow').innerHTML='';
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = false;
+  btn.textContent = 'Route to Events Team';
+  approvalPlayed = false;
+  startTime = Date.now();
+  setTimeout(()=>runScript(0), 600);
+}
+
+function tryCustom(){
+  const val = document.getElementById('tryInput').value.trim();
+  if(!val) return;
+  addMsg('customer', val);
+  document.getElementById('tryInput').value='';
+  showTyping(true);
+  setTimeout(()=>{
+    showTyping(false);
+    addMsg('nicole', "Got it — thanks! In the full version I'd pull the guest count, date, and dietary notes from that automatically and fold them straight into the lead card on the right. This demo plays a fixed example so you can see the end-to-end flow.");
+  }, 1000);
+}
+
+document.getElementById('tryInput').addEventListener('keydown', e=>{ if(e.key==='Enter') tryCustom(); });
+
+startTime = Date.now();
+setTimeout(()=>runScript(0), 700);
+</script>
+</body>
+</html>
