@@ -41,27 +41,56 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--dar
 .match-tag{font-size:9px;background:#E6F4EC;color:var(--good);padding:1px 6px;border-radius:10px;margin-left:6px;white-space:nowrap;}
 
 /* Flyer side */
-.flyer-body{padding:20px;min-height:520px;}
+.flyer-body{padding:20px;min-height:520px;background:#E4E7F7;}
 .flyer-empty{color:var(--muted);font-size:13px;text-align:center;padding:80px 20px;}
 .flyer-doc{opacity:0;}
 .flyer-doc.show{opacity:1;}
-.flyer-topbar{display:flex;justify-content:space-between;align-items:center;background:var(--dark);color:#fff;border-radius:10px;padding:14px 18px;margin-bottom:16px;}
-.flyer-topbar .fname{font-family:'Playfair Display',serif;font-size:18px;}
-.flyer-topbar .fdate{font-size:11px;opacity:.75;}
-.flyer-status{display:inline-block;background:#E6F4EC;color:var(--good);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:12px;}
-.cat-header{background:var(--cream);border-left:4px solid var(--gold);padding:6px 12px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dark);margin:16px 0 10px;opacity:0;transform:translateY(6px);transition:all .35s ease;}
+.flyer-sheet{background:#fff;border-radius:14px;box-shadow:0 14px 40px rgba(30,30,58,.18);overflow:hidden;position:relative;}
+.flyer-sheet::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(30,30,58,.05) 1px,transparent 1px);background-size:14px 14px;opacity:.5;}
+.flyer-masthead{position:relative;background:linear-gradient(120deg,#1E1E3A,#3B3A78 55%,#5558B8);color:#fff;padding:24px 26px 30px;overflow:hidden;}
+.flyer-masthead::after{content:'';position:absolute;right:-40px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(130,223,255,.25),transparent 70%);}
+.flyer-masthead-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
+.flyer-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#82DFFF;margin-bottom:6px;}
+.flyer-masthead .fname{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;line-height:1.1;}
+.flyer-masthead .ftag{font-size:12.5px;color:rgba(255,255,255,.7);margin-top:6px;}
+.flyer-masthead .fdate{font-size:11px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:6px 12px;border-radius:20px;white-space:nowrap;}
+.flyer-status{display:inline-block;background:#E6F4EC;color:var(--good);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin:14px 26px 0;}
+
+.hero-deal{position:relative;z-index:1;margin:22px 26px 0;background:#fff;border-radius:14px;box-shadow:0 10px 26px rgba(30,30,58,.16);padding:16px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;opacity:0;transform:translateY(10px);transition:all .4s ease;}
+.hero-deal.in{opacity:1;transform:translateY(0);}
+.hero-deal .hthumb{width:84px;height:84px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#FFF3E0,#FFE0D6);display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:inset 0 0 0 3px #fff,0 4px 14px rgba(0,0,0,.12);}
+.hero-deal .hbody{flex:1 1 140px;min-width:140px;}
+.hero-deal .heyebrow{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--save);margin-bottom:3px;}
+.hero-deal .hname{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--dark);line-height:1.2;}
+.hero-deal .horigin{font-size:11px;color:var(--muted);margin-top:2px;}
+.hero-deal .hprice{text-align:right;flex-shrink:0;}
+.hero-deal .hwas{font-size:12px;color:var(--muted);text-decoration:line-through;}
+.hero-deal .hnow{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--save);line-height:1.1;}
+.hero-deal .hnow small{font-size:12px;font-weight:600;color:var(--muted);}
+.hero-burst{position:absolute;top:-12px;right:14px;width:56px;height:56px;border-radius:50%;background:var(--save);color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;font-weight:800;box-shadow:0 6px 14px rgba(192,57,43,.4);transform:rotate(8deg);z-index:2;line-height:1;}
+.hero-burst b{font-size:15px;} .hero-burst span{font-size:7.5px;letter-spacing:.03em;}
+
+.flyer-inner{padding:22px 26px 8px;}
+.cat-header{display:flex;align-items:center;gap:10px;margin:22px 0 12px;opacity:0;transform:translateY(6px);transition:all .35s ease;}
 .cat-header.in{opacity:1;transform:translateY(0);}
+.cat-header .cname{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--dark);white-space:nowrap;}
+.cat-header .cline{flex:1;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
 .tile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 @media(max-width:640px){.tile-grid{grid-template-columns:repeat(2,1fr);}}
-.tile{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;position:relative;opacity:0;transform:scale(.92);transition:all .3s ease;}
+.tile{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 10px 10px;position:relative;opacity:0;transform:scale(.92);transition:all .3s ease;box-shadow:0 2px 6px rgba(30,30,58,.05);}
 .tile.in{opacity:1;transform:scale(1);}
-.tile .badge{position:absolute;top:6px;right:6px;background:var(--save);color:#fff;font-size:9.5px;font-weight:700;padding:3px 6px;border-radius:6px;}
-.tile .thumb{width:100%;height:56px;background:var(--bg);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:6px;}
-.tile .tname{font-size:11.5px;font-weight:700;line-height:1.25;min-height:28px;}
-.tile .torigin{font-size:9.5px;color:var(--muted);margin:2px 0 4px;}
-.tile .tprice{font-size:15px;font-weight:800;color:var(--dark);}
+.tile .badge{position:absolute;top:-7px;right:-7px;background:var(--save);color:#fff;font-size:9.5px;font-weight:800;padding:4px 8px;border-radius:20px;box-shadow:0 3px 8px rgba(192,57,43,.4);}
+.tile .thumb{width:52px;height:52px;margin:0 auto 8px;border-radius:50%;background:linear-gradient(135deg,var(--bg),#dfe3fa);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:inset 0 0 0 2px #fff;}
+.tile .tname{font-size:12px;font-weight:700;line-height:1.25;min-height:28px;text-align:center;}
+.tile .torigin{font-size:9.5px;color:var(--muted);margin:2px 0 6px;text-align:center;}
+.tile .tprice-row{text-align:center;}
+.tile .tprice{font-size:16px;font-weight:800;color:var(--dark);}
 .tile .tprice small{font-size:10px;font-weight:600;color:var(--muted);}
 .tile .twas{font-size:10px;color:var(--muted);text-decoration:line-through;}
+
+.flyer-cta{position:relative;z-index:1;margin:24px 0 0;background:linear-gradient(90deg,#5558B8,#7782D4);color:#fff;padding:16px 26px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.flyer-cta .ctext{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.flyer-cta .csub{font-size:11px;color:rgba(255,255,255,.75);margin-top:2px;}
 
 .actions{display:flex;gap:10px;margin-top:20px;}
 .actions button{flex:1;padding:11px;border-radius:8px;font-size:13px;font-weight:600;font-family:'DM Sans';cursor:pointer;border:none;}
@@ -106,12 +135,25 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--dar
       <div class="flyer-body">
         <div class="flyer-empty" id="flyerEmpty">Waiting for this week's items…<br>the flyer will build itself, category by category, as items are matched.</div>
         <div class="flyer-doc" id="flyerDoc">
-          <div class="flyer-status" id="flyerStatus">● Draft — auto-generated</div>
-          <div class="flyer-topbar">
-            <div class="fname">ABC Company — Weekly Flyer</div>
-            <div class="fdate">Valid Aug 21 – 27, 2026</div>
+          <div class="flyer-sheet">
+            <div class="flyer-masthead">
+              <div class="flyer-masthead-top">
+                <div>
+                  <div class="flyer-eyebrow">Weekly Deals</div>
+                  <div class="fname">ABC Company</div>
+                  <div class="ftag">Fresh picks, better prices — every week</div>
+                </div>
+                <div class="fdate">Valid Aug 21 – 27, 2026</div>
+              </div>
+            </div>
+            <div class="flyer-status" id="flyerStatus">● Draft — auto-generated</div>
+            <div id="heroContainer"></div>
+            <div class="flyer-inner" id="catContainer"></div>
+            <div class="flyer-cta">
+              <div><div class="ctext">Order online or in-store</div><div class="csub">Prices valid while supplies last</div></div>
+              <div class="csub">📞 (416) 555-0100 &nbsp;·&nbsp; abccompany.ca</div>
+            </div>
           </div>
-          <div id="catContainer"></div>
           <div class="actions">
             <button class="ghost">Edit a tile</button>
             <button class="primary">Approve &amp; Send to Print</button>
@@ -163,15 +205,34 @@ function buildFlyer(){
   document.getElementById('flyerEmpty').style.display='none';
   document.getElementById('flyerDoc').classList.add('show');
 
+  // Deal of the Week — whichever item has the biggest discount gets the hero spot
+  const hero = items.reduce((best, it) => pct(it.was, it.now) > pct(best.was, best.now) ? it : best, items[0]);
+  const heroWrap = document.getElementById('heroContainer');
+  heroWrap.innerHTML = `
+    <div class="hero-deal" id="heroDeal">
+      <div class="hero-burst"><b>${pct(hero.was, hero.now)}%</b><span>OFF</span></div>
+      <div class="hthumb">${hero.icon}</div>
+      <div class="hbody">
+        <div class="heyebrow">⭐ Deal of the Week</div>
+        <div class="hname">${hero.name}</div>
+        <div class="horigin">${hero.origin}</div>
+      </div>
+      <div class="hprice">
+        <div class="hwas">$${hero.was.toFixed(2)}</div>
+        <div class="hnow">$${hero.now.toFixed(2)}<small>${hero.unit}</small></div>
+      </div>
+    </div>`;
+  setTimeout(()=> document.getElementById('heroDeal').classList.add('in'), 60);
+
   const cats = [...new Set(items.map(i=>i.cat))];
   const container = document.getElementById('catContainer');
-  let delay = 0;
+  let delay = 300;
 
   cats.forEach(cat=>{
     setTimeout(()=>{
       const header = document.createElement('div');
       header.className = 'cat-header';
-      header.textContent = cat;
+      header.innerHTML = `<span class="cname">${cat}</span><span class="cline"></span>`;
       container.appendChild(header);
       requestAnimationFrame(()=> header.classList.add('in'));
 
@@ -185,12 +246,12 @@ function buildFlyer(){
           const tile = document.createElement('div');
           tile.className = 'tile';
           tile.innerHTML = `
-            <div class="badge">Save ${pct(it.was, it.now)}%</div>
+            <div class="badge">-${pct(it.was, it.now)}%</div>
             <div class="thumb">${it.icon}</div>
             <div class="tname">${it.name}</div>
             <div class="torigin">${it.origin}</div>
-            <div class="twas">$${it.was.toFixed(2)}</div>
-            <div class="tprice">$${it.now.toFixed(2)}<small>${it.unit}</small></div>`;
+            <div class="tprice-row"><div class="twas">$${it.was.toFixed(2)}</div>
+            <div class="tprice">$${it.now.toFixed(2)}<small>${it.unit}</small></div></div>`;
           grid.appendChild(tile);
           requestAnimationFrame(()=> tile.classList.add('in'));
         }, idx*160);
@@ -209,6 +270,7 @@ function buildFlyer(){
 function restart(){
   listEl.innerHTML = '';
   document.getElementById('catContainer').innerHTML = '';
+  document.getElementById('heroContainer').innerHTML = '';
   document.getElementById('flyerDoc').classList.remove('show');
   document.getElementById('flyerEmpty').style.display='block';
   document.getElementById('genTimer').textContent = '';
