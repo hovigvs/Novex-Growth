@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Weekly Flyer — Print Prototype (Page 1 of 8)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap"/>
+<style>
+:root{
+  --dark:#1E1E3A; --amber:#5558B8; --gold:#7782D4; --cream:#F0F2FF;
+  --muted:#646BC1; --border:#D4D8F5; --bg:#EEEEFF;
+  --good:#1E8E5A; --good-bg:#E6F4EC;
+  --hot:#C0392B; --hot-bg:#FCE8E5;
+  --new:#B8790E; --new-bg:#FFF3D6;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#ccc;font-family:'DM Sans',Arial,sans-serif;color:var(--dark);}
+
+/* Screen chrome — not part of the printed page */
+.screen-note{max-width:816px;margin:0 auto;padding:14px 6px;font-size:12.5px;color:#444;text-align:center;}
+.screen-note b{color:var(--dark);}
+
+/* The actual printable page — exactly US Letter, 8.5in x 11in */
+@page{ size: letter; margin: 0; }
+.page{
+  width:8.5in; height:11in; margin:0 auto 30px; background:#fff;
+  box-shadow:0 10px 30px rgba(0,0,0,.25); position:relative; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+@media print{
+  html,body{background:#fff;}
+  .screen-note{display:none;}
+  .page{margin:0; box-shadow:none;}
+}
+
+/* ---------- Masthead ---------- */
+.masthead{background:linear-gradient(120deg,#1E1E3A,#3B3A78 55%,#5558B8); color:#fff; padding:0.22in 0.3in; display:flex; align-items:center; justify-content:space-between; position:relative; overflow:hidden;}
+.masthead::after{content:'';position:absolute;right:-.4in;top:-.6in;width:2.4in;height:2.4in;border-radius:50%;background:radial-gradient(circle,rgba(130,223,255,.22),transparent 70%);}
+.m-left{position:relative;z-index:1;}
+.m-logo{font-family:'DM Sans';font-weight:800;font-size:15px;letter-spacing:.02em;}
+.m-logo span{background:linear-gradient(90deg,#82DFFF,#7782D4,#B7C3FF);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.m-name{font-family:'Playfair Display',serif;font-weight:800;font-size:26px;line-height:1.05;margin-top:2px;}
+.m-tag{font-size:10.5px;color:rgba(255,255,255,.7);margin-top:3px;}
+.m-right{position:relative;z-index:1;text-align:right;}
+.m-dates{font-size:10px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);padding:5px 11px;border-radius:20px;white-space:nowrap;}
+.m-page{font-size:9px;color:rgba(255,255,255,.55);margin-top:5px;}
+
+/* ---------- Hot Deal strip (auto-featured, top discount items) ---------- */
+.hotstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:0.09in;padding:0.14in 0.24in 0.06in;}
+.hotcard{background:var(--hot-bg);border:1px solid #F4C7C0;border-radius:8px;padding:8px 9px;display:flex;align-items:center;gap:8px;position:relative;}
+.hotcard .hlabel{position:absolute;top:-7px;left:8px;background:var(--hot);color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.03em;padding:2px 7px;border-radius:8px;text-transform:uppercase;}
+.hotcard .hthumb{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+.hotcard .hinfo{flex:1;min-width:0;}
+.hotcard .hname{font-size:10.5px;font-weight:700;line-height:1.2;}
+.hotcard .hsize{font-size:8px;color:var(--muted);}
+.hotcard .hprice{text-align:right;flex-shrink:0;}
+.hotcard .hwas{font-size:8px;color:#999;text-decoration:line-through;}
+.hotcard .hnow{font-size:16px;font-weight:800;color:var(--hot);line-height:1;}
+.hotcard .hpct{font-size:7px;font-weight:800;color:var(--hot);}
+
+/* ---------- Section grid ---------- */
+.section{padding:0.05in 0.24in;}
+.sec-title{display:flex;align-items:center;gap:8px;margin:0.09in 0 0.07in;}
+.sec-title .sname{font-family:'Playfair Display',serif;font-weight:700;font-size:13px;color:var(--dark);white-space:nowrap;}
+.sec-title .sline{flex:1;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.08in;}
+.item{border:1px solid var(--border);border-radius:7px;padding:7px 6px 6px;position:relative;text-align:center;}
+.item .badge{position:absolute;top:-6px;right:-6px;font-size:7px;font-weight:800;padding:3px 6px;border-radius:10px;color:#fff;}
+.badge.hot{background:var(--hot);} .badge.new{background:var(--new);} .badge.save{background:var(--good);}
+.item .ithumb{width:38px;height:38px;margin:0 auto 5px;border-radius:50%;background:linear-gradient(135deg,var(--bg),#dfe3fa);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.item .iname{font-size:9px;font-weight:700;line-height:1.2;min-height:22px;}
+.item .isize{font-size:7px;color:var(--muted);margin:1px 0 3px;}
+.item .iwas{font-size:7px;color:#999;text-decoration:line-through;}
+.item .inow{font-size:12.5px;font-weight:800;color:var(--dark);}
+.item .inow small{font-size:7.5px;font-weight:600;color:var(--muted);}
+
+/* ---------- Footer ---------- */
+.pfooter{margin-top:auto;background:linear-gradient(90deg,#5558B8,#7782D4);color:#fff;padding:0.1in 0.3in;display:flex;justify-content:space-between;align-items:center;font-size:9px;}
+.pfooter b{font-family:'Playfair Display',serif;font-size:11px;}
+</style>
+</head>
+<body>
+
+<div class="screen-note">This is a <b>print-accurate prototype</b> — the white sheet below is exactly 8.5in × 11in (US Letter). Sample items only; real weekly data would come from the uploaded spreadsheet + photo folder.</div>
+
+<div class="page" id="pageSheet">
+
+  <div class="masthead">
+    <div class="m-left">
+      <div class="m-logo"><span>novexgrowth</span> · powered flyer</div>
+      <div class="m-name">ABC Company</div>
+      <div class="m-tag">This Week's Deals — Fresh picks, better prices</div>
+    </div>
+    <div class="m-right">
+      <div class="m-dates">Valid Sep 11 – 17, 2026</div>
+      <div class="m-page">Page 1 of 8</div>
+    </div>
+  </div>
+
+  <div class="hotstrip" id="hotStrip"></div>
+
+  <div class="section" id="sectionArea"></div>
+
+  <div class="pfooter">
+    <div><b>Order online or in-store</b> &nbsp;·&nbsp; Prices valid while supplies last</div>
+    <div>📞 (416) 555-0100 &nbsp;·&nbsp; abccompany.ca</div>
+  </div>
+
+</div>
+
+<script>
+// ---- Sample data, styled after the real weekly flyer's density/mix ----
+// In production this comes from the customer's uploaded spreadsheet, one row
+// per item, matched to a photo in their uploaded folder by filename/name.
+const HOT = [
+  {name:'Falafel Plate + Free Pop', size:'ea', was:14.99, now:11.99, icon:'🧆', tag:'hot'},
+  {name:'Chicken Souvlaki Thighs', size:'/lb', was:8.49, now:5.99, icon:'🍗', tag:'hot'},
+  {name:'ARZ Virgin Olive Oil 2.88L', size:'ea', was:42.99, now:26.99, icon:'🫒', tag:'hot'},
+];
+
+const SECTIONS = [
+  { name:'Produce Deals', items:[
+    {name:'Field Tomatoes', size:'/lb', was:1.99, now:1.49, icon:'🍅', tag:'save'},
+    {name:'Mini Cucumbers', size:'/lb', was:1.99, now:1.49, icon:'🥒', tag:'save'},
+    {name:'Clementine Loose', size:'/lb', was:2.99, now:1.99, icon:'🍊', tag:'save'},
+    {name:'Golden Apples', size:'/lb', was:2.29, now:1.69, icon:'🍏', tag:'save'},
+    {name:'Fresh Celery', size:'ea', was:3.49, now:2.49, icon:'🥬', tag:'save'},
+    {name:'Ripe Avocados', size:'2 for', was:4.99, now:3.99, icon:'🥑', tag:'new'},
+    {name:'Seedless Grapes', size:'/lb', was:4.49, now:3.49, icon:'🍇', tag:'save'},
+    {name:'Fresh Mint Bunch', size:'ea', was:2.49, now:1.99, icon:'🌿', tag:'save'},
+  ]},
+  { name:'Bakery & Sweets', items:[
+    {name:'Sugar-Free Baklava 600g', size:'ea', was:22.99, now:19.99, icon:'🍯', tag:'new'},
+    {name:'Namoura Round Tray 700g', size:'ea', was:12.99, now:10.99, icon:'🧁', tag:'save'},
+    {name:'Tiramisu Cake 8"', size:'ea', was:26.99, now:23.99, icon:'🍰', tag:'save'},
+    {name:'Rosemary Sticks 400g', size:'ea', was:9.99, now:8.99, icon:'🥖', tag:'save'},
+  ]},
+  { name:'Grocery', items:[
+    {name:'Basmati Rice 8.82lb', size:'ea', was:17.99, now:13.99, icon:'🍚', tag:'save'},
+    {name:'Extra Virgin Olive Oil 1L', size:'ea', was:14.99, now:11.99, icon:'🫙', tag:'save'},
+    {name:'Mixed Pickles 1L', size:'ea', was:6.99, now:4.99, icon:'🥒', tag:'save'},
+    {name:'Pure Desi Ghee 800g', size:'ea', was:18.99, now:12.99, icon:'🧈', tag:'hot'},
+    {name:'Honey 1Kg', size:'ea', was:12.99, now:7.99, icon:'🍯', tag:'hot'},
+    {name:'Selected Tea 25 Bags', size:'ea', was:4.49, now:2.99, icon:'🍵', tag:'save'},
+    {name:'Tea Biscuits 450g', size:'ea', was:3.99, now:2.99, icon:'🍪', tag:'save'},
+    {name:'Sparkling Water 1.5L', size:'ea', was:1.49, now:0.99, icon:'💧', tag:'new'},
+  ]},
+  { name:'Deli & Cheese', items:[
+    {name:'Halal Mortadella Platter', size:'serves 12', was:64.99, now:59.99, icon:'🧀', tag:'save'},
+    {name:'Assorted Olives Platter', size:'serves 12-15', was:44.99, now:39.99, icon:'🫒', tag:'save'},
+    {name:'Haloumi Cheese 400g', size:'ea', was:11.99, now:8.99, icon:'🧀', tag:'hot'},
+    {name:'Cold Cut Platter Large', size:'serves 25', was:74.99, now:69.99, icon:'🥓', tag:'save'},
+  ]},
+];
+
+function fmt(n){ return '$' + n.toFixed(2); }
+function pct(was, now){ return Math.round((1 - now/was) * 100); }
+
+function renderHot(){
+  document.getElementById('hotStrip').innerHTML = HOT.map(it => `
+    <div class="hotcard">
+      <span class="hlabel">Hot Deal</span>
+      <div class="hthumb">${it.icon}</div>
+      <div class="hinfo">
+        <div class="hname">${it.name}</div>
+        <div class="hsize">${it.size}</div>
+      </div>
+      <div class="hprice">
+        <div class="hwas">${fmt(it.was)}</div>
+        <div class="hnow">${fmt(it.now)}</div>
+        <div class="hpct">-${pct(it.was, it.now)}%</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderSections(){
+  const area = document.getElementById('sectionArea');
+  area.innerHTML = SECTIONS.map(sec => `
+    <div class="sec-title"><span class="sname">${sec.name}</span><span class="sline"></span></div>
+    <div class="grid">
+      ${sec.items.map(it => `
+        <div class="item">
+          <span class="badge ${it.tag}">${it.tag === 'save' ? '-' + pct(it.was, it.now) + '%' : (it.tag === 'hot' ? 'HOT' : 'NEW')}</span>
+          <div class="ithumb">${it.icon}</div>
+          <div class="iname">${it.name}</div>
+          <div class="isize">${it.size}</div>
+          <div class="iwas">${fmt(it.was)}</div>
+          <div class="inow">${fmt(it.now)}</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+renderHot();
+renderSections();
+</script>
+</body>
+</html>
