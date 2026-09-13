@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reactivation & Revenue Recovery | Novex Growth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#0F1729; --purple:#6B75D9; --purple-dark:#4A52C4; --cyan:#5CE0FF;
+    --logo-grad:linear-gradient(90deg,#5CE0FF 0%,#6B75D9 55%,#4A52C4 100%);
+    --bg:#EEF1FB; --surface:#fff; --surface-2:#F4F6FF;
+    --ink:#0F1729; --muted:#7880B0; --text2:#3D4470; --line:#E2E6F7;
+    --accent:#6B75D9; --accent-ink:#4A52C4; --accent-soft:#E9EBFB;
+    --hot:#D5455B; --hot-bg:#FCE8EB; --warm:#C98A1E; --warm-bg:#FFF3D6;
+    --cold:#7880B0; --cold-bg:#F0F1F9; --past:#1C7A50; --past-bg:#E1F7EE;
+    --shadow:0 1px 2px rgba(15,23,41,.05),0 10px 30px rgba(15,23,41,.09);
+    --r-sm:8px; --r-md:14px; --r-lg:20px; --r-pill:999px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{background:var(--bg); color:var(--ink); font:14px/1.5 Inter,-apple-system,sans-serif; display:flex; flex-direction:column; height:100vh; overflow:hidden}
+  .logo{font-family:"Baloo 2",sans-serif; font-weight:700; font-size:20px; background:var(--logo-grad); -webkit-background-clip:text; background-clip:text; color:transparent; text-decoration:none}
+
+  header{background:var(--surface); border-bottom:1px solid var(--line); padding:14px 22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; flex:none}
+  header h1{font-size:15px; font-weight:800; margin:0; color:var(--navy)}
+  header .sub{font-size:12px; color:var(--muted); margin-top:1px}
+  .titleblock{display:flex; flex-direction:column; margin-right:auto}
+
+  .stats{display:flex; gap:10px}
+  .stat{background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-md); padding:8px 16px; text-align:center; min-width:90px}
+  .stat .n{font-size:18px; font-weight:800; color:var(--accent-ink); line-height:1.1}
+  .stat .l{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-weight:700; margin-top:2px}
+
+  .body{flex:1; min-height:0; display:flex}
+  .sidebar{width:340px; flex:none; border-right:1px solid var(--line); background:var(--surface); display:flex; flex-direction:column; overflow:hidden}
+  .buckets{display:flex; border-bottom:1px solid var(--line); flex:none}
+  .bucket-tab{flex:1; padding:10px 4px; text-align:center; font-size:11px; font-weight:700; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; background:none; border-top:none; border-left:none; border-right:none; font-family:inherit}
+  .bucket-tab .dot{width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px}
+  .bucket-tab.on{color:var(--ink); border-bottom-color:var(--accent)}
+  .bucket-tab .count{display:block; font-size:15px; font-weight:800; margin-top:2px}
+
+  .leadlist{flex:1; overflow-y:auto; padding:10px}
+  .leadcard{border:1px solid var(--line); border-radius:var(--r-md); padding:12px 14px; margin-bottom:8px; cursor:pointer; background:var(--surface); transition:border-color .15s}
+  .leadcard:hover{border-color:var(--accent)}
+  .leadcard.sel{border-color:var(--accent); background:var(--accent-soft)}
+  .leadcard.recovered{opacity:.55}
+  .leadcard .top{display:flex; justify-content:space-between; align-items:start; gap:8px}
+  .leadcard .name{font-weight:700; font-size:13.5px; color:var(--navy)}
+  .leadcard .event{font-size:12px; color:var(--text2); margin-top:2px}
+  .leadcard .value{font-weight:800; font-size:13px; color:var(--accent-ink); white-space:nowrap}
+  .leadcard .meta{display:flex; justify-content:space-between; align-items:center; margin-top:8px}
+  .leadcard .age{font-size:11px; color:var(--muted)}
+  .badge{font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:var(--r-pill)}
+  .badge.hot{background:var(--hot-bg); color:var(--hot)}
+  .badge.warm{background:var(--warm-bg); color:var(--warm)}
+  .badge.cold{background:var(--cold-bg); color:var(--cold)}
+  .badge.past{background:var(--past-bg); color:var(--past)}
+  .badge.done{background:var(--past-bg); color:var(--past)}
+
+  .main{flex:1; min-width:0; display:flex; flex-direction:column; background:var(--surface-2)}
+  .empty-state{margin:auto; text-align:center; color:var(--muted); max-width:340px; padding:20px}
+  .empty-state .ic{font-size:40px; margin-bottom:14px}
+
+  .detail{flex:1; display:flex; flex-direction:column; min-height:0}
+  .detail-head{background:var(--surface); border-bottom:1px solid var(--line); padding:18px 24px; flex:none}
+  .detail-head .name{font-size:18px; font-weight:800; color:var(--navy)}
+  .detail-head .info{font-size:12.5px; color:var(--text2); margin-top:4px; display:flex; gap:14px; flex-wrap:wrap}
+  .detail-head .info span{display:inline-flex; align-items:center; gap:5px}
+
+  .thread{flex:1; overflow-y:auto; padding:22px 24px; display:flex; flex-direction:column; gap:12px}
+  .bubble{max-width:72%; padding:11px 15px; border-radius:16px; font-size:13.5px; line-height:1.55; box-shadow:var(--shadow)}
+  .bubble.out{align-self:flex-end; background:var(--accent); color:#fff; border-bottom-right-radius:4px}
+  .bubble.in{align-self:flex-start; background:var(--surface); color:var(--ink); border-bottom-left-radius:4px}
+  .bubble .tag{display:block; font-size:10px; opacity:.75; margin-bottom:4px; font-weight:700; text-transform:uppercase; letter-spacing:.05em}
+  .typing{align-self:flex-start; background:var(--surface); border-radius:16px; padding:11px 16px; box-shadow:var(--shadow)}
+  .typing span{width:6px; height:6px; background:var(--muted); border-radius:50%; display:inline-block; margin-right:3px; animation:blink 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.2s} .typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:.25} 40%{opacity:1}}
+
+  .composer{border-top:1px solid var(--line); background:var(--surface); padding:16px 24px; flex:none}
+  .composer .label{font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px}
+  .draft-box{border:1px solid var(--line); border-radius:var(--r-md); padding:13px 15px; font-size:13.5px; color:var(--ink); background:var(--surface-2); line-height:1.6; margin-bottom:12px}
+  .composer-actions{display:flex; gap:10px; align-items:center}
+  .btn{border:none; border-radius:var(--r-pill); padding:10px 20px; font:inherit; font-size:13px; font-weight:700; cursor:pointer}
+  .btn-primary{background:var(--accent); color:#fff}
+  .btn-primary:hover{background:var(--accent-ink)}
+  .btn-primary:disabled{opacity:.5; cursor:default}
+  .btn-ghost{background:none; border:1px solid var(--line); color:var(--text2)}
+  .via{margin-left:auto; font-size:11.5px; color:var(--muted); display:flex; align-items:center; gap:6px}
+  select{border:1px solid var(--line); border-radius:var(--r-sm); padding:6px 10px; font:inherit; font-size:12.5px; color:var(--text2); background:var(--surface)}
+
+  .recovered-banner{background:var(--past-bg); color:var(--past); font-weight:700; font-size:12.5px; padding:9px 24px; text-align:center; flex:none}
+  ::-webkit-scrollbar{width:8px} ::-webkit-scrollbar-thumb{background:var(--line); border-radius:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="titleblock">
+    <h1><a class="logo" href="https://www.novexgrowth.com" style="font-size:15px" target="_blank" rel="noopener">novexgrowth</a> &nbsp;Reactivation &amp; Revenue Recovery</h1>
+    <div class="sub">Demo data — GTA catering &amp; venue leads. Nothing here is a real client.</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="n" id="statValue">$0</div><div class="l">Dormant value</div></div>
+    <div class="stat"><div class="n" id="statContacted">0</div><div class="l">Contacted</div></div>
+    <div class="stat"><div class="n" id="statReplied">0</div><div class="l">Replied</div></div>
+    <div class="stat"><div class="n" id="statRecovered">$0</div><div class="l">Recovered</div></div>
+  </div>
+</header>
+
+<div class="body">
+  <div class="sidebar">
+    <div class="buckets" id="buckets"></div>
+    <div class="leadlist" id="leadlist"></div>
+  </div>
+  <div class="main" id="main">
+    <div class="empty-state">
+      <div class="ic">👋</div>
+      <div><strong>Pick a lead on the left</strong><br>Each bucket needs a different message — hot inquiries get urgency, dormant leads get a specific reminder, past clients get a repeat-business nudge.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================== MOCK DATA ============================== */
+var BUCKETS = [
+  { id:"hot",  label:"Hot", sub:"Unanswered", color:"var(--hot)" },
+  { id:"warm", label:"Warm", sub:"Quote gone cold", color:"var(--warm)" },
+  { id:"cold", label:"Dormant", sub:"Never booked", color:"var(--cold)" },
+  { id:"past", label:"Past Clients", sub:"No recent contact", color:"var(--past)" }
+];
+
+var LEADS = [
+  { id:1, bucket:"hot", name:"Priya Anand", event:"Wedding — 140 guests", value:9800, age:"Inquired 6 hrs ago, no reply sent",
+    draft:"Hi Priya, this is Nicole from Novex Catering — thanks for reaching out about your 140-guest wedding! We do have availability for your date and I'd love to send over menu options and pricing. What date were you thinking?",
+    reply:"Oh hi! Yes we're looking at June 20th 2027. Can you send pricing for a plated dinner?",
+    followup:"Absolutely — plated dinner for 140 typically runs $95–$130/head depending on menu. I'll put together a proposal with 3 menu tiers and send it over today. Does that work?" },
+  { id:2, bucket:"hot", name:"Marcus Chen (BrightPath Corp)", event:"Corporate holiday party — 60 people", value:4200, age:"Inquired yesterday, no reply sent",
+    draft:"Hi Marcus, thanks for your inquiry about a holiday party for BrightPath — we cater a number of Toronto offices for exactly this. Are you thinking a full dinner or more of a cocktail/appetizer format?",
+    reply:"Cocktail format, probably 5-6pm on a Friday in December. Budget is around $70/person.",
+    followup:"That's very doable at that budget — I can put together a passed-appetizer + 2 stations menu and send a proposal by tomorrow. Which Friday works best?" },
+  { id:3, bucket:"warm", name:"Sarah & Devon Whitfield", event:"Wedding — 110 guests", value:8600, age:"Quote sent 12 days ago, no follow-up",
+    draft:"Hi Sarah, following up on the proposal we sent for your wedding on September 19th — wanted to check if you had any questions, or if anything needs adjusting based on your final guest count?",
+    reply:"Sorry for the silence! We're still deciding between two caterers. Could you sweeten the buffet package a bit?",
+    followup:"Totally understand — I can add a carving station at no extra cost and lock in current pricing if you confirm by the end of the month. Want me to send the updated proposal?" },
+  { id:4, bucket:"warm", name:"Golden Oak Banquet Hall (referral partner)", event:"Preferred caterer add-on — 3 upcoming events", value:5400, age:"Quote sent 18 days ago, no follow-up",
+    draft:"Hi team, checking in on the preferred-caterer proposal for your 3 upcoming bookings this fall — happy to hop on a quick call if it's easier to sort out logistics that way.",
+    reply:"Yes let's talk — we have a wedding Oct 4 that still needs a caterer confirmed.",
+    followup:"Perfect, I'm free this afternoon or tomorrow morning — I'll send a couple of time slots now." },
+  { id:5, bucket:"cold", name:"Tanya Reyes", event:"50th birthday — 80 guests", value:3200, age:"Inquired 47 days ago, never followed up",
+    draft:"Hi Tanya, it's been a little while since you asked about catering for a 80-guest birthday celebration — wanted to check if you're still planning something, or if the date has changed?",
+    reply:"We ended up postponing it to the spring actually! Are you around for that?",
+    followup:"We are — spring is a bit quieter for us so I can likely offer better availability and pricing too. What month were you thinking?" },
+  { id:6, bucket:"cold", name:"Horizon Legal LLP", event:"Corporate lunch inquiry — 25 people", value:1100, age:"Inquired 63 days ago, never followed up",
+    draft:"Hi there, following up on your inquiry about catered lunches for Horizon Legal — still relevant, or has your team gone a different direction?",
+    reply:"Still relevant, we just got busy. Do you do a recurring weekly order?",
+    followup:"We do — several offices order a rotating weekly menu with us. I can set up a simple recurring plan, no need to re-order every week." },
+  { id:7, bucket:"past", name:"The Alcott Wedding (booked last year)", event:"Wedding — 130 guests, booked Sept 2025", value:11200, age:"No contact in 11 months",
+    draft:"Hi! It's been about a year since your wedding with us — hope married life has been wonderful. As you hit your first anniversary, a few couples like to do a small dinner to celebrate. Happy to put something together if that's of interest, and if you know anyone getting married, we'd love an introduction!",
+    reply:"That's so sweet, thank you! Actually my sister just got engaged — I'll send her your way.",
+    followup:"That would mean a lot — I'll follow up with her directly if you'd like to make the intro, or feel free to just pass along our number." },
+  { id:8, bucket:"past", name:"Meridian Consulting Group", event:"Corporate — orders ~monthly, last order 5 months ago", value:2400, age:"No order in 5 months (used to be monthly)",
+    draft:"Hi Meridian team, noticed it's been a few months since your last order with us — everything okay on your end? Happy to send over our current menu in case anything's changed, or set up a standing monthly order again.",
+    reply:"We switched offices and forgot to update our caterer! Can you send the menu for the new location?",
+    followup:"Of course — could you send the new address and headcount, and I'll confirm we can deliver there and get you back on the schedule." }
+];
+/* ========================================================================= */
+
+var state = { activeBucket:"hot", selectedId:null, recovered:{}, contacted:{}, replied:{} };
+
+var bucketsEl = document.getElementById("buckets");
+var leadlistEl = document.getElementById("leadlist");
+var mainEl = document.getElementById("main");
+
+function fmt(n){ return "$" + n.toLocaleString(); }
+
+function renderBuckets(){
+  bucketsEl.innerHTML = BUCKETS.map(function(b){
+    var count = LEADS.filter(function(l){ return l.bucket === b.id; }).length;
+    return '<button class="bucket-tab' + (state.activeBucket===b.id?' on':'') + '" data-b="' + b.id + '">' +
+      '<span class="dot" style="background:' + b.color + '"></span>' + b.label +
+      '<span class="count">' + count + '</span></button>';
+  }).join("");
+  Array.prototype.forEach.call(bucketsEl.querySelectorAll(".bucket-tab"), function(btn){
+    btn.addEventListener("click", function(){ state.activeBucket = btn.dataset.b; render(); });
+  });
+}
+
+function badgeFor(bucket){
+  var map = { hot:"hot", warm:"warm", cold:"cold", past:"past" };
+  var lbl = { hot:"Hot", warm:"Warm", cold:"Dormant", past:"Past client" };
+  return '<span class="badge ' + map[bucket] + '">' + lbl[bucket] + '</span>';
+}
+
+function renderLeadList(){
+  var items = LEADS.filter(function(l){ return l.bucket === state.activeBucket; });
+  leadlistEl.innerHTML = items.map(function(l){
+    var recovered = state.recovered[l.id];
+    return '<div class="leadcard' + (state.selectedId===l.id?' sel':'') + (recovered?' recovered':'') + '" data-id="' + l.id + '">' +
+      '<div class="top"><div><div class="name">' + l.name + '</div><div class="event">' + l.event + '</div></div>' +
+      '<div class="value">' + fmt(l.value) + '</div></div>' +
+      '<div class="meta"><span class="age">' + l.age + '</span>' +
+      (recovered ? '<span class="badge done">✓ Recovered</span>' : badgeFor(l.bucket)) + '</div></div>';
+  }).join("") || '<p style="color:var(--muted);text-align:center;padding:30px 10px;font-size:13px">No leads in this bucket right now.</p>';
+
+  Array.prototype.forEach.call(leadlistEl.querySelectorAll(".leadcard"), function(card){
+    card.addEventListener("click", function(){ state.selectedId = parseInt(card.dataset.id,10); render(); });
+  });
+}
+
+function renderStats(){
+  var dormantValue = LEADS.filter(function(l){ return !state.recovered[l.id]; })
+    .reduce(function(s,l){ return s + l.value; }, 0);
+  var recoveredValue = Object.keys(state.recovered).reduce(function(s,id){
+    var l = LEADS.find(function(x){ return x.id == id; });
+    return s + (l ? l.value : 0);
+  }, 0);
+  document.getElementById("statValue").textContent = fmt(dormantValue);
+  document.getElementById("statContacted").textContent = Object.keys(state.contacted).length;
+  document.getElementById("statReplied").textContent = Object.keys(state.replied).length;
+  document.getElementById("statRecovered").textContent = fmt(recoveredValue);
+}
+
+function renderMain(){
+  var lead = LEADS.find(function(l){ return l.id === state.selectedId; });
+  if (!lead) {
+    mainEl.innerHTML = '<div class="empty-state"><div class="ic">👋</div><div><strong>Pick a lead on the left</strong><br>Each bucket needs a different message — hot inquiries get urgency, dormant leads get a specific reminder, past clients get a repeat-business nudge.</div></div>';
+    return;
+  }
+  var contacted = state.contacted[lead.id];
+  var replied = state.replied[lead.id];
+  var recovered = state.recovered[lead.id];
+
+  var html = '<div class="detail">';
+  if (recovered) html += '<div class="recovered-banner">✓ Re-engaged — treat as an active opportunity again</div>';
+  html += '<div class="detail-head"><div class="name">' + lead.name + '</div>' +
+    '<div class="info"><span>📋 ' + lead.event + '</span><span>💰 ' + fmt(lead.value) + '</span><span>🕒 ' + lead.age + '</span></div></div>';
+  html += '<div class="thread" id="thread">';
+  if (contacted) {
+    html += '<div class="bubble out"><span class="tag">Sent</span>' + lead.draft + '</div>';
+  }
+  if (replied) {
+    html += '<div class="bubble in"><span class="tag">' + lead.name.split(" ")[0] + '</span>' + lead.reply + '</div>';
+  }
+  if (state.followupSent && state.followupSent[lead.id]) {
+    html += '<div class="bubble out"><span class="tag">Sent</span>' + lead.followup + '</div>';
+  }
+  html += '</div>';
+
+  html += '<div class="composer">';
+  if (!contacted) {
+    html += '<div class="label">AI-drafted outreach — tailored to this lead\'s actual history</div>' +
+      '<div class="draft-box">' + lead.draft + '</div>' +
+      '<div class="composer-actions"><button class="btn btn-primary" id="sendBtn">Send message</button>' +
+      '<div class="via">via <select><option>Email</option><option>SMS</option><option>WhatsApp</option></select></div></div>';
+  } else if (replied && !(state.followupSent && state.followupSent[lead.id])) {
+    html += '<div class="label">AI-drafted reply — continuing the conversation</div>' +
+      '<div class="draft-box">' + lead.followup + '</div>' +
+      '<div class="composer-actions"><button class="btn btn-primary" id="followupBtn">Send reply</button>' +
+      '<button class="btn btn-ghost" id="markRecoveredBtn">Mark as recovered</button></div>';
+  } else if (!replied) {
+    html += '<div class="label">Waiting on a reply…</div>';
+  } else {
+    html += '<div class="label">This lead is warm again — hand off to the owner for a real quote.</div>' +
+      '<div class="composer-actions"><button class="btn btn-primary" id="markRecoveredBtn2">Mark as recovered</button></div>';
+  }
+  html += '</div></div>';
+
+  mainEl.innerHTML = html;
+
+  var sendBtn = document.getElementById("sendBtn");
+  if (sendBtn) sendBtn.addEventListener("click", function(){ sendInitial(lead); });
+  var followupBtn = document.getElementById("followupBtn");
+  if (followupBtn) followupBtn.addEventListener("click", function(){ sendFollowup(lead); });
+  var mrb = document.getElementById("markRecoveredBtn") || document.getElementById("markRecoveredBtn2");
+  if (mrb) mrb.addEventListener("click", function(){ state.recovered[lead.id] = true; render(); });
+}
+
+function sendInitial(lead){
+  state.contacted[lead.id] = true;
+  render();
+  var thread = document.getElementById("thread");
+  var typing = document.createElement("div");
+  typing.className = "typing";
+  typing.innerHTML = "<span></span><span></span><span></span>";
+  thread.appendChild(typing);
+  thread.scrollTop = thread.scrollHeight;
+  setTimeout(function(){
+    state.replied[lead.id] = true;
+    render();
+  }, 1400);
+}
+
+function sendFollowup(lead){
+  state.followupSent = state.followupSent || {};
+  state.followupSent[lead.id] = true;
+  render();
+}
+
+function render(){
+  renderBuckets();
+  renderLeadList();
+  renderMain();
+  renderStats();
+}
+
+render();
+})();
+</script>
+</body>
+</html>

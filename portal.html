@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Novex Growth Software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#0F1729; --purple:#6B75D9; --purple-dark:#4A52C4; --cyan:#5CE0FF;
+    --logo-grad:linear-gradient(90deg,#5CE0FF 0%,#6B75D9 55%,#4A52C4 100%);
+    --bg:#EEF1FB; --surface:#fff; --surface-2:#F4F6FF;
+    --ink:#0F1729; --muted:#7880B0; --text2:#3D4470; --line:#E2E6F7;
+    --accent:#6B75D9; --accent-ink:#4A52C4; --accent-soft:#E9EBFB;
+    --shadow:0 1px 2px rgba(15,23,41,.05),0 10px 30px rgba(15,23,41,.09);
+    --r-sm:8px; --r-md:14px; --r-lg:20px; --r-pill:999px;
+    --sidebar-bg:#141B33;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{background:var(--bg); color:var(--ink); font:14px/1.5 Inter,-apple-system,sans-serif; display:flex; height:100vh; overflow:hidden}
+  h1,h2{font-family:Inter,sans-serif; font-weight:800; margin:0; letter-spacing:-.01em}
+  .logo{font-family:"Baloo 2",sans-serif; font-weight:700; font-size:20px; background:var(--logo-grad); -webkit-background-clip:text; background-clip:text; color:transparent}
+
+  /* ---------- App shell ---------- */
+  .shell{display:flex; width:100%; height:100%}
+  .sidebar{width:250px; flex:none; background:var(--sidebar-bg); color:#fff; display:flex; flex-direction:column; overflow:hidden}
+  .sidebar .brand{padding:20px 20px 16px; border-bottom:1px solid rgba(255,255,255,.08)}
+  .sidebar .brand .logo{font-size:19px}
+  .sidebar .brand .company{font-size:11.5px; color:rgba(255,255,255,.5); margin-top:3px; font-weight:600}
+  .sidebar .demo-tag{display:inline-block; margin-top:8px; background:rgba(92,224,255,.15); border:1px solid rgba(92,224,255,.35); color:var(--cyan); font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; padding:3px 9px; border-radius:var(--r-pill)}
+
+  .navlist{flex:1; overflow-y:auto; padding:14px 10px}
+  .navsection{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.35); padding:14px 10px 6px}
+  .navitem{display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:var(--r-sm); cursor:pointer; color:rgba(255,255,255,.75); font-size:13px; font-weight:600; margin-bottom:2px}
+  .navitem:hover{background:rgba(255,255,255,.06); color:#fff}
+  .navitem.on{background:linear-gradient(90deg,rgba(107,117,217,.35),rgba(92,224,255,.12)); color:#fff}
+  .navitem .ic{width:20px; text-align:center; flex:none; font-size:14.5px}
+  .navitem .lbl{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .navitem .lock{font-size:11px; opacity:.55; flex:none}
+  .navitem.dashboarditem{margin-bottom:8px; padding-bottom:9px; border-bottom:1px solid rgba(255,255,255,.08)}
+
+  .sidebar-foot{padding:14px 20px; border-top:1px solid rgba(255,255,255,.08); flex:none}
+  .logout{width:100%; background:none; border:1px solid rgba(255,255,255,.18); color:rgba(255,255,255,.8); padding:8px; border-radius:var(--r-pill); font:inherit; font-size:12px; font-weight:700; cursor:pointer}
+  .logout:hover{border-color:var(--cyan); color:var(--cyan)}
+
+  /* ---------- Content area ---------- */
+  .content{flex:1; min-width:0; display:flex; flex-direction:column; background:var(--bg)}
+  .topbar{background:var(--surface); border-bottom:1px solid var(--line); padding:14px 26px; display:flex; align-items:center; gap:14px; flex:none}
+  .topbar h2{font-size:16px}
+  .topbar .tagline{font-size:12px; color:var(--muted); margin-top:1px}
+  .topbar .status{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:3px 10px; border-radius:var(--r-pill)}
+  .status.active{background:#E1F7EE; color:#1C7A50}
+  .status.trial{background:#FFF3D6; color:#8A6100}
+  .status.locked{background:var(--surface-2); color:var(--muted); border:1px solid var(--line)}
+  .topbar .spacer{flex:1}
+  .topbar a.newtab{font-size:12px; color:var(--accent-ink); font-weight:700; text-decoration:none}
+
+  .upsell-bar{background:#FFF3D6; color:#8A6100; font-size:12.5px; font-weight:600; padding:9px 26px; display:flex; align-items:center; gap:10px; flex:none}
+  .upsell-bar a{color:#8A6100; font-weight:800; text-decoration:underline}
+
+  .pane{flex:1; min-height:0; position:relative}
+  .pane iframe{width:100%; height:100%; border:none; display:block}
+  .pane-inner{height:100%; overflow:auto}
+
+  .card{max-width:480px; margin:60px auto; text-align:center; padding:36px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow)}
+  .card h2{margin:0 0 10px; font-size:20px; color:var(--navy)}
+  .card p{color:var(--text2); font-size:14px; line-height:1.7; margin:0 0 22px}
+  .card .phone{display:inline-flex; align-items:center; gap:10px; background:var(--cyan); color:var(--navy); font-size:20px; font-weight:800; padding:11px 24px; border-radius:var(--r-pill); text-decoration:none}
+  .btn{display:inline-block; background:var(--accent); color:#fff; padding:11px 24px; border-radius:var(--r-pill); font-weight:700; font-size:13.5px; text-decoration:none}
+
+  /* Dashboard home */
+  .dash{padding:34px 36px; overflow-y:auto; height:100%}
+  .dash .lead{font-size:14px; color:var(--text2); margin:6px 0 26px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px}
+  .tile{border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; background:var(--surface); box-shadow:var(--shadow); display:flex; flex-direction:column; cursor:pointer; transition:transform .1s}
+  .tile:hover{transform:translateY(-2px)}
+  .tile .ic{font-size:22px; margin-bottom:8px}
+  .tile h3{font-size:15px; margin-bottom:4px}
+  .tile .tag{font-size:12px; color:var(--muted); margin-bottom:14px; flex:1}
+  .tile .st{display:inline-block; font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; border-radius:var(--r-pill); padding:3px 9px; width:fit-content}
+  .st.active{background:#E1F7EE; color:#1C7A50}
+  .st.trial{background:#FFF3D6; color:#8A6100}
+  .tile.locked{background:var(--surface-2); border-style:dashed}
+  .tile.locked .st{background:var(--line); color:var(--muted)}
+  .section-title{font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.09em; color:var(--accent-ink); margin:32px 0 12px}
+  .section-title:first-child{margin-top:0}
+  .empty{color:var(--muted); font-size:13.5px}
+  .loading{padding:80px 0; text-align:center; color:var(--muted)}
+  .placeholder{margin:auto; text-align:center; color:var(--muted); max-width:340px; padding:40px}
+  .placeholder .ic{font-size:36px; margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<div class="shell" id="shell" style="display:none">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="logo">novexgrowth</div>
+      <div class="company" id="companyName">Loading…</div>
+      <span class="demo-tag" id="demoTag" hidden>Demo mode</span>
+    </div>
+    <div class="navlist" id="navlist"></div>
+    <div class="sidebar-foot">
+      <button class="logout" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="topbar" id="topbar"></div>
+    <div class="upsell-bar" id="upsellBar" hidden></div>
+    <div class="pane" id="pane"></div>
+  </div>
+</div>
+
+<div id="loadingScreen" class="loading" style="margin:auto">Loading your dashboard…</div>
+
+<script src="portal-config.js"></script>
+<script>
+(function(){
+  var cfg = window.NOVEX_PORTAL_CONFIG;
+  var MODULE_INFO = window.NOVEX_MODULE_INFO;
+  var isDemoMode = !cfg || !cfg.SUPABASE_URL || cfg.SUPABASE_URL.indexOf("PASTE_") === 0;
+
+  var state = { client: { company_name: "Demo Account", vertical: "both" }, owned: {}, selected: null };
+
+  var shell = document.getElementById("shell");
+  var loadingScreen = document.getElementById("loadingScreen");
+  var navlist = document.getElementById("navlist");
+  var topbar = document.getElementById("topbar");
+  var upsellBar = document.getElementById("upsellBar");
+  var pane = document.getElementById("pane");
+
+  document.getElementById("logoutBtn").addEventListener("click", async function(){
+    if (isDemoMode) { window.location.href = "https://www.novexgrowth.com"; return; }
+    await supabase.auth.signOut();
+    location.href = "portal-login.html";
+  });
+
+  function renderSidebar(){
+    document.getElementById("companyName").textContent = state.client.company_name || "";
+    document.getElementById("demoTag").hidden = !isDemoMode;
+
+    var html = '<div class="navitem dashboarditem' + (state.selected===null?' on':'') + '" data-mod="__dashboard">' +
+      '<span class="ic">🏠</span><span class="lbl">Dashboard</span></div>';
+
+    var ids = Object.keys(MODULE_INFO).filter(function(id){
+      var v = MODULE_INFO[id].vertical;
+      return state.client.vertical === "both" || v === "both" || v === state.client.vertical;
+    });
+
+    html += '<div class="navsection">Your software</div>';
+    html += ids.map(function(id){
+      var info = MODULE_INFO[id];
+      var owned = !!state.owned[id] || isDemoMode;
+      return '<div class="navitem' + (state.selected===id?' on':'') + '" data-mod="' + id + '">' +
+        '<span class="ic">' + info.icon + '</span><span class="lbl">' + info.name + '</span>' +
+        (owned ? '' : '<span class="lock">🔒</span>') + '</div>';
+    }).join("");
+
+    navlist.innerHTML = html;
+    Array.prototype.forEach.call(navlist.querySelectorAll(".navitem"), function(el){
+      el.addEventListener("click", function(){
+        state.selected = el.dataset.mod === "__dashboard" ? null : el.dataset.mod;
+        render();
+      });
+    });
+  }
+
+  function renderDashboard(){
+    topbar.innerHTML = '<h2 style="font-size:16px">Dashboard</h2>';
+    upsellBar.hidden = true;
+
+    var ids = Object.keys(MODULE_INFO).filter(function(id){
+      var v = MODULE_INFO[id].vertical;
+      return state.client.vertical === "both" || v === "both" || v === state.client.vertical;
+    });
+    var ownedIds = ids.filter(function(id){ return isDemoMode || state.owned[id]; });
+    var lockedIds = ids.filter(function(id){ return !isDemoMode && !state.owned[id]; });
+
+    function tile(id, locked){
+      var info = MODULE_INFO[id];
+      var m = state.owned[id];
+      var statusCls = locked ? "" : (m && m.status === "trial" ? "trial" : "active");
+      var statusLbl = locked ? "Available add-on" : (m && m.status === "trial" ? "Trial" : "Active");
+      return '<div class="tile' + (locked?' locked':'') + '" data-mod="' + id + '">' +
+        '<div class="ic">' + info.icon + '</div>' +
+        '<span class="st ' + statusCls + '">' + statusLbl + '</span>' +
+        '<h3 style="margin-top:8px">' + info.name + '</h3><div class="tag">' + info.tagline + '</div></div>';
+    }
+
+    var html = '<div class="dash">' +
+      '<h2>Welcome' + (state.client.company_name ? ", " + state.client.company_name : "") + '</h2>' +
+      '<p class="lead">' + (isDemoMode ? "This is a live preview of the full Novex Growth software — every module is unlocked so you can click around." : "Here's everything you have running, and what else is available.") + '</p>' +
+      '<div class="section-title">Your automations</div>' +
+      '<div class="grid">' + (ownedIds.map(function(id){ return tile(id, false); }).join("") || '<p class="empty">Nothing active yet — reach out to get your first automation set up.</p>') + '</div>' +
+      (lockedIds.length ? '<div class="section-title">Available add-ons</div><div class="grid">' + lockedIds.map(function(id){ return tile(id, true); }).join("") + '</div>' : '') +
+      '</div>';
+
+    pane.innerHTML = html;
+    Array.prototype.forEach.call(pane.querySelectorAll(".tile"), function(el){
+      el.addEventListener("click", function(){ state.selected = el.dataset.mod; render(); });
+    });
+  }
+
+  function renderModule(id){
+    var info = MODULE_INFO[id];
+    if (!info) { state.selected = null; render(); return; }
+    var owned = isDemoMode || !!state.owned[id];
+    var m = state.owned[id];
+
+    var statusCls = owned ? (m && m.status === "trial" ? "trial" : "active") : "locked";
+    var statusLbl = owned ? (m && m.status === "trial" ? "Trial" : "Active") : "Not active";
+
+    topbar.innerHTML = '<div><h2>' + info.icon + ' ' + info.name + '</h2><div class="tagline">' + info.tagline + '</div></div>' +
+      '<span class="status ' + statusCls + '">' + statusLbl + '</span><div class="spacer"></div>' +
+      (info.demo.type === "iframe" ? '<a class="newtab" href="' + info.demo.src + '" target="_blank" rel="noopener">Open in new tab ↗</a>' : '');
+
+    if (!owned) {
+      upsellBar.hidden = false;
+      upsellBar.innerHTML = '🔒 This isn\'t active on your account yet — you\'re seeing a preview. <a href="mailto:info@novexgrowth.com?subject=' + encodeURIComponent("Activate " + info.name) + '">Ask about activating it →</a>';
+    } else {
+      upsellBar.hidden = true;
+    }
+
+    if (info.demo.type === "iframe") {
+      pane.innerHTML = '<iframe src="' + info.demo.src + '" title="' + info.name + '"></iframe>';
+    } else if (info.demo.type === "card") {
+      pane.innerHTML = '<div class="pane-inner">' + info.demo.html + '</div>';
+    } else {
+      pane.innerHTML = '<div class="pane-inner" style="display:flex"><div class="placeholder"><div class="ic">🛠️</div><strong>Demo coming soon</strong><br>Ask us for a walkthrough of this module in the meantime.<br><br><a class="btn" href="mailto:info@novexgrowth.com?subject=' + encodeURIComponent("Tell me about " + info.name) + '">Ask about this →</a></div></div>';
+    }
+  }
+
+  function render(){
+    renderSidebar();
+    if (state.selected === null) renderDashboard();
+    else renderModule(state.selected);
+  }
+
+  /* ---------------- Demo mode: no Supabase needed ---------------- */
+  if (isDemoMode) {
+    loadingScreen.style.display = "none";
+    shell.style.display = "flex";
+    render();
+    return;
+  }
+
+  /* ---------------- Real mode: Supabase-backed per-client login ---------------- */
+  var supabase = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+
+  async function load() {
+    var sess = await supabase.auth.getSession();
+    if (!sess.data.session) { location.href = "portal-login.html"; return; }
+    var userId = sess.data.session.user.id;
+
+    var link = await supabase.from("client_users").select("client_id").eq("user_id", userId).single();
+    if (link.error || !link.data) {
+      loadingScreen.innerHTML = 'Your login isn\'t linked to a client account yet — contact <a href="mailto:info@novexgrowth.com">info@novexgrowth.com</a>.';
+      return;
+    }
+    var clientId = link.data.client_id;
+
+    var clientRes = await supabase.from("clients").select("company_name, vertical").eq("id", clientId).single();
+    state.client = clientRes.data || { company_name: "", vertical: "both" };
+
+    var modsRes = await supabase.from("client_modules").select("module_id, status, instance_url").eq("client_id", clientId);
+    (modsRes.data || []).forEach(function(m){ state.owned[m.module_id] = m; });
+
+    loadingScreen.style.display = "none";
+    shell.style.display = "flex";
+    render();
+  }
+
+  load().catch(function(err){
+    console.error(err);
+    loadingScreen.innerHTML = 'Something went wrong loading your dashboard — refresh, or contact <a href="mailto:info@novexgrowth.com">info@novexgrowth.com</a>.';
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Client Login | Novex Growth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#0F1729; --purple:#6B75D9; --purple-dark:#4A52C4; --cyan:#5CE0FF;
+    --logo-grad:linear-gradient(90deg,#5CE0FF 0%,#6B75D9 55%,#4A52C4 100%);
+    --line:#E2E6F7; --muted:#7880B0; --text2:#3D4470; --danger:#D5455B;
+    --r-sm:8px; --r-lg:20px; --r-pill:999px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    background:linear-gradient(145deg,#1A1F4E 0%,#2D3480 40%,#3B2D7A 70%,#1E3470 100%);
+    display:flex; align-items:center; justify-content:center; min-height:100vh;
+    font:14px/1.6 Inter,-apple-system,sans-serif; padding:20px;
+  }
+  .card{background:#fff; border-radius:var(--r-lg); padding:36px 32px; width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .logo{display:block; text-align:center; font-family:"Baloo 2",sans-serif; font-weight:700; font-size:24px; background:var(--logo-grad); -webkit-background-clip:text; background-clip:text; color:transparent; text-decoration:none; margin-bottom:6px}
+  .sub{text-align:center; font-size:12.5px; color:var(--muted); margin-bottom:26px}
+  label{display:block; font-size:12px; font-weight:600; color:var(--text2); margin:0 0 5px}
+  input{width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm); font:inherit; margin-bottom:16px}
+  input:focus{outline:2px solid #E9EBFB; border-color:var(--purple)}
+  button{width:100%; background:var(--purple); color:#fff; border:none; border-radius:var(--r-pill); padding:12px; font:inherit; font-weight:700; font-size:13.5px; cursor:pointer}
+  button:hover{background:var(--purple-dark)}
+  button:disabled{opacity:.6; cursor:default}
+  .msg{font-size:12.5px; margin-top:12px; text-align:center; min-height:16px}
+  .msg.err{color:var(--danger)}
+  .msg.ok{color:#2FA37A}
+  .foot{text-align:center; margin-top:18px; font-size:11.5px; color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <a class="logo" href="https://www.novexgrowth.com">novexgrowth</a>
+  <p class="sub">Client Portal</p>
+
+  <form id="loginForm">
+    <label for="email">Email</label>
+    <input type="email" id="email" required autocomplete="username" />
+    <label for="pass">Password</label>
+    <input type="password" id="pass" required autocomplete="current-password" />
+    <button type="submit" id="submitBtn">Log in</button>
+    <p class="msg" id="msg"></p>
+  </form>
+  <p class="foot">Trouble logging in? <a href="mailto:info@novexgrowth.com">info@novexgrowth.com</a></p>
+</div>
+
+<script src="portal-config.js"></script>
+<script>
+(function(){
+  var cfg = window.NOVEX_PORTAL_CONFIG;
+  var msg = document.getElementById("msg");
+
+  if (!cfg || cfg.SUPABASE_URL.indexOf("PASTE_") === 0) {
+    msg.textContent = "Portal isn't connected yet — add your Supabase URL/key to portal-config.js.";
+    msg.className = "msg err";
+    document.getElementById("submitBtn").disabled = true;
+    return;
+  }
+
+  var supabase = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+
+  // Already logged in? Skip straight to the dashboard.
+  supabase.auth.getSession().then(function(r){
+    if (r.data.session) location.href = "portal.html";
+  });
+
+  document.getElementById("loginForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+    var btn = document.getElementById("submitBtn");
+    btn.disabled = true; msg.textContent = "Logging in…"; msg.className = "msg";
+    var email = document.getElementById("email").value.trim();
+    var pass = document.getElementById("pass").value;
+    var res = await supabase.auth.signInWithPassword({ email: email, password: pass });
+    if (res.error) {
+      msg.textContent = "Couldn't log in — check your email and password.";
+      msg.className = "msg err";
+      btn.disabled = false;
+      return;
+    }
+    msg.textContent = "Welcome back — loading your dashboard…";
+    msg.className = "msg ok";
+    location.href = "portal.html";
+  });
+})();
+</script>
+</body>
+</html>
