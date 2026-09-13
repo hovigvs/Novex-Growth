@@ -82,7 +82,7 @@ window.NOVEX_MODULE_INFO = {
       "Once approved, a deposit payment link goes out to the customer automatically."
     ] },
   "flyer": { name: "AI Weekly Flyer Automation", tagline: "Photos in, print-ready flyer out", vertical: "catering", icon:"🖼️",
-    demo:{ type:"none" },
+    demo:{ type:"iframe", src:"flyer_generator_demo.html" },
     howItWorks:[
       "You upload this week's dish photos and pricing — no design skills needed.",
       "It automatically lays out a branded, print-ready weekly flyer or menu.",

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AI Flyer Generator — Novex Growth</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap"/>
+<style>
+:root{--dark:#1E1E3A;--amber:#5558B8;--gold:#7782D4;--cream:#F0F2FF;--muted:#646BC1;--border:#D4D8F5;--bg:#EEEEFF;--good:#1E8E5A;--warn:#B8790E;--save:#C0392B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--dark);}
+.wrap{max-width:1320px;margin:0 auto;padding:28px 24px 60px;}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+.logo{font-family:'DM Sans';font-weight:700;font-size:22px;}
+.logo span{background:linear-gradient(90deg,#82DFFF,#7782D4,#646BC1);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.headline{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--dark);}
+.subhead{color:var(--muted);font-size:14px;margin-top:4px;}
+.replay-btn{background:var(--dark);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans';}
+.replay-btn:hover{background:var(--amber);}
+.grid{display:grid;grid-template-columns:0.85fr 1.4fr;gap:22px;align-items:start;}
+@media(max-width:960px){.grid{grid-template-columns:1fr;}}
+
+.panel{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.panel-head .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(30,142,90,.15);}
+.panel-title{font-weight:700;font-size:14px;}
+.panel-sub{font-size:12px;color:var(--muted);margin-left:auto;}
+
+/* Input side */
+.input-body{padding:16px 18px;min-height:520px;}
+.drop-note{font-size:12px;color:var(--muted);background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:14px;}
+.item-row{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px solid var(--border);opacity:0;transform:translateX(-8px);animation:slidein .35s ease forwards;}
+@keyframes slidein{to{opacity:1;transform:translateX(0);}}
+.item-row .ico{width:34px;height:34px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.item-row .info{flex:1;min-width:0;}
+.item-row .name{font-size:12.5px;font-weight:600;}
+.item-row .cat{font-size:10.5px;color:var(--muted);}
+.item-row .prices{text-align:right;font-size:11.5px;flex-shrink:0;}
+.item-row .was{text-decoration:line-through;color:var(--muted);}
+.item-row .now{font-weight:700;color:var(--save);}
+.match-tag{font-size:9px;background:#E6F4EC;color:var(--good);padding:1px 6px;border-radius:10px;margin-left:6px;white-space:nowrap;}
+
+/* Flyer side */
+.flyer-body{padding:20px;min-height:520px;}
+.flyer-empty{color:var(--muted);font-size:13px;text-align:center;padding:80px 20px;}
+.flyer-doc{opacity:0;}
+.flyer-doc.show{opacity:1;}
+.flyer-topbar{display:flex;justify-content:space-between;align-items:center;background:var(--dark);color:#fff;border-radius:10px;padding:14px 18px;margin-bottom:16px;}
+.flyer-topbar .fname{font-family:'Playfair Display',serif;font-size:18px;}
+.flyer-topbar .fdate{font-size:11px;opacity:.75;}
+.flyer-status{display:inline-block;background:#E6F4EC;color:var(--good);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:12px;}
+.cat-header{background:var(--cream);border-left:4px solid var(--gold);padding:6px 12px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dark);margin:16px 0 10px;opacity:0;transform:translateY(6px);transition:all .35s ease;}
+.cat-header.in{opacity:1;transform:translateY(0);}
+.tile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media(max-width:640px){.tile-grid{grid-template-columns:repeat(2,1fr);}}
+.tile{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;position:relative;opacity:0;transform:scale(.92);transition:all .3s ease;}
+.tile.in{opacity:1;transform:scale(1);}
+.tile .badge{position:absolute;top:6px;right:6px;background:var(--save);color:#fff;font-size:9.5px;font-weight:700;padding:3px 6px;border-radius:6px;}
+.tile .thumb{width:100%;height:56px;background:var(--bg);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:6px;}
+.tile .tname{font-size:11.5px;font-weight:700;line-height:1.25;min-height:28px;}
+.tile .torigin{font-size:9.5px;color:var(--muted);margin:2px 0 4px;}
+.tile .tprice{font-size:15px;font-weight:800;color:var(--dark);}
+.tile .tprice small{font-size:10px;font-weight:600;color:var(--muted);}
+.tile .twas{font-size:10px;color:var(--muted);text-decoration:line-through;}
+
+.actions{display:flex;gap:10px;margin-top:20px;}
+.actions button{flex:1;padding:11px;border-radius:8px;font-size:13px;font-weight:600;font-family:'DM Sans';cursor:pointer;border:none;}
+.actions .primary{background:var(--dark);color:#fff;}
+.actions .ghost{background:#fff;border:1px solid var(--border);color:var(--dark);}
+
+.footer-note{margin-top:26px;text-align:center;color:var(--muted);font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="logo"><span>novexgrowth</span></div>
+      <div class="headline">This week's photos + price list in — finished flyer out</div>
+      <div class="subhead">No live back-and-forth needed. Drop in what you already produce every week, and the AI matches, formats, and lays it into the template automatically.</div>
+    </div>
+    <button class="replay-btn" onclick="restart()">▶ Replay demo</button>
+  </div>
+
+  <div class="grid">
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="dot"></div>
+        <div class="panel-title">This Week's Input</div>
+        <div class="panel-sub">Folder + list</div>
+      </div>
+      <div class="input-body">
+        <div class="drop-note">📁 <b>promo-photos-aug21.zip</b> (14 images) + <b>this-week-items.xlsx</b> received — matching items to photos…</div>
+        <div id="itemList"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="position:relative;">
+      <div class="panel-head">
+        <div class="dot" style="background:var(--gold);box-shadow:0 0 0 4px rgba(119,130,212,.15);"></div>
+        <div class="panel-title">Generated Weekly Flyer</div>
+        <div class="panel-sub" id="genTimer"></div>
+      </div>
+      <div class="flyer-body">
+        <div class="flyer-empty" id="flyerEmpty">Waiting for this week's items…<br>the flyer will build itself, category by category, as items are matched.</div>
+        <div class="flyer-doc" id="flyerDoc">
+          <div class="flyer-status" id="flyerStatus">● Draft — auto-generated</div>
+          <div class="flyer-topbar">
+            <div class="fname">ABC Company — Weekly Flyer</div>
+            <div class="fdate">Valid Aug 21 – 27, 2026</div>
+          </div>
+          <div id="catContainer"></div>
+          <div class="actions">
+            <button class="ghost">Edit a tile</button>
+            <button class="primary">Approve &amp; Send to Print</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">This is a working concept demo with placeholder art — in production it uses your business's real product photos and matches them to the list even when filenames don't line up cleanly.</div>
+</div>
+
+<script>
+const items = [
+  {cat:'Produce Deals', name:'Mini English Cucumber', origin:'Product of Canada', was:2.49, now:1.49, unit:'/lb', icon:'🥒'},
+  {cat:'Produce Deals', name:'Peaches Loose', origin:'Product of Canada', was:4.49, now:2.69, unit:'/lb', icon:'🍑'},
+  {cat:'Produce Deals', name:'Clementine Loose', origin:'Product of Argentina', was:3.99, now:2.49, unit:'/lb', icon:'🍊'},
+  {cat:'Meat & Deli', name:'Lean Ground Beef', origin:'Fresh', was:9.99, now:6.99, unit:'/lb', icon:'🥩'},
+  {cat:'Meat & Deli', name:'Bakery Sesame Cookies', origin:'350g', was:9.99, now:6.99, unit:'ea', icon:'🍪'},
+  {cat:'Grocery', name:'Primo Selected Tomato', origin:'796ml', was:2.99, now:2.39, unit:'ea', icon:'🥫'},
+  {cat:'Grocery', name:'Nutella Hazelnut Spread', origin:'750g', was:6.99, now:4.99, unit:'ea', icon:'🍫'},
+  {cat:'Grocery', name:'Selected Plain Yogurt', origin:'750g', was:1.79, now:1.49, unit:'ea', icon:'🥣'},
+];
+
+const listEl = document.getElementById('itemList');
+let startTime;
+
+function pct(was, now){ return Math.round((1-(now/was))*100); }
+
+function renderInputRow(it, i){
+  const div = document.createElement('div');
+  div.className = 'item-row';
+  div.style.animationDelay = (i*0.05)+'s';
+  div.innerHTML = `
+    <div class="ico">${it.icon}</div>
+    <div class="info">
+      <div class="name">${it.name} <span class="match-tag">✓ photo matched</span></div>
+      <div class="cat">${it.cat} · ${it.origin}</div>
+    </div>
+    <div class="prices">
+      <div class="was">$${it.was.toFixed(2)}</div>
+      <div class="now">$${it.now.toFixed(2)}${it.unit}</div>
+    </div>`;
+  listEl.appendChild(div);
+}
+
+function buildFlyer(){
+  document.getElementById('flyerEmpty').style.display='none';
+  document.getElementById('flyerDoc').classList.add('show');
+
+  const cats = [...new Set(items.map(i=>i.cat))];
+  const container = document.getElementById('catContainer');
+  let delay = 0;
+
+  cats.forEach(cat=>{
+    setTimeout(()=>{
+      const header = document.createElement('div');
+      header.className = 'cat-header';
+      header.textContent = cat;
+      container.appendChild(header);
+      requestAnimationFrame(()=> header.classList.add('in'));
+
+      const grid = document.createElement('div');
+      grid.className = 'tile-grid';
+      container.appendChild(grid);
+
+      const catItems = items.filter(i=>i.cat===cat);
+      catItems.forEach((it, idx)=>{
+        setTimeout(()=>{
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.innerHTML = `
+            <div class="badge">Save ${pct(it.was, it.now)}%</div>
+            <div class="thumb">${it.icon}</div>
+            <div class="tname">${it.name}</div>
+            <div class="torigin">${it.origin}</div>
+            <div class="twas">$${it.was.toFixed(2)}</div>
+            <div class="tprice">$${it.now.toFixed(2)}<small>${it.unit}</small></div>`;
+          grid.appendChild(tile);
+          requestAnimationFrame(()=> tile.classList.add('in'));
+        }, idx*160);
+      });
+    }, delay);
+    delay += 220 + items.filter(i=>i.cat===cat).length*160;
+  });
+
+  setTimeout(()=>{
+    document.getElementById('flyerStatus').textContent = '✓ Ready for print';
+    const elapsed = ((Date.now()-startTime)/1000).toFixed(0);
+    document.getElementById('genTimer').textContent = 'Built in ' + elapsed + 's — 8 items, 0 manual layout';
+  }, delay+400);
+}
+
+function restart(){
+  listEl.innerHTML = '';
+  document.getElementById('catContainer').innerHTML = '';
+  document.getElementById('flyerDoc').classList.remove('show');
+  document.getElementById('flyerEmpty').style.display='block';
+  document.getElementById('genTimer').textContent = '';
+  startTime = Date.now();
+  items.forEach((it,i)=> renderInputRow(it, i));
+  setTimeout(buildFlyer, items.length*50 + 700);
+}
+
+startTime = Date.now();
+items.forEach((it,i)=> renderInputRow(it, i));
+setTimeout(buildFlyer, items.length*50 + 700);
+</script>
+</body>
+</html>
