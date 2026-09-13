@@ -86,6 +86,11 @@ body.rtl .search-icon{left:auto;right:16px}
 .items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .item-card{background:#fff;border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);display:flex;flex-direction:column;transition:box-shadow 0.2s}
 .item-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.1)}
+.item-media-wrap{position:relative;width:100%;height:140px;overflow:hidden;z-index:1;transition:transform .35s ease,box-shadow .35s ease}
+.item-media-wrap img,.item-media-wrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.item-media-wrap video{opacity:0;transition:opacity .3s ease}
+.item-media-wrap.playing{transform:scale(1.12);box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.item-media-wrap.playing video{opacity:1}
 .item-top-bar{height:4px;background:linear-gradient(90deg,var(--amber),var(--brown))}
 .item-body{padding:12px 14px;flex:1}
 .item-code{font-size:10px;color:var(--amber);font-weight:700;background:#F5F3FF;border-radius:4px;padding:1px 6px}
@@ -1117,6 +1122,14 @@ var CAT_IMAGES={
   'Mini Cakes & Pastries':'https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=600&q=80&fit=crop',
   'Ice Cream':'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=600&q=80&fit=crop'
 };
+// Per-dish hover video, keyed by item code — overrides the shared category
+// photo for just that one dish. Add a line here once a real clip exists;
+// leave the rest on CAT_IMAGES until they get their own. If the video file
+// 404s (not uploaded yet), the <video> just fails silently and the static
+// photo underneath keeps showing — nothing breaks either way.
+var ITEM_MEDIA={
+  '9002': { video: 'assets/menu-video/hummus.mp4' } // Hummus (Appetizers) — drop the real clip at this path
+};
 function renderCateringPage() { renderSidebar(); renderItems(); }
 function renderSidebar() {
   var el = document.getElementById('cat-sidebar-btns'); var html = '';
@@ -1147,7 +1160,15 @@ function renderItems() {
     html += '<div class="item-card">';
     var _ct=item._cat||currentCat;
     var _im=(typeof CAT_IMAGES!=='undefined'&&CAT_IMAGES[_ct])||'';
-    if(_im)html+='<img src="'+_im+'" style="width:100%;height:140px;object-fit:cover;display:block" loading="lazy" onerror="this.style.display=\'none\'">';
+    var _media=(typeof ITEM_MEDIA!=='undefined'&&ITEM_MEDIA[item.code])||null;
+    if(_media&&_media.video){
+      html+='<div class="item-media-wrap" onmouseenter="var v=this.querySelector(\'video\');v.currentTime=0;v.play().catch(function(){});this.classList.add(\'playing\')" onmouseleave="var v=this.querySelector(\'video\');v.pause();this.classList.remove(\'playing\')">';
+      if(_im)html+='<img src="'+_im+'" loading="lazy" onerror="this.style.display=\'none\'">';
+      html+='<video muted loop playsinline preload="none" src="'+esc(_media.video)+'" onerror="this.style.display=\'none\'"></video>';
+      html+='</div>';
+    } else if(_im){
+      html+='<img src="'+_im+'" style="width:100%;height:140px;object-fit:cover;display:block" loading="lazy" onerror="this.style.display=\'none\'">';
+    }
     html += '<div class="item-top-bar"></div><div class="item-body">';
     html += '<div style="display:flex;justify-content:space-between;margin-bottom:5px"><span class="item-code">#' + esc(item.code) + '</span>';
     if (item._cat) html += '<span style="font-size:10px;color:var(--muted);background:var(--light);border-radius:4px;padding:1px 6px">' + CAT_ICONS[item._cat] + ' ' + esc(catName(item._cat)) + '</span>';
