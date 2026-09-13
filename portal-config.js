@@ -97,6 +97,14 @@ window.NOVEX_MODULE_INFO = {
       "A staff member reviews and approves in under a minute instead of building it from scratch.",
       "Once approved, a deposit payment link goes out to the customer automatically."
     ] },
+  "custom-website": { name: "Custom Catering Website", tagline: "A full site built around your menu and ready-meals program", vertical: "catering", icon:"🌐",
+    demo:{ type:"iframe", src:"https://www.novexgrowth.com/website_v2.html" },
+    howItWorks:[
+      "A fully branded ordering website built around your real menu — not a generic template.",
+      "Customers browse, customize, and order online, including recurring ready-meal subscriptions.",
+      "Every order flows straight into the same kitchen dashboard and CRM as your other channels — nothing separate to manage.",
+      "Built and hosted for you — you focus on the food, not web development."
+    ] },
   "flyer": { name: "AI Weekly Flyer Automation", tagline: "Photos in, print-ready flyer out", vertical: "catering", icon:"🖼️",
     demo:{ type:"iframe", src:"flyer_generator_demo.html" },
     howItWorks:[
