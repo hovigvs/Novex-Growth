@@ -917,6 +917,31 @@ function detectVoiceId(text){
   return VOICE_MAP.en;
 }
 (function(){try{var ck=localStorage.getItem("layla_ck"),ek=localStorage.getItem("layla_ek"),ev=localStorage.getItem("layla_ev"),sp=localStorage.getItem("layla_sp");if(ck)LAYLA_CLAUDE_KEY=ck;if(ek)LAYLA_ELEVEN_KEY=ek;if(ev)LAYLA_ELEVEN_VOICE=ev;if(sp){LAYLA_VOICE_SPEED=parseFloat(sp);var sl=document.getElementById("speed-slider");if(sl){sl.value=LAYLA_VOICE_SPEED;var sv=document.getElementById("speed-val");if(sv)sv.textContent=LAYLA_VOICE_SPEED.toFixed(2);}}}catch(e){}})();
+
+// Settings panel — referenced by the gear button and Save button, but was
+// never defined, so clicking either silently did nothing (ReferenceError).
+function toggleLaylaSettings(){
+  var p = document.getElementById('chat-settings-panel');
+  if(!p) return;
+  p.classList.toggle('open');
+  // pre-fill fields with whatever's already set so reopening doesn't look blank
+  var ck = document.getElementById('claude-key-input'); if(ck) ck.value = LAYLA_CLAUDE_KEY || '';
+  var ek = document.getElementById('eleven-key-input'); if(ek) ek.value = LAYLA_ELEVEN_KEY || '';
+  var ev = document.getElementById('eleven-voice-input'); if(ev) ev.value = LAYLA_ELEVEN_VOICE || '';
+}
+function saveLaylaKeys(){
+  try{
+    var ck = document.getElementById('claude-key-input').value.trim();
+    var ek = document.getElementById('eleven-key-input').value.trim();
+    var ev = document.getElementById('eleven-voice-input').value.trim();
+    var sp = document.getElementById('speed-slider').value;
+    if(ck){ LAYLA_CLAUDE_KEY = ck; localStorage.setItem('layla_ck', ck); }
+    if(ek){ LAYLA_ELEVEN_KEY = ek; localStorage.setItem('layla_ek', ek); }
+    if(ev){ LAYLA_ELEVEN_VOICE = ev; localStorage.setItem('layla_ev', ev); }
+    LAYLA_VOICE_SPEED = parseFloat(sp); localStorage.setItem('layla_sp', sp);
+  }catch(e){}
+  toggleLaylaSettings();
+}
 var chatMsgs = [];
 
 function t(k) { return (T[LANG] && T[LANG][k] !== undefined) ? T[LANG][k] : (T.en && T.en[k] !== undefined ? T.en[k] : k); }
