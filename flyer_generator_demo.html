@@ -168,15 +168,18 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--dar
 </div>
 
 <script>
+// Example items styled after a real Mediterranean catering menu (same catalog
+// already used elsewhere on the site) — swap for any client's real weekly
+// items and prices; the layout/branding stays identical either way.
 const items = [
-  {cat:'Produce Deals', name:'Mini English Cucumber', origin:'Product of Canada', was:2.49, now:1.49, unit:'/lb', icon:'🥒'},
-  {cat:'Produce Deals', name:'Peaches Loose', origin:'Product of Canada', was:4.49, now:2.69, unit:'/lb', icon:'🍑'},
-  {cat:'Produce Deals', name:'Clementine Loose', origin:'Product of Argentina', was:3.99, now:2.49, unit:'/lb', icon:'🍊'},
-  {cat:'Meat & Deli', name:'Lean Ground Beef', origin:'Fresh', was:9.99, now:6.99, unit:'/lb', icon:'🥩'},
-  {cat:'Meat & Deli', name:'Bakery Sesame Cookies', origin:'350g', was:9.99, now:6.99, unit:'ea', icon:'🍪'},
-  {cat:'Grocery', name:'Primo Selected Tomato', origin:'796ml', was:2.99, now:2.39, unit:'ea', icon:'🥫'},
-  {cat:'Grocery', name:'Nutella Hazelnut Spread', origin:'750g', was:6.99, now:4.99, unit:'ea', icon:'🍫'},
-  {cat:'Grocery', name:'Selected Plain Yogurt', origin:'750g', was:1.79, now:1.49, unit:'ea', icon:'🥣'},
+  {cat:'Appetizers', name:'Hummus', origin:'Serves 10-12', was:34.99, now:22.99, unit:'', icon:'🫙'},
+  {cat:'Appetizers', name:'Falafel', origin:'1 dozen', was:11.99, now:8.99, unit:'', icon:'🧆'},
+  {cat:'Salads', name:'Taboule', origin:'Serves 8-10', was:32.99, now:26.99, unit:'', icon:'🥗'},
+  {cat:'Salads', name:'Fattoush Salad', origin:'Serves 8-10', was:37.99, now:29.99, unit:'', icon:'🥙'},
+  {cat:'Hot Food Platters', name:'Large Kebab Platter', origin:'Serves 8-10', was:109.99, now:79.99, unit:'', icon:'🍢'},
+  {cat:'Hot Food Platters', name:'Chicken Shish Taouk', origin:'Serves 6-8', was:69.99, now:54.99, unit:'', icon:'🍗'},
+  {cat:'Sweet Platters', name:'Mixed Baklawa Tray', origin:'Serves 18-20', was:38.00, now:28.00, unit:'/Kg', icon:'🍯'},
+  {cat:'Sweet Platters', name:'Kenafe Tray', origin:'Serves 6-8', was:30.00, now:22.00, unit:'', icon:'🧁'},
 ];
 
 const listEl = document.getElementById('itemList');
