@@ -129,3 +129,68 @@ into, instead of each demo inventing its own state.
    created first, before any per-module tables — every module should be
    migratable onto them without a rewrite, because it was already shaped
    that way.
+
+## Implementation plan (audit + phased rollout)
+
+Full repo audit performed 2026-09-13. Summary — **no database exists today**:
+frontend is static HTML/vanilla JS with no build step; the only backend is 8
+stateless Netlify Functions proxying 3rd-party AI APIs (Anthropic, ElevenLabs,
+Anam, Tavus); every module's "data" is a hardcoded JS array or scattered
+`localStorage`; Supabase Auth is wired in `portal-login.html` but dormant
+(`SUPABASE_URL` is still the `"PASTE_..."` placeholder in `portal-config.js`).
+Standing up Core means provisioning the project's first real backend, not
+refactoring an existing one.
+
+**Phase 1 (audit) — done, no changes made.**
+
+**Phase 2 (Core schema) — designed, not yet applied.** See
+[`supabase/migrations/0001_core_schema.sql`](../supabase/migrations/0001_core_schema.sql):
+9 tables (businesses, profiles, customers, leads, conversations, assets,
+campaigns, automations, ai_agents), each with `id`/`business_id`/
+`created_at`/`updated_at`, indexes on `business_id` (+ a few hot paths), and
+Row Level Security policies enforcing that every table's rows are only
+visible to callers whose `profiles.business_id` matches — so a customer
+belonging to Business A is never queryable by Business B, enforced at the
+database layer. Chosen backend: Supabase (Postgres + Auth + RLS), since it's
+already half-wired and free at current scale — avoids hand-rolling a
+tenant-isolation layer Supabase already provides.
+
+This file sits in the repo unapplied. **Provisioning it live is a separate
+decision from designing it** — nothing forces that to happen now.
+
+**Phase 3 (API/service layer) — not started, pending Phase 2 going live.**
+Plan: simple CRUD (a business reading/writing its own leads/customers) goes
+straight from the browser through the Supabase JS client, relying on RLS for
+the tenant boundary — no custom REST layer needed for that, matching "don't
+over-engineer." Anything invoking a paid AI API keeps going through a Netlify
+Function as today, which additionally validates the caller's `business_id`
+server-side before acting, so `UI → Netlify Function → Core` for AI-driven
+writes and `UI → Supabase (RLS-enforced) → Core` for plain data CRUD.
+
+**Phase 4 (existing demos) — no migration planned yet**, per the "don't
+migrate speculatively" rule. The audit table above already flags which
+demos are mock-only; none get moved onto Core until one of them becomes an
+actual production, client-facing feature (first candidate: whichever module
+a real paying client starts using).
+
+**Phase 5 (first production module) — Novex Content Engine, not started.**
+Deferred until Core is live, since it needs Assets (client media),
+Campaigns, Businesses/Users, and AI Agents to all already exist.
+
+**Risk / rollback:** everything in Phase 1-2 so far is either read-only
+audit or an unapplied `.sql` file — zero risk to the live site, zero cost.
+The only action with real cost/commitment is actually creating a Supabase
+project and pointing `SUPABASE_URL`/`SUPABASE_ANON_KEY` at it. That step is
+easily reversible too (delete the project, revert `portal-config.js` to the
+placeholder, site returns to today's demo-mode behavior) — but it's a real
+go/no-go decision, not something to do silently.
+
+**Remaining technical debt:** every existing demo module listed in the audit
+table above still runs on isolated mock data; none of that is fixed by
+writing the schema, only by an actual future migration per Phase 4.
+
+**Recommended next step:** hold Phase 2 as designed-but-unapplied until
+there's a concrete reason to go live with it (a real client onboarding, or
+the Content Engine build actually starting) — provisioning a live
+multi-tenant database with zero production features consuming it yet is
+exactly the speculative infrastructure this directive says to avoid.
