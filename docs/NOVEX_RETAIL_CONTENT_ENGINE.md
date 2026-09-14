@@ -1,281 +1,351 @@
-# Novex Retail Content Engine — Architecture Proposal
+# Novex Retail Content Engine — Architecture Proposal (Revision 2)
 
 **Status: PROPOSAL ONLY. Not implemented. Nothing in this doc has been built.**
 No existing file has been touched — `flyer_print_prototype.html` and
 `flyer_generator_demo.html` are untouched and stay as reference prototypes.
-This is Phase 0: architecture for review, per direction. Nothing past this
-document gets built until it's approved.
+This is Phase 0: architecture for review. Nothing past this document gets
+built until it's approved.
 
 This extends [`NOVEX_SYSTEM_ARCHITECTURE.md`](NOVEX_SYSTEM_ARCHITECTURE.md) —
-read that first for the Core entity model (Business/User/Customer/Lead/
-Conversation/Asset/Campaign/Automation/AI Agent) this proposal builds on.
+read that first for the Core entity model this proposal builds on.
+
+**Revision 2 changes:** added Page Archetypes as a layer above bin-packing,
+added a formal Layout Constraint system, added an Asset Preparation
+Pipeline, restructured the data model so the layout specification (not the
+PDF) is the source of truth, settled on server-side rendering for
+production output, split AI scope into V1 (ingestion) vs V1.1 (design
+assistant), and moved score-weight ownership to Novex with intuitive
+merchant-facing controls instead of exposed math. The actual migration SQL
+is now written (`supabase/migrations/0002_flyer_engine_schema.sql`) but not
+executed anywhere.
 
 ## 0. Why we're changing course, not just restyling
 
-The last few iterations on `flyer_print_prototype.html` (uniform grid →
-bigger photos → grocery-circular reskin → variable image sizes) kept
-producing the same failure mode: a hand-tuned CSS grid that looks fine until
-content changes, at which point it either overflows the page or forces
-arbitrary trims. That's a symptom of the actual problem — there's no
-separation between *deciding what goes where* and *drawing it*. Restyling
-the grid again would produce another version of the same fragile thing.
+The last few iterations on `flyer_print_prototype.html` kept producing the
+same failure mode: a hand-tuned CSS grid that looks fine until content
+changes, then either overflows or forces arbitrary trims. Revision 1 of this
+proposal fixed *that* problem (deterministic component library + scored
+bin-packing) but had a real gap, caught in review: **efficient bin-packing
+alone produces an organized catalog, not a professionally art-directed
+flyer.** The real ARZ flyer deliberately varies its page composition —
+Page 1 mixes a produce sidebar with a grocery grid, Page 2 is bakery plus a
+catering side-rail ad, Page 8 is almost entirely big meat photography. That
+variety is deliberate art direction, not an emergent property of packing
+efficiency. Section 1 below (Page Archetypes) is the fix.
 
-The fix is architectural: a fixed library of layout components, a
-deterministic planner that decides which component represents each product
-and which page it lands on, and a renderer that only ever draws what the
-planner approved. AI assists the decision-making; it never touches pixels.
+One thing still worth carrying forward from this session's actual
+measurements: page space is a countable budget. A standard page held **33
+standard-sized items**; making 2 items hero-sized cost **~5 standard items'
+worth of space each**, confirmed by measurement. Archetypes don't replace
+that budget — they organize *how* it's spent per page.
 
-One concrete thing this session already proved empirically, worth carrying
-into the design: **page space is a countable budget, not a feeling.** A
-standard 8.5×11 page held **33 standard-sized items** cleanly; making 2 items
-"hero"-sized cost roughly **5 standard items' worth of space each** (2 heroes
-= ~10 items' worth of room, confirmed by measurement, not estimate). The
-layout planner below turns that observation into the actual mechanism —
-every component has a known cell-cost, and page assignment is bin-packing
-against a fixed per-page budget, not visual guesswork.
+## 1. Page Archetypes (selected before bin-packing)
 
-## 1. Component library (rendering layer)
+The planner's first decision isn't "which component does this product get,"
+it's **"what composition is this page?"** Only then does bin-packing fill
+the zones that composition defines. This is the direct fix for "a more
+organized version of the flyer you disliked."
 
-Each component is a fixed HTML/CSS template taking a strict props object
-(product data + brand kit + size variant). No component ever generates its
-own markup dynamically from a prompt — the props change, the template
-doesn't. Approximate cell-cost is denominated in "standard grid cells" (1
-cell ≈ one compact item in the current prototype's 5-column grid), so the
-planner can budget pages numerically instead of by eye:
-
-| Component | Purpose | Approx. cost (cells) | Key props |
+| Archetype | Composition | Zones (approx. budget) | Modeled on |
 |---|---|---|---|
-| **Hero Product** | One standout item, huge photo + price | ~8-10 | product, badge |
-| **Standard Product** | The workhorse — photo, name, price | 1 | product |
-| **Double Product** | Wider promo, ~2x width | 2-3 | product, promo copy |
-| **Produce Hero** | Oversized produce photography | ~6-8 | product, seasonal tag |
-| **Hot Deal** | High-contrast treatment, small footprint | 1.5-2 | product, badge |
-| **Brand Feature** | Several SKUs from one brand, grouped | 4-6 | brand, products[] |
-| **Catering Feature** | Large photo + description block | 6-10 | product, description |
-| **Prepared Food Feature** | Platter photo + serving info | 6-8 | product, serves_count |
-| **Category Grid** | Uniform bulk grid (today's prototype) | 1/item | products[] |
-| **Promo Message** | Seasonal banner, no product | 3-5 | headline, theme |
-| **Meat Feature** | Photography-led meat cut layout | 4-6 | product |
-| **Full-width Campaign** | Major promo spanning the page | 15-20 | product/campaign |
-| **Side Rail** | Vertical column (ARZ pages 2 & 7 pattern) | ~30% page width | products[] or ad copy |
-| **Category Header** | Section divider bar | ~0 (structural) | category name, color |
-| **Footer Promotion** | Bottom CTA strip | fixed (structural) | brand kit |
-| **Store Information** | Hours/address/social | fixed (structural) | brand kit |
+| `produce_feature_page` | Vertical produce sidebar + main grid | sidebar (~8 cells, produce-only), main_grid (~22 cells) | Real ARZ page 1 |
+| `grocery_dense_page` | Uniform high-density grid, few/no features | grid (~30-33 cells) | Real ARZ pages 4, 5 |
+| `hero_plus_grid_page` | 1-2 heroes + supporting grid | hero_zone (~10-16 cells), grid_zone (~15-20 cells) | General workhorse mix |
+| `category_split_page` | Page divided into 2 category bands | band_a (~15 cells), band_b (~15 cells) | Real ARZ page 6 (Frozen + Deli) |
+| `catering_side_rail_page` | Main content + vertical ad/feature rail | main_zone (~24 cells), rail_zone (~9 cells, no bin-packing — editorial) | Real ARZ pages 2, 7 |
+| `brand_feature_page` | One brand's SKUs grouped prominently + grid fill | brand_zone (~8 cells), grid_zone (~22 cells) | — |
+| `meat_visual_page` | Large photography-led layout, low item count | visual_grid (~9-12 large cells) | Real ARZ page 8 |
+| `promo_campaign_page` | Full-width seasonal/campaign banner + supporting items | banner_zone (~10 cells, no product), grid_zone (~20 cells) | Real ARZ page 3 (Back to School) |
 
-That's 16 — comfortably in the 15-25 range. Costs above are starting
-estimates seeded from this session's measurements; they get refined once
-real pages are rendered and measured (same `getBoundingClientRect()`
-overflow-check method already used manually this session, but run
-automatically per generated page instead of by hand).
+**How archetype gets chosen per page:** the planner looks at what's actually
+being assigned to that page — category mix, score distribution, whether a
+`catering`/`prepared_food` category is present with descriptive content,
+whether one item's score is an outlier vs. the rest — and picks the closest-
+matching archetype from the table above (rule-based selection, not an LLM
+call). If nothing distinctive applies, it defaults to `grocery_dense_page`,
+the safe efficient fallback. Once the archetype is chosen, bin-packing (as
+described in Revision 1) runs *within* that archetype's defined zones,
+never across them — a produce item never lands in a `meat_visual_page`'s
+zone, for instance.
 
-## 2. Data model — Product entity
+This is genuinely how professional flyer design works — a small library of
+proven page compositions, populated with this week's specific products —
+rather than one universal grid algorithm.
 
-New entity, sitting alongside Core (extends
-`supabase/migrations/0001_core_schema.sql`, not replacing it):
+## 2. Layout Constraints (in addition to scores)
 
-```
-products
-  id                uuid
-  business_id       uuid  -> businesses
-  sku               text
-  name              text
-  description       text
-  category          text
-  regular_price     numeric
-  sale_price        numeric
-  discount_pct      numeric   -- generated from regular/sale
-  unit              text      -- "/lb", "ea", "2 for", etc.
-  promotion_type    text      -- none | hot_deal | new | seasonal | clearance
-  featured          boolean
-  page_preference   int       -- optional merchant hint from the spreadsheet
-  image_asset_id    uuid  -> assets
-  priority_score    numeric   -- computed, cached (see below)
-  created_at/updated_at
-```
+Priority score decides *how much space* a product deserves. Constraints
+decide *placement rules that scores can't express* — a catering platter and
+a bag of cucumbers are fundamentally different content objects, and scoring
+alone can't capture that a platter photo can never be cropped tighter than
+85%, or that two competing brands' hero items must not sit adjacent.
 
-Plus one more Core-adjacent table for outputs:
+Constraints live per-campaign (they're about *this week's* flyer, not the
+eternal product catalog — see the data model below):
 
-```
-generated_documents
-  id            uuid
-  business_id   uuid  -> businesses
-  campaign_id   uuid  -> campaigns
-  channel       text   -- print_flyer | digital_flyer | instagram_post | email | ...
-  layout_plan   jsonb  -- the approved plan that produced this output
-  asset_id      uuid  -> assets   -- the rendered file, once produced
-  status        text   -- draft | approved | published
-  created_at/updated_at
-```
+| Constraint | Meaning |
+|---|---|
+| `must_be_page_1` | Hard placement requirement |
+| `preferred_page` | Soft placement hint, honored if it doesn't break the budget |
+| `must_be_adjacent_to` | e.g. keep a platter next to its side-dish upsell |
+| `must_not_be_adjacent_to` | e.g. competing brands, or two hero items too close together |
+| `same_brand_group` | Groups SKUs for `brand_feature_page` selection |
+| `same_category_group` | Groups SKUs for `category_split_page`/grid cohesion |
+| `minimum_component_size` / `maximum_component_size` | Floor/ceiling on which components a product may be assigned, regardless of score |
+| `requires_price` | Nearly always true; explicit for completeness |
+| `requires_regular_price` | Show the crossed-out "was" price |
+| `requires_save_badge` | Force a "SAVE X%" badge even if not top-scored |
+| `requires_description` | Component must have a description slot (disqualifies pure-grid components) |
+| `requires_serving_count` | Catering/prepared-food specific — component must show "serves X" |
 
-Each weekly upload creates one `campaigns` row (`type = 'weekly_specials'`).
-Uploaded photos become `assets`. This is what makes the flyer "the first
-output of a larger content system" rather than an isolated tool — Product,
-Asset, and Campaign are the same rows a future Instagram-carousel or
-email-campaign renderer would consume.
+The planner treats constraints as filters applied *before* scoring picks a
+tier — a product with `requires_description` + `requires_serving_count`
+(a catering platter, say) can only ever be assigned to a component that has
+those slots (Catering Feature, Prepared Food Feature), no matter how its
+score comes out. Constraints are hard; scores are soft.
 
-This proposal does **not** include a new `.sql` migration file yet — schema
-gets written once the model below is approved, same two-step pattern already
-used for Core (design in the doc first, `.sql` file as a separate, still-
-unapplied artifact after sign-off).
+## 3. Asset Preparation Pipeline (new — not previously addressed)
 
-## 3. Priority / visual-importance score
+Flagged as a real gap in Revision 1: a brilliant layout engine still
+produces an ugly flyer if the input photography is bad, and merchant-
+uploaded images will be inconsistent — white backgrounds, transparent PNGs,
+angled phone photos, wildly different aspect ratios, tiny files, products
+occupying a fraction of the frame.
 
-Deterministic, transparent, and logged per product (so "why is this the
-hero?" always has an answer):
+Pipeline, run once per uploaded image, output attached to the `assets` row:
 
 ```
-priority_score =
-    w1 * promotion_weight(promotion_type)      -- hot_deal > seasonal > new > none
-  + w2 * discount_pct
-  + w3 * margin_pct                             -- optional, if merchant provides cost data
-  + w4 * (featured ? 1 : 0)
-  + w5 * category_importance(category)          -- produce/meat default higher (traffic drivers)
-  + w6 * campaign_relevance                      -- e.g. matches active seasonal theme
+Upload image
+  → detect product bounds
+  → normalize/remove background if needed
+  → crop whitespace
+  → normalize orientation
+  → determine safe-crop region (for hero vs. standard vs. thumbnail use)
+  → generate a master (cleaned) version
+  → generate flyer-sized derivatives (per component size class)
+  → compute asset_quality_score
+  → attach all of the above to the product's asset record
 ```
 
-Default weights ship sensible and are tunable per business later, not
-hard-coded forever. Score buckets map to component tiers:
+`asset_quality_score`: **Excellent / Acceptable / Poor / Missing.** This
+feeds the layout planner directly — a `Poor`-scored image disqualifies a
+product from Hero/Full-width/Catering Feature placement regardless of its
+priority score, with a surfaced warning instead of a silent downgrade:
 
-- Top percentile (≈1-2 per page) → Hero / Full-width Campaign / Catering Feature
-- Next tier → Double Product / Brand Feature / Prepared Food Feature
-- Everything else → Standard Product / Category Grid
+> ⚠ Olive Oil image resolution is too low for Hero placement. Use Standard
+> Product instead, or upload a larger image.
 
-This is the "merchandising, not box-filling" mechanism: a `Falafel Plate |
-Hot Deal | Featured` scores high and earns a big block; `Fresh Mint |
-Regular` scores low and stays small — automatically, not by manual per-item
-styling like the last few iterations.
+This is scoped as an assist pipeline (mostly deterministic image processing
+— bounds detection, whitespace cropping, resolution checks — with AI used
+narrowly for background removal/product detection where deterministic
+methods fall short), not a new AI-generation surface.
 
-## 4. Layout-planning layer (deterministic — separate from rendering)
+## 4. Data model — layout specification is the source of truth
 
-Input: full scored product list, merchant's `page_preference`/category
-hints, brand kit, target page count (8, configurable), fixed per-page cell
-budget.
+Direct response to the concern that mattered most here: **if a customer
+changes Tomatoes $1.49 → $1.29, Novex updates the structured flyer and
+regenerates — it never treats the PDF as the source of truth.** The PDF (or
+PNG/JPEG for social) is a rendered *output* of this structure, always
+regeneratable from it:
 
-Algorithm (greedy bin-packing, not AI):
+```
+business
+  → products                (catalog identity: SKU, name, category, master image)
+  → assets                  (photos, incl. Asset Preparation Pipeline metadata)
+  → campaigns                (a weekly-specials run — from existing Core schema)
+      → campaign_products    (THIS week's price/promo/constraints for a product)
+      → generated_documents  (one output artifact: the print flyer, an IG post, etc.)
+          → document_pages   (each page, tagged with its chosen archetype)
+              → layout_instances  (each component placed in a page, referencing
+                                    a campaign_product, sized/positioned)
+```
 
-1. Group products by explicit `page_preference` first, then by `category`.
-2. Sort each group by `priority_score` descending.
-3. Walk each page's group, assigning component tiers by score bucket,
-   accumulating cell-cost against that page's budget.
-4. Cap hero-tier components per page (e.g. max 1-2) so one page can't
-   accidentally blow its budget the way this session's 2-hero experiment did
-   (measured cost: +242px over one page for 2 heroes, confirmed by testing).
-5. Overflow handling: if a category doesn't fit at its current component
-   tier, downgrade its lowest-scored members to a smaller tier before ever
-   spilling to a 9th page or silently dropping an item — visibility over
-   surprise.
-6. Output is a **Layout Plan**: plain JSON, e.g.
-   `{ pages: [ { page: 1, blocks: [ {component:"produce_hero", product_id:"..."}, {component:"category_grid", product_ids:[...]} ] } ] }`.
+Key modeling decision: **`regular_price` lives on `products`** (catalog
+identity), but **`sale_price`, `promotion_type`, `featured`, and all the
+Section 2 constraints live on `campaign_products`** — because those change
+every week, while the product itself doesn't. Editing this week's Tomatoes
+price touches one `campaign_products` row; it never touches `products` and
+never requires regenerating anything by hand — the next render of that
+`generated_documents` row picks up the change automatically.
 
-This plan is what the "click a product → make larger / smaller / move /
-feature / remove" editing surface actually edits — those actions mutate this
-JSON; the renderer redraws deterministically from whatever the JSON says.
-It's also what makes "✨ Improve This Page" tractable: that feature is Claude
-reading this JSON + the score distribution for one page and proposing a
-*structured diff* to it ("promote product X to hero", "move 3 products to
-page 5") — never touching HTML directly, always a plan edit the merchant
-approves before re-render.
+`page_archetypes` is a small reference table (not per-tenant data) holding
+the 8 archetypes from Section 1 and their zone definitions as data, not
+hardcoded logic — so tuning a zone's budget, or adding a 9th archetype
+later, is a data change, not a code change.
 
-## 5. Rendering layer (deterministic, no free-form LLM output)
+Actual migration SQL for all of this is written and ready for inspection at
+[`supabase/migrations/0002_flyer_engine_schema.sql`](../supabase/migrations/0002_flyer_engine_schema.sql)
+— **not executed against anything.** It extends `0001_core_schema.sql`
+(businesses/campaigns/assets already exist there) rather than duplicating
+it.
 
-A renderer walks the approved Layout Plan and calls the matching component
-template per block. Same principle the current prototype already uses for
-its `@page{size:letter}` print-accurate sizing — this generalizes it into
-reusable functions instead of one hand-tuned page.
+## 5. Rendering — server-side for production, client-side for preview only
 
-**PDF export — proposing MVP now, bigger option flagged for later:**
-- **MVP (recommended to start):** keep the already-proven client-side
-  approach — the page is sized in real inches via CSS, the merchant uses the
-  browser's own "Print to PDF." Zero new infrastructure, zero new cost,
-  already validated this session.
-- **Later, if/when a client needs unattended/scheduled generation:**
-  server-side headless rendering (Puppeteer/Playwright). This needs new
-  infrastructure — Netlify Functions aren't well-suited to running a full
-  Chromium instance — so it's a real infra decision, not a default.
+Settled: production PDF generation is server-side, deterministic, using
+headless Chromium (Playwright). Client-side rendering is for live preview
+only, while a merchant is editing.
 
-## 6. Where AI is allowed — and explicitly where it is not
+```
+Layout Plan (structured JSON: pages → layout_instances → campaign_products)
+  → Renderer (component templates, same ones used for preview)
+  → HTML/CSS/SVG
+  → Headless Chromium (Playwright)
+       ├─→ Print-to-PDF   → print flyer, press-ready
+       └─→ Screenshot     → PNG/JPEG/WebP → digital/social derivatives
+```
 
-**Allowed** (always structured, reviewable output; never final pixels):
-- Spreadsheet cleanup — inferring a missing category/unit, normalizing
-  messy product names.
-- Photo-to-SKU fuzzy matching when filenames don't line up exactly (same
-  low-confidence-flagged-for-review pattern already agreed earlier this
-  session, not silent guessing).
-- Suggesting `priority_score` inputs (promotion_type, featured) when a
-  merchant leaves a field blank.
+Same structured plan, same component templates, same renderer — the only
+difference between a print PDF and an Instagram-ready PNG is which capture
+step headless Chromium runs. That's what makes "one upload → flyer + social
+assets" realistic later without a second rendering system.
+
+**Real infrastructure implication, flagged honestly:** Netlify's standard
+Functions aren't built for running a full Chromium instance (cold-start and
+package-size constraints). This needs either a Netlify Background Function
+with a Chromium binary layer (e.g. `@sparticuz/chromium`), or a small
+dedicated always-on rendering service (Render/Fly.io-style). That's a real
+"what does this cost and where does it run" decision — not resolved here,
+flagged as the next infra question once implementation actually starts.
+Given the cost-sensitivity we've operated under all along, I'd want to
+confirm actual usage volume (how many flyers/week, how many pages) before
+picking a specific hosting approach — a Background Function is likely
+sufficient and cheapest at Novex's current scale.
+
+## 6. AI scope — V1 vs V1.1
+
+**V1 (ships with the first working engine) — ingestion assistance only:**
+- Normalize messy product names/units from the spreadsheet.
+- Infer a missing category.
+- Detect obvious data problems (blank price, duplicate SKU, etc.) and flag
+  them instead of guessing silently.
+- Fuzzy-match photos to SKUs when filenames don't line up exactly
+  (low-confidence matches flagged for human review, never silent).
+
+These directly reduce real merchant effort and don't require the
+deterministic core to be fully proven first — they operate on raw input
+before layout planning ever runs. V1's job is to prove:
+`spreadsheet + images → structured products → merchandising → layout → flyer → PDF`
+end to end, deterministically, before any design-assistant AI is added.
+
+**V1.1 (fast-follow, after V1's deterministic core is proven) — design/
+merchandising assistant:**
 - "✨ Improve This Page" — proposes a structured diff to the Layout Plan
-  JSON, approved by the merchant before re-render.
-- QA pass — flagging pages with too-uniform visual weight, empty slots,
-  price/SKU mismatches.
+  JSON (never touches HTML/CSS directly), merchant approves before re-render.
+- Suggesting a better hero item, rearranging promotions, flagging pages with
+  too-uniform visual weight.
 
-**Never allowed:**
-- Freely generating page HTML/CSS per flyer or per page.
-- Choosing fonts/colors/positions outside the component library.
-- Any path that bypasses the deterministic renderer.
+**Longer-term, explicitly not scoped yet:** learning from a business's own
+flyer history — e.g. noticing this merchant's produce reliably gets heavy
+Page-1 space, or that catering consistently performs better in a side rail
+— and letting that shape future archetype/placement choices automatically.
+Genuinely interesting, deliberately deferred until the deterministic engine
+and V1.1 assistant are both proven.
 
-This is the direct fix for "AI randomly designing every page" — the
-component library and planner are the guardrails; AI operates *inside* them,
-never around them.
+## 7. Priority scoring — Novex owns the weights, merchants use plain controls
 
-## 7. Novex Core integration
+No merchant ever sees or edits a weight. Novex ships sensible internal
+defaults (illustrative — to be tuned against real output, not treated as
+final):
 
-- Uploaded photos → `assets` (tagged by SKU).
-- Spreadsheet rows → `products` (new table, business-owned).
-- Each weekly upload → one `campaigns` row.
-- Each generated output (flyer PDF, IG post, email, etc.) → a
-  `generated_documents` row linked to that campaign.
-- Future auto-publishing (posting to IG/FB/GBP on a schedule) → `automations`
-  rows, per the existing Core design.
+| Factor | Illustrative weight |
+|---|---|
+| Featured status | 30 |
+| Promotion type (hot deal > seasonal > new > none) | 20 |
+| Discount strength | 15 |
+| Campaign relevance | 15 |
+| Margin contribution (if merchant provides cost data) | 10 |
+| Category importance | 10 |
 
-Because Product/Asset/Campaign data is channel-agnostic, a future Instagram-
-carousel renderer, email renderer, or Google Business Profile post is just
-another renderer consuming the same scored product data — not a redesign.
-That's the "one upload → flyer + social + email + signage" vision, but it's
-a consequence of this data model, not something being built now.
+Merchants influence the outcome through plain controls that map onto the
+constraint/scoring system underneath, not math:
 
-## 8. Explicitly NOT being built in this phase
+- **Feature this product**
+- **Make this a hero**
+- **Priority: High / Normal / Low**
+- **Must appear on Page 1**
+- **Keep these together** (maps to `same_brand_group`/`same_category_group`
+  or `must_be_adjacent_to`)
+- **Do not feature**
 
-Digital flyer variant, Instagram/Facebook/GBP/WhatsApp/email renderers,
-digital signage output, scheduled auto-publishing, server-side PDF
-automation. The data model doesn't preclude any of these later — none of
-them are in scope for the first build.
+Each of these is a thin, understandable layer over the constraint fields in
+Section 2 and the score inputs in the table above — the merchant clicks
+"Make this a hero," Novex sets the internal weight/constraint fields that
+produce that outcome.
 
-## 9. Migration / rollout plan
+## 8. Where AI is allowed — and explicitly where it is not
 
-- **Phase A (this document):** proposal, no code. ✅ current step.
-- **Phase B (on approval):** build component library + planner + renderer
-  as new files, entirely separate from `flyer_print_prototype.html` /
-  `flyer_generator_demo.html` — both stay untouched, unlinked from the
-  portal, kept as reference.
+Unchanged from Revision 1, restated for completeness:
+
+**Allowed** (structured, reviewable, never final pixels): spreadsheet
+cleanup, photo-to-SKU fuzzy matching, asset quality flagging, "Improve This
+Page" as a plan-diff (V1.1), QA passes.
+
+**Never allowed:** freely generating page HTML/CSS, choosing fonts/colors/
+positions outside the component library, any path that bypasses the
+deterministic renderer.
+
+## 9. Novex Core integration
+
+Unchanged in spirit from Revision 1 — photos become `assets`, the weekly
+upload becomes a `campaigns` row, generated outputs become
+`generated_documents` rows — now modeled precisely per Section 4's entity
+chain instead of one flat JSON blob. Future auto-publishing becomes
+`automations` rows, per existing Core design.
+
+## 10. Explicitly NOT being built in this phase
+
+Digital flyer variant beyond print, Instagram/Facebook/GBP/WhatsApp/email
+renderers, digital signage output, scheduled auto-publishing, the V1.1
+design-assistant AI, and the "learn from flyer history" idea in Section 6.
+The data model doesn't preclude any of these — none are in scope for the
+first build.
+
+## 11. Migration / rollout plan
+
+- **Phase A (Revision 1 + this revision):** proposal, no code. ✅ current step.
+- **Phase B (on approval):** build page archetypes, constraint system, asset
+  pipeline, component library, planner, and renderer as new files, entirely
+  separate from `flyer_print_prototype.html` / `flyer_generator_demo.html` —
+  both stay untouched, unlinked from the portal, kept as reference.
 - **Phase C:** internal validation against the real ARZ reference — we
   already have all 8 real pages rendered as images and the real per-page
-  item counts from this session (~122 items across 8 pages, ranging 6-23
-  per page). Feed a comparable synthetic product list through the planner
-  and compare page-by-page character against the real thing before showing
-  it to you.
+  item counts/character from this session. Feed a comparable synthetic
+  product list through the planner and compare page-by-page archetype
+  choices and composition against the real thing before showing it to you.
 - **Phase D:** only once Phase C passes, repoint the portal's "flyer" module
   at the new engine. Still additive — nothing destructive.
 
 **Rollback:** every phase up to D touches only new files. Nothing existing
-is at risk; if the new engine doesn't work out, delete the new files and
-nothing about the live site changes.
+is at risk.
 
-## 10. Decisions needed before any implementation starts
+## 12. Decisions — resolved this round
 
-1. **PDF approach:** client-side print-to-PDF for MVP (free, proven) vs.
-   investing in server-side automated generation now (new infra/cost)? —
-   *Recommend client-side for MVP.*
-2. **AI-assisted spreadsheet cleanup / photo fuzzy-matching:** in the first
-   build, or fast-follow once the deterministic core works end-to-end? —
-   *Recommend fast-follow — ship the deterministic path first since a clean
-   spreadsheet already gives the planner everything it needs.*
-3. **Schema timing:** OK to write the actual `products` +
-   `generated_documents` migration SQL (unapplied, same as
-   `0001_core_schema.sql`) once this proposal is approved, before component
-   code? — *Recommend yes, keeps data model and code in lockstep.*
-4. **Score weights:** comfortable with sensible defaults I propose (discount%
-   and hot-deal status weighted heaviest, category importance secondary),
-   tunable later — or do you want to set the initial weights yourself?
+1. **PDF approach: server-side, resolved.** Headless Chromium (Playwright),
+   deterministic HTML/CSS/SVG → PDF and → PNG/JPEG/WebP from the same
+   renderer. Client-side is preview-only. Hosting approach for the headless
+   step is a follow-up infra decision once implementation starts (see
+   Section 5).
+2. **AI scope: resolved.** V1 = ingestion assistance only (data cleanup,
+   image-SKU matching). V1.1 = design/merchandising assistant ("Improve
+   This Page," etc.), fast-follow after V1's deterministic core is proven.
+3. **Schema: resolved.** Migration SQL is written
+   (`supabase/migrations/0002_flyer_engine_schema.sql`) for inspection, not
+   executed anywhere.
+4. **Score weights: resolved.** Novex owns and tunes internal weights;
+   merchants get plain controls (Feature, Hero, Priority, Must Be Page 1,
+   Keep Together, Do Not Feature) that map onto the underlying scoring/
+   constraint system, never raw numbers.
 
-Nothing below this line gets built until you've reviewed this and told me
-which way to go on the four decisions above.
+## 13. Open for the next review round
+
+- Final tuning of the illustrative weight table in Section 7 (needs testing
+  against real product mixes, not guessed).
+- Hosting/cost decision for headless-Chromium rendering (Section 5) —
+  needs actual expected volume (flyers/week, pages/flyer) before picking
+  Background Function vs. a small dedicated service.
+- Exact rule-based heuristics for archetype selection per page (Section 1's
+  "how archetype gets chosen" is directional; the precise decision rules
+  get refined once we're testing against real data in Phase C).
+
+Nothing gets built until you've reviewed this revision and we've done the
+one more pass you mentioned.
