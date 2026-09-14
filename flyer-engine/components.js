@@ -11,6 +11,19 @@ function fmt(n) {
   return '$' + Number(n).toFixed(2);
 }
 
+// B1.1: renders a real <img> when the merged product carries a `photo` URL
+// (manually-sourced real product photography, per B1.1 scope -- test
+// fixture only, NOT the automated Asset Preparation Pipeline), falling
+// back to the B1 emoji placeholder otherwise. object-fit:cover crops to
+// fill the box regardless of the source photo's own aspect ratio, which is
+// deliberate: real photos come in wildly different shapes (a produce shot
+// vs. a tall bottle vs. a wide platter) and part of what B1.1 is meant to
+// reveal is whether that cropping reads as consistent or breaks rhythm.
+function imageBox(m) {
+  if (m.photo) return `<img src="${m.photo}" alt="${m.name}" style="width:100%;height:100%;object-fit:cover;display:block;"/>`;
+  return m.icon || '🛒';
+}
+
 function styles(brandKit) {
   return `
   *{margin:0;padding:0;box-sizing:border-box;}
@@ -36,7 +49,7 @@ function styles(brandKit) {
   .hero-product{border:1.5px solid ${brandKit.inkColor};display:flex;height:100%;position:relative;background:#fff;}
   .hero-product.left_image{flex-direction:row;}
   .hero-product.right_image{flex-direction:row-reverse;}
-  .hero-product .h-img{flex:0 0 42%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:72px;}
+  .hero-product .h-img{flex:0 0 42%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:72px;overflow:hidden;}
   .hero-product .h-body{flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;}
   .hero-product .h-badge{position:absolute;top:-9px;left:14px;background:${brandKit.badgeStyle.hot};color:#fff;font-size:9px;font-weight:800;letter-spacing:.04em;padding:3px 10px;text-transform:uppercase;}
   .hero-product .h-name{font-size:19px;font-weight:800;line-height:1.15;margin-bottom:4px;}
@@ -48,7 +61,7 @@ function styles(brandKit) {
 
   .double-product{border:1.5px solid ${brandKit.inkColor};display:flex;align-items:center;height:100%;background:#fff;position:relative;padding:8px 10px;gap:10px;}
   .double-product .d-badge{position:absolute;top:-8px;left:10px;background:${brandKit.badgeStyle.hot};color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.04em;padding:2px 8px;text-transform:uppercase;}
-  .double-product .d-img{flex:0 0 78px;width:78px;height:78px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:40px;}
+  .double-product .d-img{flex:0 0 78px;width:78px;height:78px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;}
   .double-product .d-body{flex:1;min-width:0;}
   .double-product .d-name{font-size:13px;font-weight:800;line-height:1.2;margin-bottom:2px;}
   .double-product .d-desc{font-size:8.5px;color:#555;line-height:1.35;margin-bottom:3px;}
@@ -59,7 +72,7 @@ function styles(brandKit) {
 
   .hot-deal{background:#fff;border:1.5px solid ${brandKit.inkColor};padding:8px 9px;display:flex;align-items:center;gap:8px;position:relative;height:100%;}
   .hot-deal .label{position:absolute;top:-8px;left:8px;background:${brandKit.inkColor};color:#fff;font-size:7px;font-weight:800;letter-spacing:.04em;padding:2px 7px;text-transform:uppercase;}
-  .hot-deal .thumb{width:50px;height:50px;background:#f2f2f2;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;}
+  .hot-deal .thumb{width:50px;height:50px;background:#f2f2f2;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;}
   .hot-deal .info{flex:1;min-width:0;}
   .hot-deal .name{font-size:10px;font-weight:700;line-height:1.15;}
   .hot-deal .size{font-size:7.5px;color:#777;}
@@ -69,7 +82,7 @@ function styles(brandKit) {
 
   .standard-product{border:1px solid ${brandKit.borderStyle.color};padding:6px 4px 7px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;position:relative;background:#fff;}
   .standard-product .badge{position:absolute;top:3px;left:3px;font-size:6.5px;font-weight:800;padding:2px 5px;color:#fff;letter-spacing:.02em;}
-  .standard-product .thumb{width:46px;height:46px;margin:2px auto 4px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+  .standard-product .thumb{width:46px;height:46px;margin:2px auto 4px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;overflow:hidden;}
   .standard-product .name{font-size:8px;font-weight:700;line-height:1.15;min-height:20px;text-transform:uppercase;}
   .standard-product .size{font-size:6.5px;color:#888;margin:1px 0 3px;}
   .standard-product .was{font-size:7px;color:${brandKit.priceStyle.regularColor};text-decoration:line-through;}
@@ -119,7 +132,7 @@ function heroProduct(m, brandKit, variant = 'left_image') {
   return `
   <div class="hero-product ${variant}">
     ${badge ? `<span class="h-badge">${badge}</span>` : ''}
-    <div class="h-img">${m.icon || '🛒'}</div>
+    <div class="h-img">${imageBox(m)}</div>
     <div class="h-body">
       <div class="h-name">${m.name}</div>
       ${m.requires_description && m.description ? `<div class="h-desc">${m.description}</div>` : ''}
@@ -136,7 +149,7 @@ function doubleProduct(m, brandKit) {
   return `
   <div class="double-product">
     ${badge ? `<span class="d-badge">${badge}</span>` : ''}
-    <div class="d-img">${m.icon || '🛒'}</div>
+    <div class="d-img">${imageBox(m)}</div>
     <div class="d-body">
       <div class="d-name">${m.name}</div>
       ${m.requires_description && m.description ? `<div class="d-desc">${m.description}</div>` : ''}
@@ -153,7 +166,7 @@ function hotDeal(m, brandKit) {
   return `
   <div class="hot-deal">
     <span class="label">Hot Deal</span>
-    <div class="thumb">${m.icon || '🛒'}</div>
+    <div class="thumb">${imageBox(m)}</div>
     <div class="info">
       <div class="name">${m.name}</div>
       <div class="size">${m.unit}</div>
@@ -173,7 +186,7 @@ function standardProduct(m, brandKit) {
   return `
   <div class="standard-product">
     ${badgeHtml}
-    <div class="thumb">${m.icon || '🛒'}</div>
+    <div class="thumb">${imageBox(m)}</div>
     <div class="name">${m.name}</div>
     <div class="size">${m.unit}</div>
     ${isSale ? `<div class="was">${fmt(m.regular_price)}</div>` : ''}
