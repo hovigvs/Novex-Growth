@@ -1,10 +1,30 @@
 # Novex Core Integration Readiness Audit
 
-**Status: PROPOSAL ONLY. No code, SQL, Social, Flyer, or portal files
-modified.** This audits the current state across `main` and the
-read-only-inspected `social-b1` worktree, and proposes the migration
-sequence for moving Brand Center and Campaign Center from localStorage
-demo mode to a real shared backend. Nothing here is executed.
+**Status: APPROVED as a plan. No implementation authorized.** No code,
+SQL, Social, Flyer, or portal files have been modified — this remains an
+audit and sequencing plan only. Holding here while Social B2 completes
+manual visual approval and the next integration phase is prioritized.
+
+## Approved, with one added principle
+
+The migration sequence (§2) and the `businesses` RLS finding (§7) are
+accepted as written. One principle is added, binding on §3/§8's staged
+cleanup:
+
+> **Migration `0007` (removing Social's duplicate campaign-intent columns)
+> must never be deployed in the same release as `0006` (the backfill +
+> application-code switch). A verification period separates them, and
+> that period must actually elapse — not be assumed or skipped for
+> convenience. Destructive cleanup is never automatic; it is a distinct,
+> later, deliberately-triggered step.**
+
+This hardens what §3/§8 already recommended into a hard rule: even once
+`0006` ships and its verification checklist (§3 step 3) passes, `0007`
+still requires its own separate deploy, decided on its own, not bundled
+in "while we're at it." The risk this closes: a backfill and a
+destructive drop landing in one deploy because they were designed
+together, which quietly deletes the verification period's reason to
+exist.
 
 ## Current-state audit
 
@@ -97,7 +117,10 @@ The staged, non-destructive approach specified, made concrete:
 4. **Remove duplicates later** (`0007`) — only after step 3 passes, drop
    the five columns from `social_content_campaigns`. This is the only
    destructive step, deliberately last and separate from the migration
-   that adds the new canonical columns.
+   that adds the new canonical columns. **Hard rule (added on approval):
+   `0007` is never in the same deploy as `0006` — step 3's verification
+   period must actually elapse between them, every time, not just when
+   convenient.**
 
 All four steps are Social's to execute — Campaign Center does not touch
 `social_content_campaigns`.
@@ -200,8 +223,11 @@ this audit now rather than after a pilot merchant is live.
 - `0007` (drop Social's duplicate columns): the one genuinely
   hard-to-reverse step — once dropped, recovering the data requires a
   backup restore, not a simple migration rollback. This is exactly why
-  the staged approach exists and why it's sequenced last, only after a
-  verified soak period.
+  the staged approach exists, why it's sequenced last, only after a
+  verified soak period, and why — per the principle added on approval —
+  it may never ship in the same deployment as `0006`. Bundling the two
+  would delete the verification window's entire purpose along with the
+  columns.
 - Cross-cutting risk: if Social's application-code switch (§3 step 2) is
   *not* deployed atomically with the backfill, a live merchant could edit
   a campaign's title through Social's old code path after the backfill
