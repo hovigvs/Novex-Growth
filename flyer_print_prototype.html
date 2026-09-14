@@ -45,35 +45,42 @@ html,body{background:#ccc;font-family:'DM Sans',Arial,sans-serif;color:var(--dar
 .m-dates{font-size:10px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);padding:5px 11px;border-radius:20px;white-space:nowrap;}
 .m-page{font-size:9px;color:rgba(255,255,255,.55);margin-top:5px;}
 
-/* ---------- Hot Deal strip (auto-featured, top discount items) ---------- */
-.hotstrip{display:grid;grid-template-columns:repeat(2,1fr);gap:0.12in;padding:0.16in 0.24in 0.1in;}
-.hotcard{background:var(--hot-bg);border:1px solid #F4C7C0;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:12px;position:relative;}
-.hotcard .hlabel{position:absolute;top:-8px;left:10px;background:var(--hot);color:#fff;font-size:8.5px;font-weight:800;letter-spacing:.03em;padding:3px 9px;border-radius:8px;text-transform:uppercase;}
-.hotcard .hthumb{width:76px;height:76px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:44px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+/* ---------- Hot Deal strip (auto-featured, top discount items) ----------
+   These stay bigger/heroic — a small number of real standouts per page,
+   same as the real flyer's "Hot Deal" callouts. Everything below this is
+   the dense, compact grid that carries the bulk of the item count. */
+.hotstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:0.1in;padding:0.14in 0.22in 0.08in;}
+.hotcard{background:var(--hot-bg);border:1px solid #F4C7C0;border-radius:9px;padding:8px 10px;display:flex;align-items:center;gap:9px;position:relative;}
+.hotcard .hlabel{position:absolute;top:-7px;left:9px;background:var(--hot);color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.03em;padding:2px 7px;border-radius:7px;text-transform:uppercase;}
+.hotcard .hthumb{width:52px;height:52px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.12);}
 .hotcard .hinfo{flex:1;min-width:0;}
-.hotcard .hname{font-size:13px;font-weight:700;line-height:1.2;}
-.hotcard .hsize{font-size:9.5px;color:var(--muted);}
+.hotcard .hname{font-size:10.5px;font-weight:700;line-height:1.15;}
+.hotcard .hsize{font-size:8px;color:var(--muted);}
 .hotcard .hprice{text-align:right;flex-shrink:0;}
-.hotcard .hwas{font-size:9.5px;color:#999;text-decoration:line-through;}
-.hotcard .hnow{font-size:26px;font-weight:800;color:var(--hot);line-height:1;}
-.hotcard .hpct{font-size:9px;font-weight:800;color:var(--hot);}
+.hotcard .hwas{font-size:8px;color:#999;text-decoration:line-through;}
+.hotcard .hnow{font-size:21px;font-weight:800;color:var(--hot);line-height:1;}
+.hotcard .hpct{font-size:7.5px;font-weight:800;color:var(--hot);}
 
-/* ---------- Section grid ---------- */
-.section{padding:0.05in 0.24in;}
-.sec-title{display:flex;align-items:center;gap:8px;margin:0.1in 0 0.08in;}
-.sec-title .sname{font-family:'Playfair Display',serif;font-weight:700;font-size:15px;color:var(--dark);white-space:nowrap;}
+/* ---------- Section grid — the dense, repeatable workhorse layout ----------
+   No card borders/boxes (that's what was eating space) — just a thin
+   bottom rule between rows, like the real flyer's tight packing. Photo
+   stays compact; the PRICE is what's oversized and bold, which is what
+   actually reads as "big" on the page without costing item-count. */
+.section{padding:0.04in 0.22in;}
+.sec-title{display:flex;align-items:center;gap:7px;margin:0.08in 0 0.06in;}
+.sec-title .sname{font-family:'Playfair Display',serif;font-weight:700;font-size:13px;color:var(--dark);white-space:nowrap;}
 .sec-title .sline{flex:1;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
 
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.1in;}
-.item{border:1px solid var(--border);border-radius:9px;padding:10px 8px 8px;position:relative;text-align:center;}
-.item .badge{position:absolute;top:-7px;right:-7px;font-size:8.5px;font-weight:800;padding:4px 8px;border-radius:10px;color:#fff;}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.04in 0.08in;}
+.item{border-bottom:1px solid var(--border);padding:6px 4px 7px;position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;}
+.item .badge{position:absolute;top:-5px;right:2px;font-size:7px;font-weight:800;padding:3px 6px;border-radius:8px;color:#fff;}
 .badge.hot{background:var(--hot);} .badge.new{background:var(--new);} .badge.save{background:var(--good);}
-.item .ithumb{width:64px;height:64px;margin:0 auto 7px;border-radius:12px;background:linear-gradient(135deg,var(--bg),#dfe3fa);display:flex;align-items:center;justify-content:center;font-size:36px;}
-.item .iname{font-size:11px;font-weight:700;line-height:1.25;min-height:26px;}
-.item .isize{font-size:8.5px;color:var(--muted);margin:1px 0 4px;}
-.item .iwas{font-size:8.5px;color:#999;text-decoration:line-through;}
-.item .inow{font-size:18px;font-weight:800;color:var(--dark);}
-.item .inow small{font-size:9px;font-weight:600;color:var(--muted);}
+.item .ithumb{width:44px;height:44px;margin:0 auto 4px;border-radius:9px;background:linear-gradient(135deg,var(--bg),#dfe3fa);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.item .iname{font-size:8.5px;font-weight:700;line-height:1.15;min-height:20px;}
+.item .isize{font-size:7px;color:var(--muted);margin:1px 0 3px;}
+.item .iwas{font-size:7px;color:#999;text-decoration:line-through;}
+.item .inow{font-size:16px;font-weight:800;color:var(--dark);line-height:1;}
+.item .inow small{font-size:7.5px;font-weight:600;color:var(--muted);}
 
 /* ---------- Footer ---------- */
 .pfooter{margin-top:auto;background:linear-gradient(90deg,#5558B8,#7782D4);color:#fff;padding:0.1in 0.3in;display:flex;justify-content:space-between;align-items:center;font-size:9px;}
@@ -116,6 +123,7 @@ html,body{background:#ccc;font-family:'DM Sans',Arial,sans-serif;color:var(--dar
 const HOT = [
   {name:'Falafel Plate + Free Pop', size:'ea', was:14.99, now:11.99, icon:'🧆', tag:'hot'},
   {name:'ARZ Virgin Olive Oil 2.88L', size:'ea', was:42.99, now:26.99, icon:'🫒', tag:'hot'},
+  {name:'BBQ Chicken Family Platter', size:'ea', was:32.99, now:26.99, icon:'🍗', tag:'hot'},
 ];
 
 const SECTIONS = [
@@ -126,6 +134,10 @@ const SECTIONS = [
     {name:'Golden Apples', size:'/lb', was:2.29, now:1.69, icon:'🍏', tag:'save'},
     {name:'Ripe Avocados', size:'2 for', was:4.99, now:3.99, icon:'🥑', tag:'new'},
     {name:'Seedless Grapes', size:'/lb', was:4.49, now:3.49, icon:'🍇', tag:'save'},
+    {name:'Celery Bunch', size:'2 for', was:3.99, now:2.99, icon:'🥬', tag:'save'},
+    {name:'Baby Spinach 142g', size:'ea', was:3.49, now:2.49, icon:'🥗', tag:'save'},
+    {name:'Green Bell Peppers', size:'/lb', was:2.49, now:1.79, icon:'🫑', tag:'save'},
+    {name:'Fresh Mint Bunch', size:'ea', was:1.99, now:1.29, icon:'🌿', tag:'new'},
   ]},
   { name:'Grocery', items:[
     {name:'Basmati Rice 8.82lb', size:'ea', was:17.99, now:13.99, icon:'🍚', tag:'save'},
@@ -134,6 +146,22 @@ const SECTIONS = [
     {name:'Sugar-Free Baklava 600g', size:'ea', was:22.99, now:19.99, icon:'🍯', tag:'new'},
     {name:'Haloumi Cheese 400g', size:'ea', was:11.99, now:8.99, icon:'🧀', tag:'save'},
     {name:'Mixed Pickles 1L', size:'ea', was:6.99, now:4.99, icon:'🥒', tag:'save'},
+    {name:'Pitted Dates 500g', size:'ea', was:7.99, now:5.99, icon:'🍯', tag:'save'},
+    {name:'Selected Pasta 450g', size:'4 for', was:1.99, now:1.25, icon:'🍝', tag:'save'},
+    {name:'Instant Noodles 30pk', size:'ea', was:24.99, now:17.99, icon:'🍜', tag:'hot'},
+    {name:'Jumbo Eggs 20pcs', size:'ea', was:14.99, now:10.99, icon:'🥚', tag:'save'},
+  ]},
+  { name:'Dairy & Deli', items:[
+    {name:'Balkan Yogurt 1.8Kg', size:'ea', was:7.99, now:5.99, icon:'🥛', tag:'save'},
+    {name:'Slice Cheese 165g', size:'ea', was:6.99, now:4.99, icon:'🧀', tag:'save'},
+    {name:'Laughing Cow 24pk', size:'ea', was:13.99, now:9.99, icon:'🧀', tag:'save'},
+    {name:'Deluxe Chicken Wieners', size:'ea', was:6.99, now:4.99, icon:'🌭', tag:'save'},
+    {name:'Haloumi / Nabulsi 400g', size:'ea', was:12.49, now:8.99, icon:'🧀', tag:'save'},
+    {name:'Cheese Pizza 9pk 580g', size:'ea', was:13.99, now:9.99, icon:'🍕', tag:'new'},
+    {name:'Vegetable Samosas 10pc', size:'ea', was:2.99, now:1.99, icon:'🥟', tag:'new'},
+    {name:'Chicken Souvlaki Thighs', size:'/lb', was:8.99, now:5.99, icon:'🍢', tag:'save'},
+    {name:'Pineapple Juice 21x190ml', size:'ea', was:9.99, now:7.99, icon:'🧃', tag:'save'},
+    {name:'Mini Rolls 454g', size:'ea', was:5.49, now:4.49, icon:'🥐', tag:'save'},
   ]},
 ];
 
