@@ -4,21 +4,26 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Weekly Flyer — Print Prototype (Page 1 of 8)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500;600;700;800;900&display=swap"/>
 <style>
+/* ---------- Real grocery-circular palette, not a boutique-brand palette ----------
+   Matched to the actual ARZ reference: white page, solid-color section bars
+   (each category gets its own flat color, not a gradient), black body text,
+   red for deals/savings, black pill for "HOT DEAL". No pastels, no gradients
+   on content — this is what makes it read as a real flyer, not a brochure. */
 :root{
-  --dark:#1E1E3A; --amber:#5558B8; --gold:#7782D4; --cream:#F0F2FF;
-  --muted:#646BC1; --border:#D4D8F5; --bg:#EEEEFF;
-  --good:#1E8E5A; --good-bg:#E6F4EC;
-  --hot:#C0392B; --hot-bg:#FCE8E5;
-  --new:#B8790E; --new-bg:#FFF3D6;
+  --ink:#1a1a1a; --line:#000; --rule:#ddd;
+  --red:#D31E25; --red-dark:#A8161C;
+  --green:#1E8E3E; --green-bg:#E8F5EA;
+  --gold:#C98A12; --gold-bg:#FFF3D6;
+  --bar1:#D31E25; --bar2:#1E8E3E; --bar3:#8B5A2B; --bar4:#1C1C1C; --bar5:#0B6E4F;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{background:#ccc;font-family:'DM Sans',Arial,sans-serif;color:var(--dark);}
+html,body{background:#ccc;font-family:'DM Sans',Arial,sans-serif;color:var(--ink);}
 
 /* Screen chrome — not part of the printed page */
 .screen-note{max-width:816px;margin:0 auto;padding:14px 6px;font-size:12.5px;color:#444;text-align:center;}
-.screen-note b{color:var(--dark);}
+.screen-note b{color:var(--ink);}
 
 /* The actual printable page — exactly US Letter, 8.5in x 11in */
 @page{ size: letter; margin: 0; }
@@ -33,58 +38,53 @@ html,body{background:#ccc;font-family:'DM Sans',Arial,sans-serif;color:var(--dar
   .page{margin:0; box-shadow:none;}
 }
 
-/* ---------- Masthead ---------- */
-.masthead{background:linear-gradient(120deg,#1E1E3A,#3B3A78 55%,#5558B8); color:#fff; padding:0.22in 0.3in; display:flex; align-items:center; justify-content:space-between; position:relative; overflow:hidden;}
-.masthead::after{content:'';position:absolute;right:-.4in;top:-.6in;width:2.4in;height:2.4in;border-radius:50%;background:radial-gradient(circle,rgba(130,223,255,.22),transparent 70%);}
-.m-left{position:relative;z-index:1;}
-.m-logo{font-family:'DM Sans';font-weight:800;font-size:15px;letter-spacing:.02em;}
-.m-logo span{background:linear-gradient(90deg,#82DFFF,#7782D4,#B7C3FF);-webkit-background-clip:text;background-clip:text;color:transparent;}
-.m-name{font-family:'Playfair Display',serif;font-weight:800;font-size:26px;line-height:1.05;margin-top:2px;}
-.m-tag{font-size:10.5px;color:rgba(255,255,255,.7);margin-top:3px;}
-.m-right{position:relative;z-index:1;text-align:right;}
-.m-dates{font-size:10px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);padding:5px 11px;border-radius:20px;white-space:nowrap;}
-.m-page{font-size:9px;color:rgba(255,255,255,.55);margin-top:5px;}
+/* ---------- Masthead — flat white banner like a real circular, not a hero gradient ---------- */
+.masthead{background:#fff; color:var(--ink); padding:0.14in 0.24in; display:flex; align-items:center; justify-content:space-between; border-bottom:4px solid var(--red);}
+.m-left{display:flex; align-items:center; gap:10px;}
+.m-logo-mark{width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0;}
+.m-name{font-family:'Archivo Black',Arial,sans-serif;font-weight:400;font-size:22px;line-height:1;letter-spacing:-.01em;}
+.m-tag{font-size:9.5px;color:#666;margin-top:2px;}
+.m-right{text-align:right;}
+.m-dates{font-size:10px;font-weight:800;background:var(--ink);color:#fff;padding:5px 11px;border-radius:3px;white-space:nowrap;}
+.m-page{font-size:8.5px;color:#888;margin-top:4px;}
 
-/* ---------- Hot Deal strip (auto-featured, top discount items) ----------
-   These stay bigger/heroic — a small number of real standouts per page,
-   same as the real flyer's "Hot Deal" callouts. Everything below this is
-   the dense, compact grid that carries the bulk of the item count. */
-.hotstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:0.1in;padding:0.14in 0.22in 0.08in;}
-.hotcard{background:var(--hot-bg);border:1px solid #F4C7C0;border-radius:9px;padding:8px 10px;display:flex;align-items:center;gap:9px;position:relative;}
-.hotcard .hlabel{position:absolute;top:-7px;left:9px;background:var(--hot);color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.03em;padding:2px 7px;border-radius:7px;text-transform:uppercase;}
-.hotcard .hthumb{width:52px;height:52px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+/* ---------- Hot Deal strip — black "HOT DEAL" pill + red price, like the real callouts ---------- */
+.hotstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:0.1in;padding:0.12in 0.22in 0.08in;border-bottom:2px solid var(--ink);}
+.hotcard{background:#fff;border:1.5px solid var(--ink);padding:8px 9px;display:flex;align-items:center;gap:8px;position:relative;}
+.hotcard .hlabel{position:absolute;top:-8px;left:8px;background:var(--ink);color:#fff;font-size:7px;font-weight:800;letter-spacing:.04em;padding:2px 7px;text-transform:uppercase;}
+.hotcard .hthumb{width:50px;height:50px;background:#f2f2f2;border:1px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;}
 .hotcard .hinfo{flex:1;min-width:0;}
-.hotcard .hname{font-size:10.5px;font-weight:700;line-height:1.15;}
-.hotcard .hsize{font-size:8px;color:var(--muted);}
+.hotcard .hname{font-size:10px;font-weight:700;line-height:1.15;}
+.hotcard .hsize{font-size:7.5px;color:#777;}
 .hotcard .hprice{text-align:right;flex-shrink:0;}
-.hotcard .hwas{font-size:8px;color:#999;text-decoration:line-through;}
-.hotcard .hnow{font-size:21px;font-weight:800;color:var(--hot);line-height:1;}
-.hotcard .hpct{font-size:7.5px;font-weight:800;color:var(--hot);}
+.hotcard .hwas{font-size:7.5px;color:#999;text-decoration:line-through;}
+.hotcard .hnow{font-size:22px;font-weight:900;color:var(--red);line-height:1;font-family:'Archivo Black',Arial,sans-serif;}
+.hotcard .hpct{font-size:7px;font-weight:800;color:#fff;background:var(--red);padding:1px 5px;border-radius:2px;display:inline-block;margin-top:1px;}
+
+/* ---------- Section header — solid color bar, white caps text, like a real category band ---------- */
+.section{padding:0 0.22in;}
+.sec-title{color:#fff;font-family:'Archivo Black',Arial,sans-serif;font-weight:400;font-size:13px;letter-spacing:.02em;text-transform:uppercase;padding:5px 10px;margin:0.07in 0 0.06in;}
 
 /* ---------- Section grid — the dense, repeatable workhorse layout ----------
-   No card borders/boxes (that's what was eating space) — just a thin
-   bottom rule between rows, like the real flyer's tight packing. Photo
-   stays compact; the PRICE is what's oversized and bold, which is what
-   actually reads as "big" on the page without costing item-count. */
-.section{padding:0.04in 0.22in;}
-.sec-title{display:flex;align-items:center;gap:7px;margin:0.08in 0 0.06in;}
-.sec-title .sname{font-family:'Playfair Display',serif;font-weight:700;font-size:13px;color:var(--dark);white-space:nowrap;}
-.sec-title .sline{flex:1;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
-
-.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.04in 0.08in;}
-.item{border-bottom:1px solid var(--border);padding:6px 4px 7px;position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;}
-.item .badge{position:absolute;top:-5px;right:2px;font-size:7px;font-weight:800;padding:3px 6px;border-radius:8px;color:#fff;}
-.badge.hot{background:var(--hot);} .badge.new{background:var(--new);} .badge.save{background:var(--good);}
-.item .ithumb{width:44px;height:44px;margin:0 auto 4px;border-radius:9px;background:linear-gradient(135deg,var(--bg),#dfe3fa);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
-.item .iname{font-size:8.5px;font-weight:700;line-height:1.15;min-height:20px;}
-.item .isize{font-size:7px;color:var(--muted);margin:1px 0 3px;}
+   Thin black-ish rules between cells (not soft pastel cards) — photo stays
+   compact and un-rounded on a light gray tile; the PRICE is what's oversized
+   and bold in black/red, which is what actually reads as "big" without
+   costing item-count. Badges are flat rectangles, not rounded pills. */
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;}
+.item{border:1px solid var(--rule);padding:6px 4px 7px;position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;margin:-1px 0 0 -1px;}
+.item .badge{position:absolute;top:3px;left:3px;font-size:6.5px;font-weight:800;padding:2px 5px;color:#fff;letter-spacing:.02em;}
+.badge.hot{background:var(--ink);} .badge.new{background:var(--gold);} .badge.save{background:var(--red);}
+.item .ithumb{width:46px;height:46px;margin:2px auto 4px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.item .iname{font-size:8px;font-weight:700;line-height:1.15;min-height:20px;text-transform:uppercase;}
+.item .isize{font-size:6.5px;color:#888;margin:1px 0 3px;}
 .item .iwas{font-size:7px;color:#999;text-decoration:line-through;}
-.item .inow{font-size:16px;font-weight:800;color:var(--dark);line-height:1;}
-.item .inow small{font-size:7.5px;font-weight:600;color:var(--muted);}
+.item .inow{font-size:17px;font-weight:900;color:var(--ink);line-height:1;font-family:'Archivo Black',Arial,sans-serif;}
+.item .inow.on-sale{color:var(--red);}
+.item .inow small{font-size:8px;font-weight:700;color:inherit;}
 
-/* ---------- Footer ---------- */
-.pfooter{margin-top:auto;background:linear-gradient(90deg,#5558B8,#7782D4);color:#fff;padding:0.1in 0.3in;display:flex;justify-content:space-between;align-items:center;font-size:9px;}
-.pfooter b{font-family:'Playfair Display',serif;font-size:11px;}
+/* ---------- Footer — flat black bar, plain, like the real store-info strip ---------- */
+.pfooter{margin-top:auto;background:var(--ink);color:#fff;padding:0.09in 0.3in;display:flex;justify-content:space-between;align-items:center;font-size:8.5px;}
+.pfooter b{font-family:'Archivo Black',Arial,sans-serif;font-weight:400;font-size:10px;}
 </style>
 </head>
 <body>
@@ -95,12 +95,14 @@ html,body{background:#ccc;font-family:'DM Sans',Arial,sans-serif;color:var(--dar
 
   <div class="masthead">
     <div class="m-left">
-      <div class="m-logo"><span>novexgrowth</span> · powered flyer</div>
-      <div class="m-name">ABC Company</div>
-      <div class="m-tag">This Week's Deals — Fresh picks, better prices</div>
+      <div class="m-logo-mark">AC</div>
+      <div>
+        <div class="m-name">ABC COMPANY</div>
+        <div class="m-tag">Weekly flyer · generated by Novex Growth</div>
+      </div>
     </div>
     <div class="m-right">
-      <div class="m-dates">Valid Sep 11 – 17, 2026</div>
+      <div class="m-dates">VALID SEP 11 – 17, 2026</div>
       <div class="m-page">Page 1 of 8</div>
     </div>
   </div>
@@ -127,7 +129,7 @@ const HOT = [
 ];
 
 const SECTIONS = [
-  { name:'Produce Deals', items:[
+  { name:'Produce Deals', color:'var(--bar2)', items:[
     {name:'Field Tomatoes', size:'/lb', was:1.99, now:1.49, icon:'🍅', tag:'save'},
     {name:'Mini Cucumbers', size:'/lb', was:1.99, now:1.49, icon:'🥒', tag:'save'},
     {name:'Clementine Loose', size:'/lb', was:2.99, now:1.99, icon:'🍊', tag:'save'},
@@ -139,7 +141,7 @@ const SECTIONS = [
     {name:'Green Bell Peppers', size:'/lb', was:2.49, now:1.79, icon:'🫑', tag:'save'},
     {name:'Fresh Mint Bunch', size:'ea', was:1.99, now:1.29, icon:'🌿', tag:'new'},
   ]},
-  { name:'Grocery', items:[
+  { name:'Grocery', color:'var(--bar4)', items:[
     {name:'Basmati Rice 8.82lb', size:'ea', was:17.99, now:13.99, icon:'🍚', tag:'save'},
     {name:'Pure Desi Ghee 800g', size:'ea', was:18.99, now:12.99, icon:'🧈', tag:'hot'},
     {name:'Honey 1Kg', size:'ea', was:12.99, now:7.99, icon:'🍯', tag:'hot'},
@@ -151,7 +153,7 @@ const SECTIONS = [
     {name:'Instant Noodles 30pk', size:'ea', was:24.99, now:17.99, icon:'🍜', tag:'hot'},
     {name:'Jumbo Eggs 20pcs', size:'ea', was:14.99, now:10.99, icon:'🥚', tag:'save'},
   ]},
-  { name:'Dairy & Deli', items:[
+  { name:'Dairy & Deli', color:'var(--bar5)', items:[
     {name:'Balkan Yogurt 1.8Kg', size:'ea', was:7.99, now:5.99, icon:'🥛', tag:'save'},
     {name:'Slice Cheese 165g', size:'ea', was:6.99, now:4.99, icon:'🧀', tag:'save'},
     {name:'Laughing Cow 24pk', size:'ea', was:13.99, now:9.99, icon:'🧀', tag:'save'},
@@ -180,7 +182,7 @@ function renderHot(){
       <div class="hprice">
         <div class="hwas">${fmt(it.was)}</div>
         <div class="hnow">${fmt(it.now)}</div>
-        <div class="hpct">-${pct(it.was, it.now)}%</div>
+        <div class="hpct">SAVE ${pct(it.was, it.now)}%</div>
       </div>
     </div>`).join('');
 }
@@ -188,16 +190,16 @@ function renderHot(){
 function renderSections(){
   const area = document.getElementById('sectionArea');
   area.innerHTML = SECTIONS.map(sec => `
-    <div class="sec-title"><span class="sname">${sec.name}</span><span class="sline"></span></div>
+    <div class="sec-title" style="background:${sec.color}">${sec.name}</div>
     <div class="grid">
       ${sec.items.map(it => `
         <div class="item">
-          <span class="badge ${it.tag}">${it.tag === 'save' ? '-' + pct(it.was, it.now) + '%' : (it.tag === 'hot' ? 'HOT' : 'NEW')}</span>
+          <span class="badge ${it.tag}">${it.tag === 'save' ? 'SAVE ' + pct(it.was, it.now) + '%' : (it.tag === 'hot' ? 'HOT DEAL' : 'NEW')}</span>
           <div class="ithumb">${it.icon}</div>
           <div class="iname">${it.name}</div>
           <div class="isize">${it.size}</div>
           <div class="iwas">${fmt(it.was)}</div>
-          <div class="inow">${fmt(it.now)}</div>
+          <div class="inow on-sale">${fmt(it.now)}</div>
         </div>`).join('')}
     </div>`).join('');
 }
