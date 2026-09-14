@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Campaign Center — Novex Growth</title>
+<style>
+:root{
+  --ink:#1a1a1a; --muted:#666; --border:#e2e2e6; --bg:#f7f7f9;
+  --accent:#5558B8; --accent-bg:#EEEEFF; --good:#1E8E5A; --warn:#B8790E; --off:#aaa;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--ink);}
+.shell{max-width:920px;margin:0 auto;padding:20px 20px 60px;}
+.top h1{font-size:20px;margin:0 0 4px;}
+.top p{font-size:12.5px;color:var(--muted);margin:0 0 16px;}
+.note{font-size:11.5px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:16px;}
+.note.warn{color:#8a5b00;background:#FFF7E6;border-color:#F0DCA8;}
+.panel{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;}
+.list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.section-title{font-size:14px;font-weight:800;margin:0;}
+.campaign-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
+.campaign-card{border:1.5px solid var(--border);border-radius:8px;padding:14px;cursor:pointer;position:relative;}
+.campaign-card:hover{border-color:var(--accent);}
+.campaign-card .ctitle{font-weight:700;font-size:13.5px;margin-bottom:4px;}
+.campaign-card .cmeta{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.status-badge{display:inline-block;font-size:9.5px;font-weight:800;text-transform:uppercase;padding:2px 8px;border-radius:20px;}
+.status-badge.draft{background:#eee;color:#666;}
+.status-badge.scheduled{background:#FFF3D6;color:var(--warn);}
+.status-badge.active{background:#E6F4EC;color:var(--good);}
+.status-badge.completed{background:var(--accent-bg);color:var(--accent);}
+.status-badge.archived{background:#eee;color:#999;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;margin-bottom:4px;}
+.field input[type=text], .field input[type=date], .field textarea, .field select{
+  width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13.5px;font-family:inherit;background:#fff;color:var(--ink);
+}
+.field textarea{resize:vertical;min-height:60px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.hint{font-size:11px;color:var(--muted);margin-top:3px;}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;}
+.btn:hover{opacity:.92;}
+.btn.secondary{background:#fff;color:var(--accent);border:1px solid var(--accent);}
+.btn.danger{background:#fff;color:#c0392b;border:1px solid #c0392b;}
+.btn.small{padding:5px 10px;font-size:11.5px;}
+.actions{display:flex;gap:8px;align-items:center;margin-top:16px;}
+.save-msg{font-size:12px;color:var(--good);display:none;}
+.save-msg.err{color:#c0392b;}
+.brandkit-readonly{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;}
+.brandkit-readonly .swatches{display:flex;gap:4px;}
+.brandkit-readonly .sw{width:16px;height:16px;border-radius:3px;border:1px solid rgba(0,0,0,.1);}
+.profile-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;}
+.profile-pick{border:1.5px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;font-size:12.5px;}
+.profile-pick.selected{border-color:var(--accent);background:var(--accent-bg);}
+.profile-pick .pname{font-weight:700;margin-bottom:2px;}
+.profile-pick .pstyle{color:var(--muted);font-size:11px;}
+.asset-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;}
+.asset-pick{border:2px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;position:relative;}
+.asset-pick.selected{border-color:var(--accent);}
+.asset-pick img{width:100%;height:60px;object-fit:cover;display:block;background:#f0f0f0;}
+.asset-pick .check{position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:#fff;border:1.5px solid var(--border);font-size:10px;display:flex;align-items:center;justify-content:center;}
+.asset-pick.selected .check{background:var(--accent);border-color:var(--accent);color:#fff;}
+.channels{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;}
+.channel-tile{border:1px solid var(--border);border-radius:8px;padding:12px;opacity:.6;position:relative;background:#fafafa;}
+.channel-tile .cname{font-weight:700;font-size:12.5px;margin-bottom:3px;}
+.channel-tile .cstatus{font-size:10.5px;color:var(--muted);}
+.channel-tile .disabled-badge{position:absolute;top:8px;right:8px;font-size:8px;font-weight:800;color:#fff;background:var(--off);padding:2px 6px;border-radius:10px;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="top">
+    <h1>Campaign Center</h1>
+    <p>What is this business trying to promote? Define it once — Flyer, Social, Email, WhatsApp and Website all read the same campaign later.</p>
+  </div>
+  <div class="note">Demo mode — saved locally in this browser. Reads Brand Kit / Creative Profile / Assets live from Brand Center's own record, not a copy — configure those there first. This module does not generate any output; the channels below are informational only.</div>
+  <div class="note warn" id="noBrandCenterNote" style="display:none;">No Brand Center data found yet in this browser. Open the Brand Center module first so Creative Profiles and Assets are available to select here.</div>
+
+  <div class="panel" id="listPanel">
+    <div class="list-header">
+      <div class="section-title">Campaigns</div>
+      <button class="btn" onclick="newCampaign()">+ New Campaign</button>
+    </div>
+    <div class="campaign-cards" id="campaignCards"></div>
+  </div>
+
+  <div class="panel" id="formPanel" style="display:none;">
+    <div class="section-title" id="formTitle">New Campaign</div>
+
+    <div class="field" style="margin-top:14px;"><label>Campaign title</label><input type="text" id="cc-title"/></div>
+    <div class="field"><label>Objective</label><input type="text" id="cc-objective" placeholder="e.g. Generate family-party catering inquiries"/></div>
+    <div class="field"><label>Offer</label><input type="text" id="cc-offer" placeholder="e.g. Catering for gatherings of 10-100 guests"/></div>
+    <div class="field"><label>Audience</label><input type="text" id="cc-audience" placeholder="Who is this for?"/></div>
+    <div class="row2">
+      <div class="field"><label>Start date</label><input type="date" id="cc-startDate"/></div>
+      <div class="field"><label>End date</label><input type="date" id="cc-endDate"/></div>
+    </div>
+
+    <div class="field"><label>Brand Kit</label>
+      <div class="brandkit-readonly" id="brandKitDisplay"></div>
+      <div class="hint">B1 uses your one configured Brand Kit — multiple Brand Kits per business is a future enhancement.</div>
+    </div>
+
+    <div class="field"><label>Creative Profile</label>
+      <div class="profile-picker" id="profilePicker"></div>
+    </div>
+
+    <div class="field"><label>Source assets</label>
+      <div class="asset-picker" id="assetPicker"></div>
+      <div class="hint" id="noAssetsHint" style="display:none;">No assets uploaded yet — add some in Brand Center's Asset Library.</div>
+    </div>
+
+    <div class="field"><label>Notes</label><textarea id="cc-notes"></textarea></div>
+
+    <div class="field"><label>Status</label>
+      <select id="cc-status">
+        <option value="draft">Draft</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+        <option value="archived">Archived</option>
+      </select>
+    </div>
+
+    <div class="field"><label>Output channels</label>
+      <div class="channels">
+        <div class="channel-tile"><span class="disabled-badge">Disabled</span><div class="cname">📣 Social</div><div class="cstatus">Social B1 exists — orchestration not wired yet</div></div>
+        <div class="channel-tile"><span class="disabled-badge">Disabled</span><div class="cname">🖼️ Flyer</div><div class="cstatus">Flyer B1.1 exists — orchestration not wired yet</div></div>
+        <div class="channel-tile"><span class="disabled-badge">Disabled</span><div class="cname">✉️ Email</div><div class="cstatus">Not built yet</div></div>
+        <div class="channel-tile"><span class="disabled-badge">Disabled</span><div class="cname">💬 WhatsApp</div><div class="cstatus">Not built yet</div></div>
+        <div class="channel-tile"><span class="disabled-badge">Disabled</span><div class="cname">🌐 Website</div><div class="cstatus">Not built yet</div></div>
+      </div>
+      <div class="hint">Informational only in B1 — Campaign Center never triggers generation for any channel.</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="saveCampaign()">Save Campaign</button>
+      <button class="btn secondary" onclick="closeForm()">Cancel</button>
+      <button class="btn danger" id="deleteBtn" style="display:none;" onclick="deleteCampaign()">Delete</button>
+      <span class="save-msg" id="msg-campaign">Saved.</span>
+    </div>
+  </div>
+</div>
+
+<script src="brand-center/schemas/business-profile.schema.js"></script>
+<script src="brand-center/schemas/brand-kit.schema.js"></script>
+<script src="brand-center/schemas/creative-profile.schema.js"></script>
+<script src="brand-center/schemas/asset-contract.schema.js"></script>
+<script src="campaign-center/schemas/campaign.schema.js"></script>
+<script src="campaign-center/data/sample-campaigns.js"></script>
+<script>
+var NCC = window.NovexCampaignCenter;
+var CAMPAIGN_KEY = 'novex_campaign_center_demo_business';
+var BRAND_KEY = 'novex_brand_center_demo_business'; // same key brand-center.html writes to
+
+function loadBrandCenterState() {
+  try {
+    var raw = localStorage.getItem(BRAND_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return null;
+}
+
+function loadCampaigns() {
+  try {
+    var raw = localStorage.getItem(CAMPAIGN_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return NCC.SampleData.sampleCampaigns.slice();
+}
+
+function saveCampaigns() { localStorage.setItem(CAMPAIGN_KEY, JSON.stringify(campaigns)); }
+
+var brandState = loadBrandCenterState();
+var campaigns = loadCampaigns();
+var editingId = null;
+var selectedProfileId = null;
+var selectedAssetIds = [];
+
+if (!brandState) {
+  document.getElementById('noBrandCenterNote').style.display = 'block';
+  brandState = { identity: null, creativeProfiles: [], assets: [] };
+}
+
+function escapeHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function flash(id, ok, text) {
+  var el = document.getElementById(id);
+  el.textContent = text || (ok ? 'Saved.' : 'Failed.');
+  el.className = 'save-msg' + (ok ? '' : ' err');
+  el.style.display = 'inline';
+  setTimeout(function () { el.style.display = 'none'; }, 2400);
+}
+
+// ---------- List ----------
+function renderList() {
+  var wrap = document.getElementById('campaignCards');
+  wrap.innerHTML = '';
+  if (!campaigns.length) { wrap.innerHTML = '<p class="hint">No campaigns yet — click "+ New Campaign" to create one.</p>'; return; }
+  campaigns.forEach(function (c) {
+    var profile = brandState.creativeProfiles.find(function (p) { return p.id === c.creativeProfileId; });
+    var card = document.createElement('div');
+    card.className = 'campaign-card';
+    card.innerHTML =
+      '<span class="status-badge ' + c.status + '">' + c.status + '</span>' +
+      '<div class="ctitle" style="margin-top:8px;">' + escapeHtml(c.title || '(untitled)') + '</div>' +
+      '<div class="cmeta">' + escapeHtml(c.startDate || '?') + ' → ' + escapeHtml(c.endDate || '?') + '</div>' +
+      '<div class="cmeta">Creative: ' + escapeHtml(profile ? profile.name : 'none selected') + '</div>';
+    card.onclick = function () { openForm(c.id); };
+    wrap.appendChild(card);
+  });
+}
+
+// ---------- Form ----------
+function newCampaign() { openForm(null); }
+
+function openForm(id) {
+  editingId = id;
+  var c = id ? campaigns.find(function (x) { return x.id === id; }) : NCC.Campaign.emptyCampaign();
+  document.getElementById('formTitle').textContent = id ? 'Edit Campaign' : 'New Campaign';
+  document.getElementById('deleteBtn').style.display = id ? 'inline-block' : 'none';
+  document.getElementById('cc-title').value = c.title || '';
+  document.getElementById('cc-objective').value = c.objective || '';
+  document.getElementById('cc-offer').value = c.offer || '';
+  document.getElementById('cc-audience').value = c.audience || '';
+  document.getElementById('cc-startDate').value = c.startDate || '';
+  document.getElementById('cc-endDate').value = c.endDate || '';
+  document.getElementById('cc-notes').value = c.notes || '';
+  document.getElementById('cc-status').value = c.status || 'draft';
+  selectedProfileId = c.creativeProfileId || null;
+  selectedAssetIds = (c.sourceAssetIds || []).slice();
+
+  renderBrandKitDisplay();
+  renderProfilePicker();
+  renderAssetPicker();
+
+  document.getElementById('listPanel').style.display = 'none';
+  document.getElementById('formPanel').style.display = 'block';
+}
+
+function closeForm() {
+  document.getElementById('formPanel').style.display = 'none';
+  document.getElementById('listPanel').style.display = 'block';
+  renderList();
+}
+
+function renderBrandKitDisplay() {
+  var host = document.getElementById('brandKitDisplay');
+  var id = brandState.identity;
+  if (!id) { host.innerHTML = '<span class="hint">No Brand Kit configured yet.</span>'; return; }
+  host.innerHTML =
+    '<div class="swatches">' +
+      '<span class="sw" style="background:' + id.primaryColor + '"></span>' +
+      '<span class="sw" style="background:' + id.secondaryColor + '"></span>' +
+      '<span class="sw" style="background:' + id.accentColor + '"></span>' +
+    '</div>' +
+    '<div><strong>' + escapeHtml(id.name || '(unnamed)') + '</strong>' + (id.tagline ? ' — ' + escapeHtml(id.tagline) : '') + '</div>';
+}
+
+function renderProfilePicker() {
+  var wrap = document.getElementById('profilePicker');
+  wrap.innerHTML = '';
+  if (!brandState.creativeProfiles.length) { wrap.innerHTML = '<p class="hint">No Creative Profiles yet — add one in Brand Center.</p>'; return; }
+  brandState.creativeProfiles.forEach(function (p) {
+    var el = document.createElement('div');
+    el.className = 'profile-pick' + (p.id === selectedProfileId ? ' selected' : '');
+    el.innerHTML = '<div class="pname">' + escapeHtml(p.name) + '</div><div class="pstyle">' + escapeHtml(p.visualPreferences.visualStyle || '') + '</div>';
+    el.onclick = function () { selectedProfileId = p.id; renderProfilePicker(); };
+    wrap.appendChild(el);
+  });
+}
+
+function renderAssetPicker() {
+  var wrap = document.getElementById('assetPicker');
+  wrap.innerHTML = '';
+  document.getElementById('noAssetsHint').style.display = brandState.assets.length ? 'none' : 'block';
+  brandState.assets.forEach(function (a) {
+    var el = document.createElement('div');
+    el.className = 'asset-pick' + (selectedAssetIds.indexOf(a.id) !== -1 ? ' selected' : '');
+    el.innerHTML = '<img src="' + a.dataUrl + '"/><span class="check">✓</span>';
+    el.onclick = function () {
+      var idx = selectedAssetIds.indexOf(a.id);
+      if (idx === -1) selectedAssetIds.push(a.id); else selectedAssetIds.splice(idx, 1);
+      renderAssetPicker();
+    };
+    wrap.appendChild(el);
+  });
+}
+
+function saveCampaign() {
+  var campaign = {
+    id: editingId || ('camp-' + Date.now()),
+    schemaVersion: NCC.Campaign.CAMPAIGN_SCHEMA_VERSION,
+    title: document.getElementById('cc-title').value.trim(),
+    objective: document.getElementById('cc-objective').value.trim(),
+    offer: document.getElementById('cc-offer').value.trim(),
+    audience: document.getElementById('cc-audience').value.trim(),
+    startDate: document.getElementById('cc-startDate').value,
+    endDate: document.getElementById('cc-endDate').value,
+    brandKitId: 'default',
+    creativeProfileId: selectedProfileId,
+    sourceAssetIds: selectedAssetIds.slice(),
+    notes: document.getElementById('cc-notes').value.trim(),
+    status: document.getElementById('cc-status').value,
+    type: (editingId && campaigns.find(function (c) { return c.id === editingId; }).type) || 'general',
+  };
+  try {
+    var result = NCC.Campaign.validateCampaign(campaign);
+    var idx = campaigns.findIndex(function (c) { return c.id === campaign.id; });
+    if (idx === -1) campaigns.push(campaign); else campaigns[idx] = campaign;
+    saveCampaigns();
+    flash('msg-campaign', true, result.warnings.length ? ('Saved — ' + result.warnings[0]) : 'Saved.');
+    setTimeout(closeForm, 500);
+  } catch (e) {
+    flash('msg-campaign', false, e.message);
+  }
+}
+
+function deleteCampaign() {
+  campaigns = campaigns.filter(function (c) { return c.id !== editingId; });
+  saveCampaigns();
+  closeForm();
+}
+
+renderList();
+</script>
+</body>
+</html>

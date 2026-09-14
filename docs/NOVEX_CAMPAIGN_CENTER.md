@@ -1,10 +1,32 @@
-# Novex Campaign Center — Architecture Proposal (B1)
+# Novex Campaign Center — Architecture (B1)
 
-**Status: PROPOSAL ONLY. Not implemented. No migration SQL, no new files
-beyond this document.** Nothing in `main`, `brand-center/`, `flyer-engine/`,
-or the `social-b1` worktree has been touched. This is the audit + proposal
-requested before coding — stopping for approval, same pattern as Brand
-Center B1's first round.
+**Status: APPROVED, domain/UI implemented, migration still held.**
+`campaign-center/` and `campaign-center.html` are built and wired into the
+portal, backed by localStorage (same demo-mode pattern as Brand Center) —
+against the canonical contract below. **No SQL migration is written or
+committed** — `campaigns.brand_kit_id`/`.creative_profile_id` are real
+foreign keys into `brand_kits`/`creative_profiles`, which only exist in
+`0003` on the `social-b1` worktree, unmerged into `main`. Nothing in
+`brand-center/`, `flyer-engine/`, or the `social-b1` worktree was touched.
+
+## Approved canonical decisions (locked in)
+
+1. Generic campaign intent belongs to Core `campaigns` — never duplicated
+   into a channel-specific table.
+2. Social/Flyer may extend `campaigns` but must not duplicate generic
+   intent — `social_content_campaigns`'s `title`/`objective`/`offer`/
+   `brand_kit_id`/`creative_profile_id` are recognized as exactly that
+   duplication, to be resolved on the Social side (below), not here.
+3. `campaign_source_assets` remains shared and reused as-is.
+4. Output channels (Social/Flyer/Email/WhatsApp/Website) stay
+   informational/disabled in B1 — verified in `campaign-center.html`,
+   there is no code path that calls any generation engine.
+5. **Staged compatibility migration for the Social cleanup**, when Social
+   B2 picks it up: *backfill Core → switch application reads/writes →
+   verify → remove duplicates later.* No destructive column drop in the
+   first migration touching `social_content_campaigns`. This is Social's
+   migration to write, not Campaign Center's — recorded here so the plan
+   is shared before either side implements it.
 
 This is shared campaign-intent infrastructure — the object that answers
 "what is this merchant trying to promote," not a generation engine. It

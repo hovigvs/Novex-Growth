@@ -160,5 +160,13 @@ window.NOVEX_MODULE_INFO = {
       "Flyer, Social, Email, WhatsApp, and the AI Receptionist all read the same record — no re-entering your colors, tone, or contact info per module.",
       "Supports multiple Creative Profiles (e.g. Premium Editorial, Weekly Promotion, Holiday) — pick one per campaign without changing your core brand identity.",
       "Shared Asset Library — upload once, reference everywhere; originals are never modified."
+    ] },
+  "campaign-center": { name: "Campaign Center", tagline: "Define what you're promoting — once", vertical: "both", icon:"🎯",
+    demo:{ type:"iframe", src:"campaign-center.html" },
+    howItWorks:[
+      "Define a campaign's goal, offer, and audience once — title, objective, offer, dates, notes.",
+      "Pick the Brand Kit and Creative Profile from Brand Center — no re-entering colors or style per campaign.",
+      "Select which uploaded assets belong to this campaign from the shared Asset Library.",
+      "This becomes the shared intent object Flyer, Social, Email, WhatsApp, and Website outputs will orchestrate from — Campaign Center itself never generates anything."
     ] }
 };
