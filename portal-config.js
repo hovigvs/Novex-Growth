@@ -105,14 +105,6 @@ window.NOVEX_MODULE_INFO = {
       "Every order flows straight into the same kitchen dashboard and CRM as your other channels — nothing separate to manage.",
       "Built and hosted for you — you focus on the food, not web development."
     ] },
-  "flyer": { name: "AI Weekly Flyer Automation", tagline: "Photos in, print-ready flyer out", vertical: "catering", icon:"🖼️",
-    demo:{ type:"iframe", src:"flyer_generator_demo.html" },
-    howItWorks:[
-      "You upload this week's dish photos and pricing — no design skills needed.",
-      "It automatically lays out a branded, print-ready weekly flyer or menu.",
-      "Keeps your visual style consistent week to week without hiring a designer.",
-      "Exports ready to print or post directly to social/WhatsApp."
-    ] },
   "ordering": { name: "Multilingual Ordering & WhatsApp", tagline: "Order by chat, text or voice", vertical: "catering", icon:"💬",
     demo:{ type:"iframe", src:"https://www.novexgrowth.com/whatsapp_demo.html" },
     howItWorks:[
