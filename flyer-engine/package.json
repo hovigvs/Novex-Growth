@@ -1,0 +1,16 @@
+{
+  "name": "flyer-engine",
+  "version": "1.0.0",
+  "description": "Novex Retail Content Engine -- Phase B1 flyer layout/rendering proof",
+  "main": "render.js",
+  "scripts": {
+    "render": "node render.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.63.0"
+  }
+}

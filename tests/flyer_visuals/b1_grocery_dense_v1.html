@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Weekly Flyer — grocery_dense_page — Page 4</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500;600;700;800;900&display=swap"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:#ccc;font-family:'DM Sans', Arial, sans-serif;color:#1a1a1a;}
+  .page{width:8.5in;height:11in;margin:0 auto 30px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.25);position:relative;overflow:hidden;}
+  @media print{ html,body{background:#fff;} .page{margin:0;box-shadow:none;} }
+  @page{ size: letter; margin: 0; }
+
+  .masthead{background:#fff;padding:0.14in 0.24in;display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid #D31E25;}
+  .m-left{display:flex;align-items:center;gap:10px;}
+  .m-logo-mark{width:34px;height:34px;border-radius:50%;background:#D31E25;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0;}
+  .m-name{font-family:'Archivo Black', Arial, sans-serif;font-size:22px;line-height:1;letter-spacing:-.01em;}
+  .m-tag{font-size:9.5px;color:#666;margin-top:2px;}
+  .m-right{text-align:right;}
+  .m-dates{font-size:10px;font-weight:800;background:#1a1a1a;color:#fff;padding:5px 11px;border-radius:3px;white-space:nowrap;}
+  .m-page{font-size:8.5px;color:#888;margin-top:4px;}
+
+  .content-area{position:relative;width:100%;height:calc(100% - 0.72in - 0.5in);}
+  .zone{position:absolute;overflow:hidden;}
+
+  .category-header{color:#fff;font-family:'Archivo Black', Arial, sans-serif;font-size:13px;letter-spacing:.02em;text-transform:uppercase;padding:5px 10px;margin-bottom:6px;}
+
+  .hero-product{border:1.5px solid #1a1a1a;display:flex;height:100%;position:relative;background:#fff;}
+  .hero-product.left_image{flex-direction:row;}
+  .hero-product.right_image{flex-direction:row-reverse;}
+  .hero-product .h-img{flex:0 0 42%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:72px;}
+  .hero-product .h-body{flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;}
+  .hero-product .h-badge{position:absolute;top:-9px;left:14px;background:#1C1C1C;color:#fff;font-size:9px;font-weight:800;letter-spacing:.04em;padding:3px 10px;text-transform:uppercase;}
+  .hero-product .h-name{font-size:19px;font-weight:800;line-height:1.15;margin-bottom:4px;}
+  .hero-product .h-desc{font-size:10.5px;color:#555;margin-bottom:6px;line-height:1.4;}
+  .hero-product .h-serves{font-size:9.5px;color:#777;margin-bottom:6px;}
+  .hero-product .h-was{font-size:11px;color:#999999;text-decoration:line-through;}
+  .hero-product .h-now{font-family:'Archivo Black', Arial, sans-serif;font-size:38px;font-weight:900;color:#D31E25;line-height:1;}
+  .hero-product .h-pct{display:inline-block;margin-top:4px;font-size:10px;font-weight:800;color:#fff;background:#D31E25;padding:2px 8px;}
+
+  .double-product{border:1.5px solid #1a1a1a;display:flex;align-items:center;height:100%;background:#fff;position:relative;padding:8px 10px;gap:10px;}
+  .double-product .d-badge{position:absolute;top:-8px;left:10px;background:#1C1C1C;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.04em;padding:2px 8px;text-transform:uppercase;}
+  .double-product .d-img{flex:0 0 78px;width:78px;height:78px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:40px;}
+  .double-product .d-body{flex:1;min-width:0;}
+  .double-product .d-name{font-size:13px;font-weight:800;line-height:1.2;margin-bottom:2px;}
+  .double-product .d-desc{font-size:8.5px;color:#555;line-height:1.35;margin-bottom:3px;}
+  .double-product .d-serves{font-size:8px;color:#777;margin-bottom:2px;}
+  .double-product .d-price{display:flex;align-items:baseline;gap:6px;}
+  .double-product .d-was{font-size:9.5px;color:#999999;text-decoration:line-through;}
+  .double-product .d-now{font-family:'Archivo Black', Arial, sans-serif;font-size:24px;font-weight:900;color:#D31E25;}
+
+  .hot-deal{background:#fff;border:1.5px solid #1a1a1a;padding:8px 9px;display:flex;align-items:center;gap:8px;position:relative;height:100%;}
+  .hot-deal .label{position:absolute;top:-8px;left:8px;background:#1a1a1a;color:#fff;font-size:7px;font-weight:800;letter-spacing:.04em;padding:2px 7px;text-transform:uppercase;}
+  .hot-deal .thumb{width:50px;height:50px;background:#f2f2f2;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;}
+  .hot-deal .info{flex:1;min-width:0;}
+  .hot-deal .name{font-size:10px;font-weight:700;line-height:1.15;}
+  .hot-deal .size{font-size:7.5px;color:#777;}
+  .hot-deal .price{text-align:right;flex-shrink:0;}
+  .hot-deal .was{font-size:7.5px;color:#999999;text-decoration:line-through;}
+  .hot-deal .now{font-family:'Archivo Black', Arial, sans-serif;font-size:22px;font-weight:900;color:#D31E25;line-height:1;}
+
+  .standard-product{border:1px solid #dddddd;padding:6px 4px 7px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;position:relative;background:#fff;}
+  .standard-product .badge{position:absolute;top:3px;left:3px;font-size:6.5px;font-weight:800;padding:2px 5px;color:#fff;letter-spacing:.02em;}
+  .standard-product .thumb{width:46px;height:46px;margin:2px auto 4px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+  .standard-product .name{font-size:8px;font-weight:700;line-height:1.15;min-height:20px;text-transform:uppercase;}
+  .standard-product .size{font-size:6.5px;color:#888;margin:1px 0 3px;}
+  .standard-product .was{font-size:7px;color:#999999;text-decoration:line-through;}
+  .standard-product .now{font-family:'Archivo Black', Arial, sans-serif;font-size:17px;font-weight:900;line-height:1;}
+  .standard-product .now.on-sale{color:#D31E25;}
+  .standard-product .now.regular{color:#1a1a1a;}
+
+  .grid-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;height:100%;align-content:start;}
+  .grid-flow .full-row{grid-column:1 / -1;}
+
+  .flyer-footer{position:absolute;bottom:0;left:0;right:0;height:0.5in;background:#1C1C1C;color:#ffffff;padding:0 0.3in;display:flex;justify-content:space-between;align-items:center;font-size:8.5px;}
+  .flyer-footer b{font-family:'Archivo Black', Arial, sans-serif;font-size:10px;}
+  </style>
+</head>
+<body>
+<div class="page" id="pageSheet">
+  
+  <div class="masthead">
+    <div class="m-left">
+      <div class="m-logo-mark">AF</div>
+      <div>
+        <div class="m-name">ABC COMPANY</div>
+        <div class="m-tag">Weekly flyer &middot; generated by Novex Growth</div>
+      </div>
+    </div>
+    <div class="m-right">
+      <div class="m-dates">VALID SEP 11 – 17, 2026</div>
+      <div class="m-page">Page 4 of 8</div>
+    </div>
+  </div>
+  <div class="content-area">
+    <div class="zone" style="left:0%;top:0%;width:100%;height:100%;"><div class="grid-flow" style="padding:0.04in 0.22in;"><div class="full-row"><div class="category-header" style="background:#1E8E3E">Grocery</div></div><div style="grid-column:span 2;">
+  <div class="hot-deal">
+    <span class="label">Hot Deal</span>
+    <div class="thumb">🫒</div>
+    <div class="info">
+      <div class="name">ARZ Virgin Olive Oil 2.88L</div>
+      <div class="size">ea</div>
+    </div>
+    <div class="price">
+      <div class="was">$42.99</div>
+      <div class="now">$26.99</div>
+    </div>
+  </div></div><div style="grid-column:span 2;">
+  <div class="hot-deal">
+    <span class="label">Hot Deal</span>
+    <div class="thumb">🍯</div>
+    <div class="info">
+      <div class="name">Honey 1Kg</div>
+      <div class="size">ea</div>
+    </div>
+    <div class="price">
+      <div class="was">$12.99</div>
+      <div class="now">$7.99</div>
+    </div>
+  </div></div><div style="grid-column:span 2;">
+  <div class="hot-deal">
+    <span class="label">Hot Deal</span>
+    <div class="thumb">🧈</div>
+    <div class="info">
+      <div class="name">Pure Desi Ghee 800g</div>
+      <div class="size">ea</div>
+    </div>
+    <div class="price">
+      <div class="was">$18.99</div>
+      <div class="now">$12.99</div>
+    </div>
+  </div></div><div style="grid-column:span 2;">
+  <div class="hot-deal">
+    <span class="label">Hot Deal</span>
+    <div class="thumb">🍜</div>
+    <div class="info">
+      <div class="name">Instant Noodles 30pk</div>
+      <div class="size">ea</div>
+    </div>
+    <div class="price">
+      <div class="was">$24.99</div>
+      <div class="now">$17.99</div>
+    </div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#C98A12">NEW</span>
+    <div class="thumb">🍯</div>
+    <div class="name">Sugar-Free Baklava 600g</div>
+    <div class="size">ea</div>
+    <div class="was">$22.99</div>
+    <div class="now on-sale">$19.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 37%</span>
+    <div class="thumb">🍝</div>
+    <div class="name">Selected Pasta 450g</div>
+    <div class="size">4 for</div>
+    <div class="was">$1.99</div>
+    <div class="now on-sale">$1.25</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 25%</span>
+    <div class="thumb">🧀</div>
+    <div class="name">Haloumi Cheese 400g</div>
+    <div class="size">ea</div>
+    <div class="was">$11.99</div>
+    <div class="now on-sale">$8.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 29%</span>
+    <div class="thumb">🥒</div>
+    <div class="name">Mixed Pickles 1L</div>
+    <div class="size">ea</div>
+    <div class="was">$6.99</div>
+    <div class="now on-sale">$4.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 25%</span>
+    <div class="thumb">🍯</div>
+    <div class="name">Pitted Dates 500g</div>
+    <div class="size">ea</div>
+    <div class="was">$7.99</div>
+    <div class="now on-sale">$5.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 27%</span>
+    <div class="thumb">🥚</div>
+    <div class="name">Jumbo Eggs 20pcs</div>
+    <div class="size">ea</div>
+    <div class="was">$14.99</div>
+    <div class="now on-sale">$10.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 25%</span>
+    <div class="thumb">🥛</div>
+    <div class="name">Balkan Yogurt 1.8Kg</div>
+    <div class="size">ea</div>
+    <div class="was">$7.99</div>
+    <div class="now on-sale">$5.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 29%</span>
+    <div class="thumb">🧀</div>
+    <div class="name">Laughing Cow Cheese 24pk</div>
+    <div class="size">ea</div>
+    <div class="was">$13.99</div>
+    <div class="now on-sale">$9.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 22%</span>
+    <div class="thumb">🍚</div>
+    <div class="name">Basmati Rice 8.82lb</div>
+    <div class="size">ea</div>
+    <div class="was">$17.99</div>
+    <div class="now on-sale">$13.99</div>
+  </div></div><div class="full-row"><div class="category-header" style="background:#1E8E3E">Dairy & Deli</div></div><div style="grid-column:span 2;">
+  <div class="hot-deal">
+    <span class="label">Hot Deal</span>
+    <div class="thumb">🧀</div>
+    <div class="info">
+      <div class="name">Feta Cheese 700g</div>
+      <div class="size">ea</div>
+    </div>
+    <div class="price">
+      <div class="was">$12.99</div>
+      <div class="now">$8.99</div>
+    </div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#C98A12">NEW</span>
+    <div class="thumb">🥟</div>
+    <div class="name">Vegetable Samosas 10pc</div>
+    <div class="size">ea</div>
+    <div class="was">$2.99</div>
+    <div class="now on-sale">$1.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#C98A12">NEW</span>
+    <div class="thumb">🍕</div>
+    <div class="name">Cheese Pizza 9pk 580g</div>
+    <div class="size">ea</div>
+    <div class="was">$13.99</div>
+    <div class="now on-sale">$9.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 33%</span>
+    <div class="thumb">🍢</div>
+    <div class="name">Chicken Souvlaki Thighs</div>
+    <div class="size">/lb</div>
+    <div class="was">$8.99</div>
+    <div class="now on-sale">$5.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 29%</span>
+    <div class="thumb">🌭</div>
+    <div class="name">Deluxe Chicken Wieners 675g</div>
+    <div class="size">ea</div>
+    <div class="was">$6.99</div>
+    <div class="now on-sale">$4.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 29%</span>
+    <div class="thumb">🫒</div>
+    <div class="name">Black Olives 1L</div>
+    <div class="size">ea</div>
+    <div class="was">$6.99</div>
+    <div class="now on-sale">$4.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 20%</span>
+    <div class="thumb">🧃</div>
+    <div class="name">Pineapple Juice 21x190ml</div>
+    <div class="size">ea</div>
+    <div class="was">$9.99</div>
+    <div class="now on-sale">$7.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 18%</span>
+    <div class="thumb">🥐</div>
+    <div class="name">Mini Rolls 454g</div>
+    <div class="size">ea</div>
+    <div class="was">$5.49</div>
+    <div class="now on-sale">$4.49</div>
+  </div></div><div class="full-row"><div class="category-header" style="background:#1E8E3E">Produce</div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 33%</span>
+    <div class="thumb">🍊</div>
+    <div class="name">Clementine Loose</div>
+    <div class="size">/lb</div>
+    <div class="was">$2.99</div>
+    <div class="now on-sale">$1.99</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 25%</span>
+    <div class="thumb">🍅</div>
+    <div class="name">Field Tomatoes</div>
+    <div class="size">/lb</div>
+    <div class="was">$1.99</div>
+    <div class="now on-sale">$1.49</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 25%</span>
+    <div class="thumb">🥒</div>
+    <div class="name">Mini Cucumbers</div>
+    <div class="size">/lb</div>
+    <div class="was">$1.99</div>
+    <div class="now on-sale">$1.49</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 26%</span>
+    <div class="thumb">🍏</div>
+    <div class="name">Golden Delicious Apples</div>
+    <div class="size">/lb</div>
+    <div class="was">$2.29</div>
+    <div class="now on-sale">$1.69</div>
+  </div></div><div>
+  <div class="standard-product">
+    <span class="badge" style="background:#D31E25">SAVE 22%</span>
+    <div class="thumb">🍇</div>
+    <div class="name">Seedless Grapes</div>
+    <div class="size">/lb</div>
+    <div class="was">$4.49</div>
+    <div class="now on-sale">$3.49</div>
+  </div></div></div></div>
+  </div>
+  
+  <div class="flyer-footer">
+    <div><b>Order online or in-store</b> &middot; Prices valid while supplies last</div>
+    <div>(416) 555-0100 &middot; abccompany.ca</div>
+  </div>
+</div>
+</body>
+</html>

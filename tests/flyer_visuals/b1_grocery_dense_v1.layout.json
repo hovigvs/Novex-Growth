@@ -1,0 +1,588 @@
+{
+  "archetypeKey": "grocery_dense_page",
+  "zones": [
+    {
+      "name": "grid",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "cost_budget": 33,
+      "allowed_components": [
+        "standard",
+        "hotDeal"
+      ],
+      "instances": [
+        {
+          "component": "categoryHeader",
+          "categoryName": "Grocery"
+        },
+        {
+          "component": "hotDeal",
+          "campaignProductId": "cp2",
+          "merged": {
+            "id": "cp2",
+            "sku": "9002",
+            "name": "ARZ Virgin Olive Oil 2.88L",
+            "category": "Grocery",
+            "priority_score": 60,
+            "priority_score_breakdown": {
+              "featured": 30,
+              "promotion_type": 20,
+              "discount": 6,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 60
+            },
+            "discount_pct": 37
+          }
+        },
+        {
+          "component": "hotDeal",
+          "campaignProductId": "cp11",
+          "merged": {
+            "id": "cp11",
+            "sku": "2003",
+            "name": "Honey 1Kg",
+            "category": "Grocery",
+            "priority_score": 30,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 20,
+              "discount": 6,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 30
+            },
+            "discount_pct": 38
+          }
+        },
+        {
+          "component": "hotDeal",
+          "campaignProductId": "cp10",
+          "merged": {
+            "id": "cp10",
+            "sku": "2002",
+            "name": "Pure Desi Ghee 800g",
+            "category": "Grocery",
+            "priority_score": 29,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 20,
+              "discount": 5,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 29
+            },
+            "discount_pct": 32
+          }
+        },
+        {
+          "component": "hotDeal",
+          "campaignProductId": "cp17",
+          "merged": {
+            "id": "cp17",
+            "sku": "2009",
+            "name": "Instant Noodles 30pk",
+            "category": "Grocery",
+            "priority_score": 28,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 20,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 28
+            },
+            "discount_pct": 28
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp12",
+          "merged": {
+            "id": "cp12",
+            "sku": "2004",
+            "name": "Sugar-Free Baklava 600g",
+            "category": "Grocery",
+            "priority_score": 16,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 10,
+              "discount": 2,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 16
+            },
+            "discount_pct": 13
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp16",
+          "merged": {
+            "id": "cp16",
+            "sku": "2008",
+            "name": "Selected Pasta 450g",
+            "category": "Grocery",
+            "priority_score": 10,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 6,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 10
+            },
+            "discount_pct": 37
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp13",
+          "merged": {
+            "id": "cp13",
+            "sku": "2005",
+            "name": "Haloumi Cheese 400g",
+            "category": "Grocery",
+            "priority_score": 8,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 8
+            },
+            "discount_pct": 25
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp14",
+          "merged": {
+            "id": "cp14",
+            "sku": "2006",
+            "name": "Mixed Pickles 1L",
+            "category": "Grocery",
+            "priority_score": 8,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 8
+            },
+            "discount_pct": 29
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp15",
+          "merged": {
+            "id": "cp15",
+            "sku": "2007",
+            "name": "Pitted Dates 500g",
+            "category": "Grocery",
+            "priority_score": 8,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 8
+            },
+            "discount_pct": 25
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp18",
+          "merged": {
+            "id": "cp18",
+            "sku": "2010",
+            "name": "Jumbo Eggs 20pcs",
+            "category": "Grocery",
+            "priority_score": 8,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 8
+            },
+            "discount_pct": 27
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp19",
+          "merged": {
+            "id": "cp19",
+            "sku": "2011",
+            "name": "Balkan Yogurt 1.8Kg",
+            "category": "Grocery",
+            "priority_score": 8,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 8
+            },
+            "discount_pct": 25
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp20",
+          "merged": {
+            "id": "cp20",
+            "sku": "2012",
+            "name": "Laughing Cow Cheese 24pk",
+            "category": "Grocery",
+            "priority_score": 8,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 8
+            },
+            "discount_pct": 29
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp9",
+          "merged": {
+            "id": "cp9",
+            "sku": "2001",
+            "name": "Basmati Rice 8.82lb",
+            "category": "Grocery",
+            "priority_score": 7,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 3,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 4,
+              "total": 7
+            },
+            "discount_pct": 22
+          }
+        },
+        {
+          "component": "categoryHeader",
+          "categoryName": "Dairy & Deli"
+        },
+        {
+          "component": "hotDeal",
+          "campaignProductId": "cp27",
+          "merged": {
+            "id": "cp27",
+            "sku": "3007",
+            "name": "Feta Cheese 700g",
+            "category": "Dairy & Deli",
+            "priority_score": 28,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 20,
+              "discount": 5,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 3,
+              "total": 28
+            },
+            "discount_pct": 31
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp22",
+          "merged": {
+            "id": "cp22",
+            "sku": "3002",
+            "name": "Vegetable Samosas 10pc",
+            "category": "Dairy & Deli",
+            "priority_score": 18,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 10,
+              "discount": 5,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 3,
+              "total": 18
+            },
+            "discount_pct": 33
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp21",
+          "merged": {
+            "id": "cp21",
+            "sku": "3001",
+            "name": "Cheese Pizza 9pk 580g",
+            "category": "Dairy & Deli",
+            "priority_score": 17,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 10,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 3,
+              "total": 17
+            },
+            "discount_pct": 29
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp23",
+          "merged": {
+            "id": "cp23",
+            "sku": "3003",
+            "name": "Chicken Souvlaki Thighs",
+            "category": "Dairy & Deli",
+            "priority_score": 8,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 5,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 3,
+              "total": 8
+            },
+            "discount_pct": 33
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp26",
+          "merged": {
+            "id": "cp26",
+            "sku": "3006",
+            "name": "Deluxe Chicken Wieners 675g",
+            "category": "Dairy & Deli",
+            "priority_score": 7,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 3,
+              "total": 7
+            },
+            "discount_pct": 29
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp28",
+          "merged": {
+            "id": "cp28",
+            "sku": "3008",
+            "name": "Black Olives 1L",
+            "category": "Dairy & Deli",
+            "priority_score": 7,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 3,
+              "total": 7
+            },
+            "discount_pct": 29
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp24",
+          "merged": {
+            "id": "cp24",
+            "sku": "3004",
+            "name": "Pineapple Juice 21x190ml",
+            "category": "Dairy & Deli",
+            "priority_score": 6,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 3,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 3,
+              "total": 6
+            },
+            "discount_pct": 20
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp25",
+          "merged": {
+            "id": "cp25",
+            "sku": "3005",
+            "name": "Mini Rolls 454g",
+            "category": "Dairy & Deli",
+            "priority_score": 6,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 3,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 3,
+              "total": 6
+            },
+            "discount_pct": 18
+          }
+        },
+        {
+          "component": "categoryHeader",
+          "categoryName": "Produce"
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp6",
+          "merged": {
+            "id": "cp6",
+            "sku": "1003",
+            "name": "Clementine Loose",
+            "category": "Produce",
+            "priority_score": 13,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 5,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 8,
+              "total": 13
+            },
+            "discount_pct": 33
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp4",
+          "merged": {
+            "id": "cp4",
+            "sku": "1001",
+            "name": "Field Tomatoes",
+            "category": "Produce",
+            "priority_score": 12,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 8,
+              "total": 12
+            },
+            "discount_pct": 25
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp5",
+          "merged": {
+            "id": "cp5",
+            "sku": "1002",
+            "name": "Mini Cucumbers",
+            "category": "Produce",
+            "priority_score": 12,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 8,
+              "total": 12
+            },
+            "discount_pct": 25
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp7",
+          "merged": {
+            "id": "cp7",
+            "sku": "1004",
+            "name": "Golden Delicious Apples",
+            "category": "Produce",
+            "priority_score": 12,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 4,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 8,
+              "total": 12
+            },
+            "discount_pct": 26
+          }
+        },
+        {
+          "component": "standard",
+          "campaignProductId": "cp8",
+          "merged": {
+            "id": "cp8",
+            "sku": "1005",
+            "name": "Seedless Grapes",
+            "category": "Produce",
+            "priority_score": 11,
+            "priority_score_breakdown": {
+              "featured": 0,
+              "promotion_type": 0,
+              "discount": 3,
+              "campaign_relevance": 0,
+              "margin": 0,
+              "category": 8,
+              "total": 11
+            },
+            "discount_pct": 22
+          }
+        }
+      ],
+      "remainingBudget": 4.5
+    }
+  ],
+  "unplaced": [
+    {
+      "id": "cp1",
+      "name": "Falafel Plate + Free Pop Can"
+    },
+    {
+      "id": "cp3",
+      "name": "BBQ Chicken Family Platter"
+    }
+  ]
+}
