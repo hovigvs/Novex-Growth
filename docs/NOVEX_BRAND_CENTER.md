@@ -1,10 +1,42 @@
-# Novex Brand Center — Architecture Proposal (B1)
+# Novex Brand Center — Architecture (B1)
 
-**Status: PROPOSAL ONLY. Not implemented. No migration SQL written.**
-No file in this repo's `main` branch has been touched by this proposal, and
-nothing in the `social-b1` worktree has been read-write touched — it was
-inspected read-only for this audit and is otherwise untouched.
-`flyer-engine/` rendering/components are untouched.
+**Status: APPROVED for implementation, with migration held.** Domain/schema
+code and the portal UI may be built against the canonical contract below,
+backed by localStorage (the same demo-mode pattern the rest of the portal
+already uses — no live Supabase project exists yet regardless). **No SQL
+migration is written or committed until `social-b1`'s
+`0003_social_content_b1_schema.sql` has actually landed in `main`'s
+migration history** — writing a `0004_...` that assumes `0003` exists
+before it's merged would create exactly the non-linear schema history this
+approval explicitly rejects. `flyer-engine/` rendering/components and the
+`social-b1` worktree remain untouched.
+
+## Approved canonical decisions (locked in)
+
+1. **Social B1's `brand_kits`/`creative_profiles` are canonical.** Brand
+   Center is their configuration/management surface — no parallel model.
+2. **Business Profile ownership corrected.** `phone`, `email`, `website`,
+   `address`, `social_links`, `industry`, `description` belong on Core
+   `businesses`, never inside `brand_kits`. The Social B1 fixture's
+   `brandKit.phone` is recognized as fixture drift, to be reconciled on
+   the Social side — not reproduced here.
+3. **JSONB contracts are versioned and validated**, not a junk drawer —
+   see §2c/§2d below for `identity_schema_version` /
+   `writing_rules_schema_version` / `visual_preferences_schema_version`
+   and the validator modules.
+4. **CreativeProfile stays separate from BrandKit, and a business may have
+   many** (Premium Editorial, Weekly Promotion, Holiday, Corporate, ...) —
+   `creative_profiles.is_default` already supports one default with room
+   for named alternates.
+5. **Asset Library is shared Core infrastructure**, architected for future
+   roles/tags/provenance/derivatives, not module-specific — minimal in B1,
+   no advanced media analysis.
+6. **Website Brand Import architecture is preserved** as future work
+   (§6) — manual configuration only in B1.
+7. **Migration history stays linear.** UI/domain code ships now against
+   the documented contract; the actual `businesses` extension migration
+   (and any `brand_kits`/`creative_profiles` key additions) waits for
+   `0003` to land in `main` first.
 
 This is shared customer configuration infrastructure, not a marketing-
 generation engine. It extends

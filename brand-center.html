@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Brand Center — Novex Growth</title>
+<style>
+:root{
+  --ink:#1a1a1a; --muted:#666; --border:#e2e2e6; --bg:#f7f7f9;
+  --accent:#5558B8; --accent-bg:#EEEEFF; --good:#1E8E5A; --warn:#B8790E;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--ink);}
+.shell{max-width:920px;margin:0 auto;padding:20px 20px 60px;}
+.top{margin-bottom:18px;}
+.top h1{font-size:20px;margin:0 0 4px;}
+.top p{font-size:12.5px;color:var(--muted);margin:0;}
+.note{font-size:11.5px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:16px;}
+.tabs{display:flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:16px;flex-wrap:wrap;}
+.tab{flex:1;min-width:110px;text-align:center;padding:9px 10px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--muted);border:none;background:transparent;}
+.tab.active{background:var(--accent);color:#fff;}
+.panel{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;display:none;}
+.panel.active{display:block;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;margin-bottom:4px;}
+.field input[type=text], .field input[type=email], .field input[type=url], .field input[type=tel], .field textarea, .field select{
+  width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13.5px;font-family:inherit;background:#fff;color:var(--ink);
+}
+.field textarea{resize:vertical;min-height:60px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.field input[type=color]{width:44px;height:34px;padding:2px;border:1px solid var(--border);border-radius:6px;cursor:pointer;}
+.color-row{display:flex;align-items:center;gap:8px;}
+.color-row span{font-size:12px;color:var(--muted);}
+.hint{font-size:11px;color:var(--muted);margin-top:3px;}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;}
+.btn:hover{opacity:.92;}
+.btn.secondary{background:#fff;color:var(--accent);border:1px solid var(--accent);}
+.btn.danger{background:#fff;color:#c0392b;border:1px solid #c0392b;}
+.btn.small{padding:5px 10px;font-size:11.5px;}
+.actions{display:flex;gap:8px;align-items:center;margin-top:16px;}
+.save-msg{font-size:12px;color:var(--good);display:none;}
+.save-msg.err{color:#c0392b;}
+.tags-input{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid var(--border);border-radius:6px;background:#fff;min-height:38px;}
+.tag-chip{background:var(--accent-bg);color:var(--accent);font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:20px;display:flex;align-items:center;gap:5px;}
+.tag-chip button{border:none;background:none;color:var(--accent);cursor:pointer;font-size:13px;line-height:1;padding:0;}
+.tags-input input{border:none;outline:none;font-size:12.5px;flex:1;min-width:80px;padding:3px;}
+.chip-list.prohibited .tag-chip{background:#FCE8E5;color:#c0392b;}
+.chip-list.prohibited .tag-chip button{color:#c0392b;}
+.profile-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;}
+.profile-card{border:1.5px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;position:relative;}
+.profile-card.selected{border-color:var(--accent);background:var(--accent-bg);}
+.profile-card .pname{font-weight:700;font-size:13px;margin-bottom:2px;}
+.profile-card .pstyle{font-size:11px;color:var(--muted);}
+.profile-card .default-badge{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;background:var(--good);color:#fff;padding:2px 6px;border-radius:10px;}
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+.asset-card{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fff;}
+.asset-card img{width:100%;height:90px;object-fit:cover;display:block;background:#f0f0f0;}
+.asset-card .meta{padding:7px 8px;}
+.asset-card .roles{font-size:9.5px;color:var(--accent);margin-bottom:3px;}
+.asset-card .tags{font-size:9.5px;color:var(--muted);}
+.asset-card .immutable{font-size:9px;color:var(--good);margin-top:3px;}
+.upload-box{border:2px dashed var(--border);border-radius:8px;padding:18px;text-align:center;font-size:12.5px;color:var(--muted);margin-bottom:16px;}
+.upload-box input{margin-top:8px;}
+.role-checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.role-checks label{font-size:11.5px;font-weight:500;color:var(--ink);text-transform:none;display:flex;align-items:center;gap:4px;}
+.section-title{font-size:14px;font-weight:800;margin:0 0 12px;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="top">
+    <h1>Brand Center</h1>
+    <p>Configure once — Flyer, Social, Email, WhatsApp and the AI Receptionist all read from here.</p>
+  </div>
+  <div class="note" id="demoNote">Demo mode — saved locally in this browser. No live Supabase project is connected yet (see docs/NOVEX_BRAND_CENTER.md); this record's shape is the exact canonical contract, so switching to real storage later is a drop-in swap.</div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="business">Business Profile</button>
+    <button class="tab" data-tab="brandkit">Brand Kit</button>
+    <button class="tab" data-tab="voice">Brand Voice</button>
+    <button class="tab" data-tab="creative">Creative Profiles</button>
+    <button class="tab" data-tab="assets">Asset Library</button>
+  </div>
+
+  <!-- BUSINESS PROFILE -->
+  <div class="panel active" id="panel-business">
+    <div class="section-title">Business Profile</div>
+    <div class="field"><label>Business name</label><input type="text" id="bp-name"/></div>
+    <div class="row2">
+      <div class="field"><label>Industry</label><input type="text" id="bp-industry" placeholder="e.g. Grocery & Specialty Foods"/></div>
+      <div class="field"><label>Website</label><input type="url" id="bp-website" placeholder="https://"/></div>
+    </div>
+    <div class="field"><label>Description</label><textarea id="bp-description"></textarea></div>
+    <div class="row2">
+      <div class="field"><label>Phone</label><input type="tel" id="bp-phone"/></div>
+      <div class="field"><label>Email</label><input type="email" id="bp-email"/></div>
+    </div>
+    <div class="row3">
+      <div class="field"><label>Street</label><input type="text" id="bp-street"/></div>
+      <div class="field"><label>City</label><input type="text" id="bp-city"/></div>
+      <div class="field"><label>Region</label><input type="text" id="bp-region"/></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Postal code</label><input type="text" id="bp-postal"/></div>
+      <div class="field"><label>Country</label><input type="text" id="bp-country"/></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Instagram</label><input type="text" id="bp-instagram"/></div>
+      <div class="field"><label>Facebook</label><input type="text" id="bp-facebook"/></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Google Business</label><input type="text" id="bp-google"/></div>
+      <div class="field"><label>WhatsApp</label><input type="text" id="bp-whatsapp"/></div>
+    </div>
+    <div class="actions"><button class="btn" onclick="saveBusinessProfile()">Save Business Profile</button><span class="save-msg" id="msg-business">Saved.</span></div>
+  </div>
+
+  <!-- BRAND KIT -->
+  <div class="panel" id="panel-brandkit">
+    <div class="section-title">Brand Kit</div>
+    <div class="hint" style="margin-bottom:14px;">Writes to the canonical <code>brand_kits.identity</code> shape (schema v<span id="identityVer"></span>) — the same record Social and Flyer both read.</div>
+    <div class="field"><label>Logo</label>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img id="logoPreview" style="width:56px;height:56px;border-radius:8px;object-fit:cover;background:#f0f0f0;border:1px solid var(--border);" />
+        <span class="hint" id="logoHint">No logo set — pick one from the Asset Library tab and click "Set as logo".</span>
+      </div>
+    </div>
+    <div class="field"><label>Tagline</label><input type="text" id="bk-tagline" placeholder="e.g. The essence of Mediterranean gourmet"/></div>
+    <div class="field"><label>Colors</label>
+      <div style="display:flex;gap:18px;">
+        <div class="color-row"><input type="color" id="bk-primary"/><span>Primary</span></div>
+        <div class="color-row"><input type="color" id="bk-secondary"/><span>Secondary</span></div>
+        <div class="color-row"><input type="color" id="bk-accent"/><span>Accent</span></div>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Heading font</label><input type="text" id="bk-headingFont"/></div>
+      <div class="field"><label>Body font</label><input type="text" id="bk-bodyFont"/></div>
+    </div>
+    <div class="field"><label>Default CTA rules</label><textarea id="bk-ctaRules" placeholder="e.g. Invitation-led; never sound discount-driven."></textarea></div>
+    <div class="field"><label>Basic writing guidance</label><textarea id="bk-writingGuidance" placeholder="How should copy for this business generally read?"></textarea></div>
+    <div class="actions"><button class="btn" onclick="saveBrandKit()">Save Brand Kit</button><span class="save-msg" id="msg-brandkit">Saved.</span></div>
+  </div>
+
+  <!-- BRAND VOICE -->
+  <div class="panel" id="panel-voice">
+    <div class="section-title">Brand Voice</div>
+    <div class="hint" style="margin-bottom:14px;">Also part of <code>brand_kits.writing_rules</code> (schema v<span id="writingVer"></span>) — kept on the Voice tab for clarity, saved together with the Brand Kit tab's CTA/writing guidance.</div>
+    <div class="field"><label>Tone attributes</label><input type="text" id="bv-tone" placeholder="e.g. warm, family-run, generous"/></div>
+    <div class="field"><label>Preferred terminology</label>
+      <div class="tags-input chip-list" id="chips-preferred"><input type="text" id="input-preferred" placeholder="Type a term and press Enter"/></div>
+    </div>
+    <div class="field"><label>Prohibited wording</label>
+      <div class="tags-input chip-list prohibited" id="chips-prohibited"><input type="text" id="input-prohibited" placeholder="Type a phrase and press Enter"/></div>
+    </div>
+    <div class="actions"><button class="btn" onclick="saveBrandKit()">Save Brand Voice</button><span class="save-msg" id="msg-voice">Saved.</span></div>
+  </div>
+
+  <!-- CREATIVE PROFILES -->
+  <div class="panel" id="panel-creative">
+    <div class="section-title">Creative Profiles</div>
+    <div class="hint" style="margin-bottom:14px;">A business can have several — the merchant picks one per campaign. Writes to <code>creative_profiles.visual_preferences</code> (schema v<span id="visualVer"></span>).</div>
+    <div class="profile-cards" id="profileCards"></div>
+    <button class="btn secondary small" onclick="addCreativeProfile()">+ New creative profile</button>
+    <hr style="margin:18px 0;border:none;border-top:1px solid var(--border);"/>
+    <div id="creativeForm"></div>
+  </div>
+
+  <!-- ASSET LIBRARY -->
+  <div class="panel" id="panel-assets">
+    <div class="section-title">Asset Library</div>
+    <div class="hint" style="margin-bottom:10px;">Shared across every engine — not a Flyer library or a Social library. Originals are immutable; a crop/derivative would be a new asset row (not built in B1).</div>
+    <div class="upload-box">
+      Upload a logo, photo, or video (stored locally in this browser for the demo).
+      <br/><input type="file" id="assetUpload" accept="image/*" onchange="handleAssetUpload(event)"/>
+    </div>
+    <div class="asset-grid" id="assetGrid"></div>
+  </div>
+
+</div>
+
+<script src="brand-center/schemas/business-profile.schema.js"></script>
+<script src="brand-center/schemas/brand-kit.schema.js"></script>
+<script src="brand-center/schemas/creative-profile.schema.js"></script>
+<script src="brand-center/schemas/asset-contract.schema.js"></script>
+<script src="brand-center/data/sample-brand-center.js"></script>
+<script>
+var NBC = window.NovexBrandCenter;
+var STORAGE_KEY = 'novex_brand_center_demo_business';
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  // First run: seed from the sample record so the module isn't empty.
+  return {
+    businessProfile: NBC.SampleData.sampleBusinessProfile,
+    identity: NBC.SampleData.sampleIdentity,
+    writingRules: NBC.SampleData.sampleWritingRules,
+    creativeProfiles: NBC.SampleData.sampleCreativeProfiles,
+    assets: []
+  };
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+var state = loadState();
+var selectedProfileId = state.creativeProfiles.length ? state.creativeProfiles[0].id : null;
+
+function flash(id, ok, text) {
+  var el = document.getElementById(id);
+  el.textContent = text || (ok ? 'Saved.' : 'Failed.');
+  el.className = 'save-msg' + (ok ? '' : ' err');
+  el.style.display = 'inline';
+  setTimeout(function () { el.style.display = 'none'; }, 2200);
+}
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab').forEach(function (tab) {
+  tab.addEventListener('click', function () {
+    document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ---------- Business Profile ----------
+function renderBusinessProfile() {
+  var bp = state.businessProfile;
+  document.getElementById('bp-name').value = bp.name || '';
+  document.getElementById('bp-industry').value = bp.industry || '';
+  document.getElementById('bp-website').value = bp.website || '';
+  document.getElementById('bp-description').value = bp.description || '';
+  document.getElementById('bp-phone').value = bp.phone || '';
+  document.getElementById('bp-email').value = bp.email || '';
+  var a = bp.address || {};
+  document.getElementById('bp-street').value = a.street || '';
+  document.getElementById('bp-city').value = a.city || '';
+  document.getElementById('bp-region').value = a.region || '';
+  document.getElementById('bp-postal').value = a.postalCode || '';
+  document.getElementById('bp-country').value = a.country || '';
+  var s = bp.socialLinks || {};
+  document.getElementById('bp-instagram').value = s.instagram || '';
+  document.getElementById('bp-facebook').value = s.facebook || '';
+  document.getElementById('bp-google').value = s.googleBusiness || '';
+  document.getElementById('bp-whatsapp').value = s.whatsapp || '';
+}
+
+function saveBusinessProfile() {
+  var profile = {
+    name: document.getElementById('bp-name').value.trim(),
+    industry: document.getElementById('bp-industry').value.trim(),
+    website: document.getElementById('bp-website').value.trim(),
+    description: document.getElementById('bp-description').value.trim(),
+    phone: document.getElementById('bp-phone').value.trim(),
+    email: document.getElementById('bp-email').value.trim(),
+    address: {
+      street: document.getElementById('bp-street').value.trim(),
+      city: document.getElementById('bp-city').value.trim(),
+      region: document.getElementById('bp-region').value.trim(),
+      postalCode: document.getElementById('bp-postal').value.trim(),
+      country: document.getElementById('bp-country').value.trim()
+    },
+    socialLinks: {
+      instagram: document.getElementById('bp-instagram').value.trim(),
+      facebook: document.getElementById('bp-facebook').value.trim(),
+      googleBusiness: document.getElementById('bp-google').value.trim(),
+      whatsapp: document.getElementById('bp-whatsapp').value.trim()
+    }
+  };
+  try {
+    var result = NBC.BusinessProfile.validateBusinessProfile(profile);
+    state.businessProfile = profile;
+    saveState();
+    flash('msg-business', true, result.warnings.length ? ('Saved — ' + result.warnings[0]) : 'Saved.');
+  } catch (e) {
+    flash('msg-business', false, e.message);
+  }
+}
+
+// ---------- Brand Kit + Voice (share the same brand_kits row) ----------
+var preferredTerms = [];
+var prohibitedTerms = [];
+
+function renderBrandKit() {
+  document.getElementById('identityVer').textContent = NBC.BrandKit.IDENTITY_SCHEMA_VERSION;
+  document.getElementById('writingVer').textContent = NBC.BrandKit.WRITING_RULES_SCHEMA_VERSION;
+  var id = state.identity;
+  document.getElementById('bk-tagline').value = id.tagline || '';
+  document.getElementById('bk-primary').value = id.primaryColor || '#1a1a1a';
+  document.getElementById('bk-secondary').value = id.secondaryColor || '#666666';
+  document.getElementById('bk-accent').value = id.accentColor || '#999999';
+  document.getElementById('bk-headingFont').value = id.headingFont || '';
+  document.getElementById('bk-bodyFont').value = id.bodyFont || '';
+
+  var wr = state.writingRules;
+  document.getElementById('bk-ctaRules').value = wr.ctaRules || '';
+  document.getElementById('bk-writingGuidance').value = wr.writingGuidance || '';
+  document.getElementById('bv-tone').value = wr.tone || '';
+  preferredTerms = (wr.preferredTerminology || []).slice();
+  prohibitedTerms = (wr.prohibitedWording || []).slice();
+  renderChips('chips-preferred', preferredTerms, 'input-preferred');
+  renderChips('chips-prohibited', prohibitedTerms, 'input-prohibited');
+
+  renderLogoPreview();
+}
+
+function renderLogoPreview() {
+  var img = document.getElementById('logoPreview');
+  var hint = document.getElementById('logoHint');
+  var asset = state.assets.find(function (a) { return a.id === state.identity.logoAssetId; });
+  if (asset) { img.src = asset.dataUrl; hint.textContent = 'Current logo — change it from the Asset Library tab.'; }
+  else { img.src = ''; hint.textContent = 'No logo set — pick one from the Asset Library tab and click "Set as logo".'; }
+}
+
+function renderChips(containerId, list, inputId) {
+  var container = document.getElementById(containerId);
+  var input = document.getElementById(inputId);
+  container.querySelectorAll('.tag-chip').forEach(function (c) { c.remove(); });
+  list.forEach(function (term, i) {
+    var chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = escapeHtml(term) + ' <button type="button">×</button>';
+    chip.querySelector('button').onclick = function () { list.splice(i, 1); renderChips(containerId, list, inputId); };
+    container.insertBefore(chip, input);
+  });
+}
+
+function escapeHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+document.getElementById('input-preferred').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && this.value.trim()) { preferredTerms.push(this.value.trim()); this.value = ''; renderChips('chips-preferred', preferredTerms, 'input-preferred'); e.preventDefault(); }
+});
+document.getElementById('input-prohibited').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && this.value.trim()) { prohibitedTerms.push(this.value.trim()); this.value = ''; renderChips('chips-prohibited', prohibitedTerms, 'input-prohibited'); e.preventDefault(); }
+});
+
+function saveBrandKit() {
+  var identity = {
+    schemaVersion: NBC.BrandKit.IDENTITY_SCHEMA_VERSION,
+    name: state.businessProfile.name, logoText: state.identity.logoText || '', logoAssetId: state.identity.logoAssetId || null,
+    primaryColor: document.getElementById('bk-primary').value,
+    secondaryColor: document.getElementById('bk-secondary').value,
+    accentColor: document.getElementById('bk-accent').value,
+    headingFont: document.getElementById('bk-headingFont').value.trim(),
+    bodyFont: document.getElementById('bk-bodyFont').value.trim(),
+    tagline: document.getElementById('bk-tagline').value.trim()
+  };
+  var writingRules = {
+    schemaVersion: NBC.BrandKit.WRITING_RULES_SCHEMA_VERSION,
+    tone: document.getElementById('bv-tone').value.trim(),
+    ctaRules: document.getElementById('bk-ctaRules').value.trim(),
+    writingGuidance: document.getElementById('bk-writingGuidance').value.trim(),
+    preferredTerminology: preferredTerms.slice(),
+    prohibitedWording: prohibitedTerms.slice()
+  };
+  try {
+    NBC.BrandKit.validateIdentity(identity);
+    NBC.BrandKit.validateWritingRules(writingRules);
+    state.identity = identity;
+    state.writingRules = writingRules;
+    saveState();
+    flash('msg-brandkit', true);
+    flash('msg-voice', true);
+  } catch (e) {
+    flash('msg-brandkit', false, e.message);
+    flash('msg-voice', false, e.message);
+  }
+}
+
+// ---------- Creative Profiles ----------
+function renderProfileCards() {
+  var wrap = document.getElementById('profileCards');
+  wrap.innerHTML = '';
+  state.creativeProfiles.forEach(function (p) {
+    var card = document.createElement('div');
+    card.className = 'profile-card' + (p.id === selectedProfileId ? ' selected' : '');
+    card.innerHTML = (p.isDefault ? '<span class="default-badge">DEFAULT</span>' : '') +
+      '<div class="pname">' + escapeHtml(p.name) + '</div>' +
+      '<div class="pstyle">' + escapeHtml(p.visualPreferences.visualStyle || 'Not set') + '</div>';
+    card.onclick = function () { selectedProfileId = p.id; renderProfileCards(); renderCreativeForm(); };
+    wrap.appendChild(card);
+  });
+}
+
+function addCreativeProfile() {
+  var id = 'cp-' + Date.now();
+  var fresh = { id: id, name: 'New Creative Profile', isDefault: false, visualPreferences: NBC.CreativeProfile.emptyVisualPreferences() };
+  state.creativeProfiles.push(fresh);
+  selectedProfileId = id;
+  saveState();
+  renderProfileCards();
+  renderCreativeForm();
+}
+
+function renderCreativeForm() {
+  var profile = state.creativeProfiles.find(function (p) { return p.id === selectedProfileId; });
+  var host = document.getElementById('creativeForm');
+  if (!profile) { host.innerHTML = '<p class="hint">No creative profile selected.</p>'; return; }
+  var vp = profile.visualPreferences;
+  host.innerHTML =
+    '<div class="field"><label>Profile name</label><input type="text" id="cf-name" value="' + escapeHtml(profile.name) + '"/></div>' +
+    '<div class="row2">' +
+      '<div class="field"><label>Visual style</label><input type="text" id="cf-visualStyle" value="' + escapeHtml(vp.visualStyle || '') + '"/></div>' +
+      '<div class="field"><label>Photography style</label><input type="text" id="cf-photographyStyle" value="' + escapeHtml(vp.photographyStyle || '') + '"/></div>' +
+    '</div>' +
+    '<div class="row2">' +
+      '<div class="field"><label>Text density</label><select id="cf-textDensity">' +
+        NBC.CreativeProfile.TEXT_DENSITIES.map(function (d) { return '<option value="' + d + '"' + (vp.textDensity === d ? ' selected' : '') + '>' + d + '</option>'; }).join('') +
+      '</select></div>' +
+      '<div class="field"><label>Logo placement</label><input type="text" id="cf-logoPlacement" value="' + escapeHtml(vp.logoPlacement || '') + '" placeholder="e.g. bottom right"/></div>' +
+    '</div>' +
+    '<div class="field"><label>Preferred compositions (comma-separated)</label><input type="text" id="cf-compositions" value="' + escapeHtml((vp.preferredCompositions || []).join(', ')) + '"/></div>' +
+    '<div class="field"><label>Preferred backgrounds (comma-separated)</label><input type="text" id="cf-backgrounds" value="' + escapeHtml((vp.preferredBackgrounds || []).join(', ')) + '"/></div>' +
+    '<div class="field"><label>Styles to avoid (comma-separated)</label><input type="text" id="cf-avoid" value="' + escapeHtml((vp.avoidStyles || []).join(', ')) + '"/></div>' +
+    '<div class="field"><label>Image generation guidance</label><textarea id="cf-imageGuidance">' + escapeHtml(vp.imageGenerationGuidance || '') + '</textarea></div>' +
+    '<div class="field"><label><input type="checkbox" id="cf-isDefault"' + (profile.isDefault ? ' checked' : '') + ' style="width:auto;margin-right:6px;"/>Default profile for this business</label></div>' +
+    '<div class="actions">' +
+      '<button class="btn" onclick="saveCreativeProfile()">Save Creative Profile</button>' +
+      '<button class="btn danger small" onclick="deleteCreativeProfile()">Delete</button>' +
+      '<span class="save-msg" id="msg-creative">Saved.</span>' +
+    '</div>';
+}
+
+function saveCreativeProfile() {
+  var profile = state.creativeProfiles.find(function (p) { return p.id === selectedProfileId; });
+  if (!profile) return;
+  var vp = {
+    schemaVersion: NBC.CreativeProfile.VISUAL_PREFERENCES_SCHEMA_VERSION,
+    visualStyle: document.getElementById('cf-visualStyle').value.trim(),
+    photographyStyle: document.getElementById('cf-photographyStyle').value.trim(),
+    textDensity: document.getElementById('cf-textDensity').value,
+    logoPlacement: document.getElementById('cf-logoPlacement').value.trim(),
+    preferredCompositions: splitCsv(document.getElementById('cf-compositions').value),
+    preferredBackgrounds: splitCsv(document.getElementById('cf-backgrounds').value),
+    avoidStyles: splitCsv(document.getElementById('cf-avoid').value),
+    imageGenerationGuidance: document.getElementById('cf-imageGuidance').value.trim()
+  };
+  try {
+    NBC.CreativeProfile.validateVisualPreferences(vp);
+    profile.name = document.getElementById('cf-name').value.trim() || profile.name;
+    profile.visualPreferences = vp;
+    var makeDefault = document.getElementById('cf-isDefault').checked;
+    if (makeDefault) state.creativeProfiles.forEach(function (p) { p.isDefault = (p.id === profile.id); });
+    else profile.isDefault = false;
+    saveState();
+    renderProfileCards();
+    flash('msg-creative', true);
+  } catch (e) {
+    flash('msg-creative', false, e.message);
+  }
+}
+
+function deleteCreativeProfile() {
+  state.creativeProfiles = state.creativeProfiles.filter(function (p) { return p.id !== selectedProfileId; });
+  selectedProfileId = state.creativeProfiles.length ? state.creativeProfiles[0].id : null;
+  saveState();
+  renderProfileCards();
+  renderCreativeForm();
+}
+
+function splitCsv(s) { return s.split(',').map(function (x) { return x.trim(); }).filter(Boolean); }
+
+// ---------- Asset Library ----------
+function renderAssets() {
+  var grid = document.getElementById('assetGrid');
+  grid.innerHTML = '';
+  state.assets.forEach(function (a) {
+    var card = document.createElement('div');
+    card.className = 'asset-card';
+    card.innerHTML =
+      '<img src="' + a.dataUrl + '"/>' +
+      '<div class="meta">' +
+        '<div class="roles">' + (a.metadata.roles.join(', ') || 'no roles') + '</div>' +
+        '<div class="tags">' + (a.metadata.tags.join(', ') || 'no tags') + '</div>' +
+        '<div class="immutable">✓ original, immutable</div>' +
+        '<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">' +
+          '<button class="btn secondary small" onclick="editAssetTags(\'' + a.id + '\')">Edit tags/roles</button>' +
+          '<button class="btn secondary small" onclick="setAsLogo(\'' + a.id + '\')">Set as logo</button>' +
+        '</div>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+function handleAssetUpload(evt) {
+  var file = evt.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function () {
+    var metadata = NBC.AssetContract.emptyAssetMetadata();
+    metadata.source = 'merchant_upload';
+    metadata.orientation = 'unknown';
+    try { NBC.AssetContract.validateAssetMetadata(metadata); } catch (e) { alert(e.message); return; }
+    var asset = { id: 'asset-' + Date.now(), type: file.type.indexOf('video') === 0 ? 'video' : 'photo', dataUrl: reader.result, metadata: metadata };
+    state.assets.push(asset);
+    saveState();
+    renderAssets();
+    evt.target.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function editAssetTags(id) {
+  var asset = state.assets.find(function (a) { return a.id === id; });
+  if (!asset) return;
+  var tagsStr = prompt('Tags (comma-separated):', asset.metadata.tags.join(', '));
+  if (tagsStr === null) return;
+  var rolesStr = prompt('Roles (comma-separated, from: ' + NBC.AssetContract.ROLES.join(', ') + '):', asset.metadata.roles.join(', '));
+  if (rolesStr === null) return;
+  var roles = splitCsv(rolesStr).filter(function (r) { return NBC.AssetContract.ROLES.indexOf(r) !== -1; });
+  asset.metadata.tags = splitCsv(tagsStr);
+  asset.metadata.roles = roles;
+  try {
+    NBC.AssetContract.validateAssetMetadata(asset.metadata);
+    saveState();
+    renderAssets();
+  } catch (e) { alert(e.message); }
+}
+
+function setAsLogo(id) {
+  state.identity.logoAssetId = id;
+  var asset = state.assets.find(function (a) { return a.id === id; });
+  if (asset && asset.metadata.roles.indexOf('logo') === -1) asset.metadata.roles.push('logo');
+  saveState();
+  renderLogoPreview();
+  renderAssets();
+  alert('Set as logo. Switch to the Brand Kit tab to see it, then Save Brand Kit to persist logoAssetId.');
+}
+
+// ---------- Init ----------
+document.getElementById('visualVer').textContent = NBC.CreativeProfile.VISUAL_PREFERENCES_SCHEMA_VERSION;
+renderBusinessProfile();
+renderBrandKit();
+renderProfileCards();
+renderCreativeForm();
+renderAssets();
+</script>
+</body>
+</html>

@@ -152,5 +152,13 @@ window.NOVEX_MODULE_INFO = {
       "We map your current workflow first, then automate the actual bottleneck, not a generic template.",
       "Uses the same AI and automation toolkit as every other module here.",
       "Book a call to scope what this would look like for your business."
+    ] },
+  "brand-center": { name: "Brand Center", tagline: "Configure once, every engine reads from here", vertical: "both", icon:"🎨",
+    demo:{ type:"iframe", src:"brand-center.html" },
+    howItWorks:[
+      "Set your Business Profile, Brand Kit, Brand Voice, and Creative Profiles once.",
+      "Flyer, Social, Email, WhatsApp, and the AI Receptionist all read the same record — no re-entering your colors, tone, or contact info per module.",
+      "Supports multiple Creative Profiles (e.g. Premium Editorial, Weekly Promotion, Holiday) — pick one per campaign without changing your core brand identity.",
+      "Shared Asset Library — upload once, reference everywhere; originals are never modified."
     ] }
 };
