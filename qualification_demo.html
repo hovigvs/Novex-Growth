@@ -190,8 +190,18 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--dar
   </div>
 
   <div class="footer-note">This is a working concept demo — shown here on Instagram DM, but the same AI, same qualifying questions, and same lead card run identically over website chat, voice calls, and WhatsApp. Nothing is invented here: every field on the lead card comes directly from what the customer actually typed. Once qualified, the lead routes to a human for the formal quote — see the AI BEO Generator demo for what happens next.</div>
+  <div class="footer-note" id="revenueEngineProof" style="display:none;margin-top:10px;padding:12px;background:#F0F2FF;border-radius:8px;">
+    <b>Revenue Engine record (real, not animated):</b>
+    <div id="revenueEngineProofBody" style="font-family:monospace;font-size:11px;white-space:pre-wrap;margin-top:6px;color:#333;"></div>
+  </div>
 </div>
 
+<script src="revenue-engine/schemas/lead.schema.js"></script>
+<script src="revenue-engine/schemas/opportunity.schema.js"></script>
+<script src="revenue-engine/schemas/activity.schema.js"></script>
+<script src="revenue-engine/schemas/conversation.schema.js"></script>
+<script src="revenue-engine/schemas/segmentation.js"></script>
+<script src="revenue-engine/store.js"></script>
 <script>
 const script = [
   {who:'customer', text:"hii do u guys do drop off catering? need something for like 50 people early dec, kinda urgent lol"},
@@ -239,10 +249,41 @@ function runScript(idx){
   }, step.who==='nicole' ? 700 : 500);
 }
 
+// Creates real Revenue Engine records (Lead -> Conversation -> Activity)
+// instead of only animating a UI card. This is the qualification_demo
+// wire-up from docs/NOVEX_REVENUE_ENGINE_AUDIT.md -- pure Conversation ->
+// Lead -> Activity, chosen first because it has zero existing-customer
+// ambiguity to get wrong. Records persist to localStorage
+// (novex_revenue_engine_demo_business), validated on write, same as
+// Brand Center / Campaign Center's demo-mode pattern.
+var lastQualifiedRecords = null;
+function persistQualifiedLead(){
+  var RE = window.NovexRevenueEngine;
+  var lead = RE.Store.createLead({
+    source: 'instagram_dm',
+    status: 'qualified',
+    notes: 'Office Holiday Party, ~50 guests, Fri Dec 5 2026 (tentative), $20-25/person. Vegetarian options + 1 gluten-free.'
+  });
+  var conversation = RE.Store.createConversation({
+    leadId: lead.id,
+    channel: 'chat', // Instagram DM mapped to the closest existing Core channel enum value
+    transcript: script
+  });
+  var activity = RE.Store.createActivity({
+    leadId: lead.id,
+    type: 'task',
+    dueAt: new Date().toISOString(),
+    notes: 'Send formal quote to @sarahk_events -- events team handoff'
+  });
+  lastQualifiedRecords = { lead: lead, conversation: conversation, activity: activity };
+  return lastQualifiedRecords;
+}
+
 function buildCard(){
+  var records = persistQualifiedLead();
   document.getElementById('cardEmpty').style.display='none';
   document.getElementById('leadDoc').classList.add('show');
-  document.getElementById('leadNum').textContent = 'LD-' + Math.floor(1000+Math.random()*8999);
+  document.getElementById('leadNum').textContent = 'LD-' + records.lead.id.split('-').pop();
   document.getElementById('leadDate').textContent = new Date().toLocaleDateString('en-CA', {year:'numeric',month:'short',day:'numeric'});
 
   fadeIn('secContact', 200);
@@ -305,11 +346,20 @@ function runApproval(){
   btn.disabled = true;
   btn.textContent = 'Routing…';
 
-  addStep('📥', 'Step 1 — Automatic, safe to run unattended', 'Lead auto-logged to CRM — name, contact, event details, all fields filled', 200, true);
-  addStep('👋', 'Step 2 — Human picks it up, not a form', 'Events team notified — they open a fully-qualified lead, not a blank inquiry', 1600, true);
+  var rec = lastQualifiedRecords;
+  addStep('📥', 'Step 1 — Automatic, safe to run unattended', 'Lead ' + (rec ? rec.lead.id : '') + ' saved to the Revenue Engine — name, contact, event details, all fields filled', 200, true);
+  addStep('👋', 'Step 2 — Human picks it up, not a form', 'Activity ' + (rec ? rec.activity.id : '') + ' created — events team opens a fully-qualified lead, not a blank inquiry', 1600, true);
   addStep('📄', 'Step 3 — Next: AI BEO Generator', 'Same details flow straight into a drafted quote — see that demo tab', 3000, false);
 
-  setTimeout(()=>{ btn.textContent = '✓ Routed to Events Team'; }, 3200);
+  setTimeout(()=>{
+    btn.textContent = '✓ Routed to Events Team';
+    if (rec) {
+      document.getElementById('revenueEngineProof').style.display = 'block';
+      document.getElementById('revenueEngineProofBody').textContent =
+        'Lead: ' + JSON.stringify(rec.lead, null, 2) + '\n\n' +
+        'Activity: ' + JSON.stringify(rec.activity, null, 2);
+    }
+  }, 3200);
 }
 
 function restart(){
@@ -320,6 +370,8 @@ function restart(){
   document.getElementById('flagsRow').innerHTML='';
   document.getElementById('genTimer').textContent='';
   document.getElementById('approvalFlow').innerHTML='';
+  document.getElementById('revenueEngineProof').style.display='none';
+  lastQualifiedRecords = null;
   const btn = document.getElementById('sendBtn');
   btn.disabled = false;
   btn.textContent = 'Route to Events Team';
