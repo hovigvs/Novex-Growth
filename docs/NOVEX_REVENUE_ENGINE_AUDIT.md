@@ -1,9 +1,18 @@
 # Novex Revenue Engine — Consolidation Audit
 
-**Status: READ-ONLY AUDIT. No code, schema, migration, demo, branch, or data
-modified.** Every finding below came from reading existing files and the
-live `0001_core_schema.sql` on `main` — nothing was changed to produce
-this report.
+**Status: APPROVED, B1 in progress.** Canonical model confirmed with one
+refinement over the original proposal: segmentation (hot/warm/dormant/
+at_risk/due_for_reorder) is derived on read, never stored — see
+[`../revenue-engine/README.md`](../revenue-engine/README.md) for the
+locked decisions this implementation follows. Domain schemas and a
+localStorage-backed store are built (`revenue-engine/`); `qualification_demo.html`
+is wired end-to-end as the first proof (real Lead/Conversation/Activity
+records, validated on write, no more animation-only UI). `reactivation_demo.html`
+is next — the harder proof, since it's the one demo that actually needs
+the Customer/Lead/Opportunity split to be modeled correctly. No SQL
+migration is written or committed — same standing rule as Brand Center
+and Campaign Center; the original audit findings below are unchanged and
+still the reference for what's being built toward.
 
 ## 1. Current exact schema and data flow
 
