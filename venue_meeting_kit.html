@@ -73,12 +73,25 @@
   .foot{margin-top:28px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--ink-soft);}
   .foot b{color:var(--ink);}
 
+  /* ---------- Demo Script stepper: one feature visible at a time ---------- */
+  .stepper-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .step-pill{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .step-pill.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .step-pill:hover:not(.active){border-color:var(--accent-2);color:var(--ink);}
+  #panel-script .stage{display:none;}
+  #panel-script .stage.active{display:block;animation:fade .2s ease;}
+  .stepper-controls{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+  .stepbtn{font-family:inherit;font-size:13px;font-weight:700;color:var(--accent);background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:10px 16px;cursor:pointer;}
+  .stepbtn:disabled{opacity:.35;cursor:default;}
+  .stepbtn:hover:not(:disabled){border-color:var(--accent);}
+  .stepcount{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+
   /* ---------- Script / Questions (UI treatment) ---------- */
   .stage{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden;}
-  .stage-head{display:flex;align-items:center;gap:12px;padding:14px 16px;}
+  .stage-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:14px 16px;}
   .stage-num{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--accent);background:var(--surface-2);width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .stage-title{font-weight:800;font-size:14.5px;flex:1;}
-  .stage-flag{font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--flag);background:var(--flag-bg);padding:3px 8px;border-radius:6px;white-space:nowrap;}
+  .stage-title{font-weight:800;font-size:14.5px;flex:1;min-width:180px;}
+  .stage-flag{font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--flag);background:var(--flag-bg);padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;}
   .stage-body{padding:0 16px 16px;}
   .say{font-size:13.5px;line-height:1.6;color:var(--ink-soft);font-style:italic;background:var(--surface-2);border-radius:8px;padding:10px 12px;margin-bottom:10px;}
   .say b{font-style:normal;color:var(--ink);}
@@ -134,12 +147,14 @@
         <li>A voice &amp; chat AI agent that answers instantly, in whatever language the customer uses — no per-language setup</li>
         <li>Automatic inquiry qualification — event type, date, guest count, dietary flags, budget — before a human ever opens it</li>
         <li>One shared record per lead and customer, not five disconnected inboxes</li>
-        <li>Branded, print-ready weekly flyers and marketing generated from your own menu and pricing</li>
+        <li>Tour booking and dietary collection handled automatically, so nothing falls through the cracks before event day</li>
+        <li>Couples/planners design their own room layout on your real floor plan — no emailed sketches back and forth</li>
         <li>A single dashboard — one login, your business, your data</li>
       </ul>
 
       <h3 class="section">What's next</h3>
       <p>Automatic recovery of stalled proposals and past clients gone quiet, and a system that flags exactly which open dates are worth actively marketing — built with real venue and catering input, not guessed at.</p>
+      <p>We've already built the pattern for a self-serve, AI-assisted ordering website for one of our catering clients — browse the real menu, order by chat or voice with Nicole, multilingual, live today. The venue version of that same idea: prospects browse your actual rooms, packages, and add-ons and configure their own event before ever picking up the phone.</p>
 
       <div class="foot">
         <span><b>Hovig Sarkissian</b> · Novex Growth</span>
@@ -148,10 +163,12 @@
     </div>
   </div>
 
-  <!-- ================= DEMO SCRIPT ================= -->
+  <!-- ================= DEMO SCRIPT (stepper — one feature at a time) ================= -->
   <div class="panel" id="panel-script">
 
-    <div class="stage">
+    <div class="stepper-nav" id="stepperNav"></div>
+
+    <div class="stage" data-step="1">
       <div class="stage-head"><span class="stage-num">01</span><span class="stage-title">Open with the claim, not the login screen</span></div>
       <div class="stage-body">
         <div class="say"><b>Say:</b> "Novex captures every inquiry, remembers everyone who's contacted you before, and tells you where you're losing bookings — instead of ten tools that don't talk to each other."</div>
@@ -159,7 +176,7 @@
       </div>
     </div>
 
-    <div class="stage">
+    <div class="stage" data-step="2">
       <div class="stage-head"><span class="stage-num">02</span><span class="stage-title">Brand Center</span></div>
       <div class="stage-body">
         <div class="say"><b>Say:</b> "You configure who you are once — logo, colors, tone, even multiple creative styles for different campaigns — and every other tool below reads it. You never re-type your brand into five different apps."</div>
@@ -167,7 +184,7 @@
       </div>
     </div>
 
-    <div class="stage">
+    <div class="stage" data-step="3">
       <div class="stage-head"><span class="stage-num">03</span><span class="stage-title">Campaign Center</span></div>
       <div class="stage-body">
         <div class="say"><b>Say:</b> "Same idea for what you're promoting — the offer, the audience, the dates — defined once, then every channel pulls from it."</div>
@@ -175,7 +192,7 @@
       </div>
     </div>
 
-    <div class="stage">
+    <div class="stage" data-step="4">
       <div class="stage-head"><span class="stage-num">04</span><span class="stage-title">Qualification — the proof moment</span><span class="stage-flag">Show the record</span></div>
       <div class="stage-body">
         <div class="say"><b>Say:</b> "Watch this DM come in — the AI asks exactly what your team would ask, and the moment it's done, it's a real saved record, not just a chat log." <b>Scroll to the bottom panel</b> and show the actual JSON that got created — this is the single best "it's not just a chatbot" moment in the whole demo.</div>
@@ -183,7 +200,7 @@
       </div>
     </div>
 
-    <div class="stage">
+    <div class="stage" data-step="5">
       <div class="stage-head"><span class="stage-num">05</span><span class="stage-title">Reactivation</span></div>
       <div class="stage-body">
         <div class="say"><b>Say:</b> "This is how you bring back people who already know you — past clients, stalled quotes — instead of them just going cold." If asked whether it's live: "Right now this runs on sample data while we finish connecting it to real records — happy to build that with a business like yours."</div>
@@ -191,20 +208,26 @@
       </div>
     </div>
 
-    <div class="stage">
-      <div class="stage-head"><span class="stage-num">06</span><span class="stage-title">Flyer</span></div>
+    <div class="stage" data-step="6">
+      <div class="stage-head"><span class="stage-num">06</span><span class="stage-title">Venue OS</span></div>
       <div class="stage-body">
-        <div class="say"><b>Say:</b> "And this is how we help fill the dates that are open — a real, print-ready flyer generated from your own products and pricing, not a generic template."</div>
-        <div class="click">Click: Portal sidebar → Flyer (or open flyer_print_prototype.html directly)</div>
+        <div class="say"><b>Say:</b> "This is built specifically for venues — a Lead Revival Bot that responds within 60 seconds any time of day, a Tour Booker that books straight into your calendar, and a Dietary Bot that hands your kitchen a clean report before the event, not a pile of texts." If there's time: also show the Layout Planner — "clients drag and drop their own floor plan instead of emailing you sketches back and forth."</div>
+        <div class="click">Click: Portal sidebar → Venue OS (and Event Layout Planner, if time permits)</div>
       </div>
     </div>
 
-    <div class="stage">
+    <div class="stage" data-step="7">
       <div class="stage-head"><span class="stage-num">07</span><span class="stage-title">Flip it around</span></div>
       <div class="stage-body">
         <div class="say"><b>Say:</b> "That's what I've built — but I want to learn from you too. Walk me through what actually happens when someone inquires, from that first message to a signed booking?"</div>
         <div class="click">Click: nothing — switch to the Discovery Qs tab</div>
       </div>
+    </div>
+
+    <div class="stepper-controls">
+      <button id="stepPrev" class="stepbtn">← Prev</button>
+      <span id="stepCount" class="stepcount"></span>
+      <button id="stepNext" class="stepbtn">Next →</button>
     </div>
 
   </div>
@@ -220,6 +243,7 @@
           <li><input type="checkbox" id="q1b"/><label for="q1b">What software touches that first message, if any?</label></li>
           <li><input type="checkbox" id="q1c"/><label for="q1c">How fast does a typical inquiry get a real reply?</label></li>
           <li><input type="checkbox" id="q1d"/><label for="q1d">Where do inquiries actually disappear or get missed?</label></li>
+          <li><input type="checkbox" id="q1e"/><label for="q1e">Would prospects want to browse your rooms, packages, and pricing themselves before calling — or do they always need to talk to someone first?</label></li>
         </ul>
       </div>
     </div>
@@ -306,4 +330,37 @@ document.querySelectorAll('.qlist input[type=checkbox]').forEach(function(box){
     saveChecks(checks);
   });
 });
+
+// ---------- Demo Script stepper ----------
+(function(){
+  var stages = Array.prototype.slice.call(document.querySelectorAll('#panel-script .stage'));
+  var nav = document.getElementById('stepperNav');
+  var prevBtn = document.getElementById('stepPrev');
+  var nextBtn = document.getElementById('stepNext');
+  var countEl = document.getElementById('stepCount');
+  var current = 0;
+
+  stages.forEach(function(stage, i){
+    var pill = document.createElement('button');
+    pill.className = 'step-pill';
+    pill.type = 'button';
+    pill.textContent = stage.dataset.step;
+    pill.addEventListener('click', function(){ goTo(i); });
+    nav.appendChild(pill);
+  });
+  var pills = Array.prototype.slice.call(nav.children);
+
+  function goTo(i){
+    current = Math.max(0, Math.min(stages.length - 1, i));
+    stages.forEach(function(s, idx){ s.classList.toggle('active', idx === current); });
+    pills.forEach(function(p, idx){ p.classList.toggle('active', idx === current); });
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === stages.length - 1;
+    countEl.textContent = (current + 1) + ' / ' + stages.length;
+  }
+
+  prevBtn.addEventListener('click', function(){ goTo(current - 1); });
+  nextBtn.addEventListener('click', function(){ goTo(current + 1); });
+  goTo(0);
+})();
 </script>
