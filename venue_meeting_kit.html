@@ -1,0 +1,309 @@
+<title>Venue Meeting Kit</title>
+<style>
+  :root{
+    --ink:#1E1E3A; --ink-soft:#4B4B6B;
+    --accent:#5558B8; --accent-2:#7782D4;
+    --flag:#C9791A; --flag-bg:#FBEEDD;
+    --bg:#F6F6FB; --surface:#FFFFFF; --surface-2:#F0F0F8;
+    --border:#E1E1EC;
+    --shadow: 0 1px 2px rgba(30,30,58,.04), 0 8px 24px rgba(30,30,58,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#ECECF6; --ink-soft:#B7B7D1;
+      --accent:#8B90DE; --accent-2:#9EA4E8;
+      --flag:#F0AD4E; --flag-bg:#3A2C15;
+      --bg:#121228; --surface:#1B1B36; --surface-2:#232345;
+      --border:#33335A;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#ECECF6; --ink-soft:#B7B7D1;
+    --accent:#8B90DE; --accent-2:#9EA4E8;
+    --flag:#F0AD4E; --flag-bg:#3A2C15;
+    --bg:#121228; --surface:#1B1B36; --surface-2:#232345;
+    --border:#33335A;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'DM Sans',Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px;}
+
+  /* ---------- Identity bar ---------- */
+  .idbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+  .mark{display:flex;align-items:center;gap:9px;}
+  .mark-dot{width:11px;height:11px;border-radius:3px;background:linear-gradient(135deg,var(--accent-2),var(--accent));flex-shrink:0;}
+  .mark-word{font-weight:800;font-size:15px;letter-spacing:-.01em;}
+  .mark-word b{font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .doc-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase;}
+
+  h1{font-size:26px;font-weight:800;letter-spacing:-.015em;line-height:1.15;margin:0 0 6px;text-wrap:balance;}
+  .sub{font-size:14px;color:var(--ink-soft);margin:0 0 22px;max-width:60ch;line-height:1.55;}
+
+  /* ---------- Tabs ---------- */
+  .tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:4px;margin-bottom:22px;}
+  .tab{flex:1;text-align:center;padding:10px 8px;border-radius:8px;font-size:12.5px;font-weight:700;letter-spacing:.01em;cursor:pointer;color:var(--ink-soft);border:none;background:transparent;font-family:inherit;}
+  .tab.active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow);}
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
+  @media (prefers-reduced-motion: reduce){ .panel.active{animation:none;} }
+
+  /* ---------- Leave-behind (document treatment) ---------- */
+  .sheet{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:36px 34px;box-shadow:var(--shadow);}
+  .sheet h2{font-size:21px;font-weight:800;letter-spacing:-.01em;margin:0 0 4px;text-wrap:balance;}
+  .sheet .tagline{color:var(--accent);font-weight:700;font-size:13px;margin-bottom:22px;}
+  .pull{font-size:17px;line-height:1.5;font-weight:600;color:var(--ink);border-left:3px solid var(--accent);padding-left:16px;margin:0 0 26px;text-wrap:balance;}
+  .loop{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:26px;}
+  .loop-step{background:var(--surface-2);border-radius:9px;padding:12px 10px;text-align:center;}
+  .loop-step .n{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-soft);}
+  .loop-step .t{font-weight:700;font-size:12.5px;margin-top:3px;}
+  .loop-arrow{display:none;}
+  h3.section{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:24px 0 10px;}
+  .sheet p{font-size:14px;line-height:1.65;color:var(--ink);margin:0 0 10px;}
+  .today-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;}
+  .today-list li{font-size:13.5px;line-height:1.5;padding-left:20px;position:relative;}
+  .today-list li::before{content:"✓";position:absolute;left:0;color:var(--accent);font-weight:800;}
+  .foot{margin-top:28px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--ink-soft);}
+  .foot b{color:var(--ink);}
+
+  /* ---------- Script / Questions (UI treatment) ---------- */
+  .stage{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden;}
+  .stage-head{display:flex;align-items:center;gap:12px;padding:14px 16px;}
+  .stage-num{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--accent);background:var(--surface-2);width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .stage-title{font-weight:800;font-size:14.5px;flex:1;}
+  .stage-flag{font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--flag);background:var(--flag-bg);padding:3px 8px;border-radius:6px;white-space:nowrap;}
+  .stage-body{padding:0 16px 16px;}
+  .say{font-size:13.5px;line-height:1.6;color:var(--ink-soft);font-style:italic;background:var(--surface-2);border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+  .say b{font-style:normal;color:var(--ink);}
+  .click{font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;}
+  .qlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
+  .qlist li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;line-height:1.5;}
+  .qlist input[type=checkbox]{margin-top:3px;width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;}
+  .qlist label{cursor:pointer;}
+  .qlist input:checked + label{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:var(--border);}
+
+  .hint{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:18px;}
+
+  @media (max-width:520px){
+    .loop{grid-template-columns:repeat(2,1fr);}
+    .sheet{padding:26px 20px;}
+  }
+</style>
+
+<div class="wrap">
+  <div class="idbar">
+    <div class="mark"><span class="mark-dot"></span><span class="mark-word"><b>novex</b>growth</span></div>
+    <span class="doc-label">Venue Meeting Kit</span>
+  </div>
+
+  <h1>Meeting kit — venue &amp; catering conversations</h1>
+  <p class="sub">One page for the whole meeting: what to leave behind, what to click and say while you demo, and what to ask so you actually learn something. Tab 1 is safe to share. Tabs 2–3 are yours.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="leave">Leave-Behind</button>
+    <button class="tab" data-tab="script">Demo Script</button>
+    <button class="tab" data-tab="questions">Discovery Qs</button>
+  </div>
+
+  <!-- ================= LEAVE-BEHIND ================= -->
+  <div class="panel active" id="panel-leave">
+    <div class="sheet">
+      <h2>Novex Growth</h2>
+      <div class="tagline">A growth system for venues &amp; catering — not another AI receptionist</div>
+
+      <p class="pull">"Fill more dates. Recover more inquiries. Never lose track of a lead — or a customer — again."</p>
+
+      <p>Most software in this space manages the inquiry you already have. Novex starts one step earlier: it captures every inquiry the moment it arrives, on any channel, in any language — then remembers it, and everyone who's contacted you before, in one place. Nothing about your date, your dietary flags, or your last conversation with a client lives in five different tools that don't talk to each other.</p>
+
+      <div class="loop">
+        <div class="loop-step"><div class="n">01</div><div class="t">Capture</div></div>
+        <div class="loop-step"><div class="n">02</div><div class="t">Convert</div></div>
+        <div class="loop-step"><div class="n">03</div><div class="t">Recover</div></div>
+        <div class="loop-step"><div class="n">04</div><div class="t">Create demand</div></div>
+      </div>
+
+      <h3 class="section">What's real today</h3>
+      <ul class="today-list">
+        <li>A voice &amp; chat AI agent that answers instantly, in whatever language the customer uses — no per-language setup</li>
+        <li>Automatic inquiry qualification — event type, date, guest count, dietary flags, budget — before a human ever opens it</li>
+        <li>One shared record per lead and customer, not five disconnected inboxes</li>
+        <li>Branded, print-ready weekly flyers and marketing generated from your own menu and pricing</li>
+        <li>A single dashboard — one login, your business, your data</li>
+      </ul>
+
+      <h3 class="section">What's next</h3>
+      <p>Automatic recovery of stalled proposals and past clients gone quiet, and a system that flags exactly which open dates are worth actively marketing — built with real venue and catering input, not guessed at.</p>
+
+      <div class="foot">
+        <span><b>Hovig Sarkissian</b> · Novex Growth</span>
+        <span>novexgrowth.com</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DEMO SCRIPT ================= -->
+  <div class="panel" id="panel-script">
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">01</span><span class="stage-title">Open with the claim, not the login screen</span></div>
+      <div class="stage-body">
+        <div class="say"><b>Say:</b> "Novex captures every inquiry, remembers everyone who's contacted you before, and tells you where you're losing bookings — instead of ten tools that don't talk to each other."</div>
+        <div class="click">Click: nothing yet — say this before opening anything</div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">02</span><span class="stage-title">Brand Center</span></div>
+      <div class="stage-body">
+        <div class="say"><b>Say:</b> "You configure who you are once — logo, colors, tone, even multiple creative styles for different campaigns — and every other tool below reads it. You never re-type your brand into five different apps."</div>
+        <div class="click">Click: Portal sidebar → Brand Center</div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">03</span><span class="stage-title">Campaign Center</span></div>
+      <div class="stage-body">
+        <div class="say"><b>Say:</b> "Same idea for what you're promoting — the offer, the audience, the dates — defined once, then every channel pulls from it."</div>
+        <div class="click">Click: Portal sidebar → Campaign Center</div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">04</span><span class="stage-title">Qualification — the proof moment</span><span class="stage-flag">Show the record</span></div>
+      <div class="stage-body">
+        <div class="say"><b>Say:</b> "Watch this DM come in — the AI asks exactly what your team would ask, and the moment it's done, it's a real saved record, not just a chat log." <b>Scroll to the bottom panel</b> and show the actual JSON that got created — this is the single best "it's not just a chatbot" moment in the whole demo.</div>
+        <div class="click">Click: Portal sidebar → AI Event Qualification → let it play through</div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">05</span><span class="stage-title">Reactivation</span></div>
+      <div class="stage-body">
+        <div class="say"><b>Say:</b> "This is how you bring back people who already know you — past clients, stalled quotes — instead of them just going cold." If asked whether it's live: "Right now this runs on sample data while we finish connecting it to real records — happy to build that with a business like yours."</div>
+        <div class="click">Click: Portal sidebar → Reactivation &amp; Revenue Recovery</div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">06</span><span class="stage-title">Flyer</span></div>
+      <div class="stage-body">
+        <div class="say"><b>Say:</b> "And this is how we help fill the dates that are open — a real, print-ready flyer generated from your own products and pricing, not a generic template."</div>
+        <div class="click">Click: Portal sidebar → Flyer (or open flyer_print_prototype.html directly)</div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">07</span><span class="stage-title">Flip it around</span></div>
+      <div class="stage-body">
+        <div class="say"><b>Say:</b> "That's what I've built — but I want to learn from you too. Walk me through what actually happens when someone inquires, from that first message to a signed booking?"</div>
+        <div class="click">Click: nothing — switch to the Discovery Qs tab</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= DISCOVERY QUESTIONS ================= -->
+  <div class="panel" id="panel-questions">
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">01</span><span class="stage-title">Inquiry</span></div>
+      <div class="stage-body">
+        <ul class="qlist" data-group="inquiry">
+          <li><input type="checkbox" id="q1a"/><label for="q1a">How do inquiries actually reach you today — phone, web form, Instagram, EventSource?</label></li>
+          <li><input type="checkbox" id="q1b"/><label for="q1b">What software touches that first message, if any?</label></li>
+          <li><input type="checkbox" id="q1c"/><label for="q1c">How fast does a typical inquiry get a real reply?</label></li>
+          <li><input type="checkbox" id="q1d"/><label for="q1d">Where do inquiries actually disappear or get missed?</label></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">02</span><span class="stage-title">Tour / consultation</span></div>
+      <div class="stage-body">
+        <ul class="qlist" data-group="tour">
+          <li><input type="checkbox" id="q2a"/><label for="q2a">How does someone book a tour or tasting — manually, or is there a booking tool?</label></li>
+          <li><input type="checkbox" id="q2b"/><label for="q2b">What's manual here that annoys your team?</label></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">03</span><span class="stage-title">Proposal</span><span class="stage-flag">Dig deeper</span></div>
+      <div class="stage-body">
+        <ul class="qlist" data-group="proposal">
+          <li><input type="checkbox" id="q3a"/><label for="q3a">When someone goes quiet after a proposal or tour, what happens next — if anything?</label></li>
+          <li><input type="checkbox" id="q3b"/><label for="q3b">Roughly how many quoted leads never book? Do you know why?</label></li>
+          <li><input type="checkbox" id="q3c"/><label for="q3c">Do you ever follow up on a "no" later, or is it treated as closed?</label></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">04</span><span class="stage-title">Deposit / booking</span></div>
+      <div class="stage-body">
+        <ul class="qlist" data-group="deposit">
+          <li><input type="checkbox" id="q4a"/><label for="q4a">What software (if any) handles contracts and deposits today?</label></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">05</span><span class="stage-title">Calendar &amp; capacity</span><span class="stage-flag">Dig deeper</span></div>
+      <div class="stage-body">
+        <ul class="qlist" data-group="calendar">
+          <li><input type="checkbox" id="q5a"/><label for="q5a">What do you currently do when a Tuesday, or a whole month, looks weak?</label></li>
+          <li><input type="checkbox" id="q5b"/><label for="q5b">Can you (or would you) share live availability out of whatever system you use today?</label></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">06</span><span class="stage-title">Post-event</span></div>
+      <div class="stage-body">
+        <ul class="qlist" data-group="post">
+          <li><input type="checkbox" id="q6a"/><label for="q6a">What happens after the event — reviews, referrals, staying in touch?</label></li>
+          <li><input type="checkbox" id="q6b"/><label for="q6b">Do past clients ever come back, and how does that usually happen?</label></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="hint">Checks save automatically on this device — safe to reopen mid-conversation.</p>
+  </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(function(tab){
+  tab.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// Lightweight per-device persistence for the discovery checklist only --
+// this is a single-viewer prep tool, not shared state.
+var STORAGE_KEY = 'novex_venue_kit_checks';
+function loadChecks(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e){ return {}; }
+}
+function saveChecks(state){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+}
+var checks = loadChecks();
+document.querySelectorAll('.qlist input[type=checkbox]').forEach(function(box){
+  if (checks[box.id]) box.checked = true;
+  box.addEventListener('change', function(){
+    checks[box.id] = box.checked;
+    saveChecks(checks);
+  });
+});
+</script>
